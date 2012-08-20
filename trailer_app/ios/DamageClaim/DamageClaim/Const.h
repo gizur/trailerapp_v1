@@ -1,0 +1,128 @@
+//
+//  Const.h
+//  Plunk
+//
+//  Created by GS LAB on 21/05/12.
+//  Copyright (c) 2012 developer.gslab@gmail.com. All rights reserved.
+
+#import <Foundation/Foundation.h>
+
+#define kDebug TRUE
+
+#define kLocalServer FALSE
+
+#define kBuildDate 20120805 //(yyyymmdd)
+
+#if kLocalServer
+
+#define SIGNUP_URL @"http://192.168.0.99:3001/register"
+#define CREATE_HIVE_URL @"http://192.168.0.99:3001/hive/create"
+#define RECOMMENDATIONS_URL  @"http://192.168.0.99:3001/recommendations"
+#define GET_CATEGORIES_URL @"http://192.168.0.99:3001/category/get"
+#define SUBMIT_REVIEW_URL @"http://192.168.0.99:3001/review/create"
+#define UPDATE_SETTINGS @"http://192.168.0.99:3001/user/update"
+#define INVITE_CONTACT @"http://192.168.0.99:3001/invite"
+#define GET_MY_PLUNKS_URL @"http://192.168.0.99:3001/plunk/get"
+#define ADD_RECOMMENDATION_URL @"http://192.168.0.99:3001/recommendation/create"
+#define UPDATE_PLUNK_URL @"http://192.168.0.99:3001/plunk/update"
+#define SEARCH_WEB_URL @"http://192.168.0.99:3001/search_web"
+#define GET_HIVE_URL @"http://192.168.0.99:3001/hive/get"
+#define SERVER_DOMAIN @"192.168.0.99"
+
+#else
+
+#define SIGNUP_URL @"http://188.65.63.142:3002/register"
+#define CREATE_HIVE_URL @"http://188.65.63.142:3002/hive/create"
+#define RECOMMENDATIONS_URL  @"http://188.65.63.142:3002/recommendations"
+#define GET_CATEGORIES_URL @"http://188.65.63.142:3002/category/get"
+#define SUBMIT_REVIEW_URL @"http://188.65.63.142:3002/review/create"
+#define UPDATE_SETTINGS @"http://188.65.63.142:3002/user/update"
+#define INVITE_CONTACT @"http://188.65.63.142:3002/invite"
+#define GET_MY_PLUNKS_URL @"http://188.65.63.142:3002/plunk/get"
+#define ADD_RECOMMENDATION_URL @"http://188.65.63.142:3002/recommendation/create"
+#define UPDATE_PLUNK_URL @"http://188.65.63.142:3002/plunk/update"
+#define SEARCH_WEB_URL @"http://188.65.63.142:3002/search_web"
+#define GET_HIVE_URL @"http://188.65.63.142:3002/hive/get"
+#define SERVER_DOMAIN @"188.65.63.142"
+
+#endif
+
+typedef enum {
+SIGNUP_URL_CALL_TYPE,
+CREATE_HIVE_URL_CALL_TYPE,
+RECOMMENDATIONS_URL_CALL_TYPE,
+REVIEW_RECOMMENDATIONS_URL_CALL_TYPE,
+GET_CATEGORIES_URL_CALL_TYPE,
+SUBMIT_REVIEW_URL_CALL_TYPE,
+UPDATE_SETTINGS_URL_CALL_TYPE,
+INVITE_CONTACT_URL_CALL_TYPE,
+GET_MY_PLUNKS_URL_CALL_TYPE,
+ADD_RECOMMENDATION_URL_CALL_TYPE,
+UPDATE_PLUNK_URL_CALL_TYPE,
+SEARCH_WEB_URL_CALL_TYPE,
+GET_HIVE_URL_CALL_TYPE
+} DC_URL_CALL_TYPE;
+
+
+
+#define DAMAGE_TYPE_KEY @"DAMAGE_TYPE_KEY"
+#define DAMAGE_POSITION_KEY @"DAMAGE_POSITION_KEY"
+#define SURVEY_TRAILER_ID @"SURVEY_TRAILER_ID"
+#define SURVEY_PLACE @"SURVEY_PLACE"
+#define SURVEY_PLATES @"SURVEY_PLATES"
+#define SURVEY_STRAPS @"SURVEY_STRAPS"
+
+#define DAMAGE_IMAGE_NAME @"IMAGE"
+#define DAMAGE_THUMBNAIL_IMAGE_NAME @"THUMBNAILIMAGE"
+
+#define THUMBNAIL_IMAGE_SIZE 80
+
+enum ADD_PHOTO_ACTION {
+    ADD_PHOTO_CAMERA = 0,
+    ADD_PHOTO_ALBUM = 1,
+    ADD_PHOTO_LIBRARY = 2,
+    ADD_PHOTO_CANCEL = 3
+};
+
+
+enum LOGIN_CELL_TEXT_FIELD_TAGS{
+    LOGIN_USERNAME_TEXTFIELD_TAG = -1,
+    LOGIN_PASSWORD_TEXTFIELD_TAG = -2
+};
+
+enum LOGIN_CUSTOM_CELL_TAGS{
+    LOGIN_CUSTOM_CELL_TEXT_FIELD_TAG = -1
+};
+
+
+enum CUSTOM_CELL_SEGMENTED_VIEW_TAGS {
+    CUSTOM_CELL_SEGMENTED_TITE_LABEL_TAG = -1,
+    CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG = -2
+};
+
+enum CUSTOM_CELL_TEXTFIELD_TAGS {
+    CUSTOM_CELL_TEXTFIELD_TEXTFIELD_TAG = -1
+};
+
+enum CUSTOM_CELL_NEW_IMAGE_DAMAGE_TAGS {
+    CUSTOM_CELL_TEXT_FIELD_NEW_IMAGE_DAMAGE_TAG = -1,
+    CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG = -2
+    };
+
+enum TEXT_FIELD_TAGS {
+    TEXT_FIELD_ID_TAG = -1,
+    TEXT_FIELD_PLACE_TAG = -2,
+    TEXT_FIELD_PLATES_TAG = -3,
+    TEXT_FIELD_STRAPS_TAG = -4
+};
+
+
+enum CUSTOM_CELL_PICK_LIST_VIEW_TAGS {
+    CUSTOM_CELL_NAME_PICK_LIST_VIEW_TAG = -1,
+    CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG = -2
+};
+
+enum CUSTOM_CELL_ADD_NEW_ITEM_TAGS {
+    CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG = -1
+    };
+
