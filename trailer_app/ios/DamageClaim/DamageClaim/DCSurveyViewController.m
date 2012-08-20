@@ -84,6 +84,10 @@
         self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
     }
     
+    if (!self.surveyModel.surveyTrailerId) {
+        [self.navigationItem.rightBarButtonItem setEnabled:NO];
+    }
+    
 }
 
 - (void)viewDidUnload
@@ -98,6 +102,7 @@
 -(void) viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self.surveyTableView reloadData];
+    
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -151,7 +156,7 @@
     idCell.textLabel.text = NSLocalizedString(@"ID", @"");
     [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:SURVEY_TRAILER_ID];
     if (self.surveyModel.surveyTrailerId) {
-        self.surveyModel.surveyTrailerId = @"";
+        self.surveyModel.surveyTrailerId = nil;
     }
     
     //reset survey place
@@ -159,7 +164,7 @@
     placeCell.textLabel.text = NSLocalizedString(@"PLACE", @"");
     [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:SURVEY_PLACE];
     if (self.surveyModel.surveyPlace) {
-        self.surveyModel.surveyPlace = @"";
+        self.surveyModel.surveyPlace = nil;
     }
     
     //reset survey plates
@@ -188,6 +193,10 @@
         [self toggleInventorySection:trailerSealedSegmentedControl];
     }
     [self setTrailerInventoryVisible:NO];
+    
+    if (!self.surveyModel.surveyTrailerId) {
+        [self.navigationItem.rightBarButtonItem setEnabled:NO];
+    }
     
     
     
@@ -418,10 +427,18 @@
                     cell.textLabel.shadowOffset = CGSizeMake(1, 1);
                     if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_TRAILER_ID]) {
                         NSArray *trailerIDArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_TRAILER_ID];
-                        if ([trailerIDArray count] > 0) {
-                            cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"ID", @""), [trailerIDArray objectAtIndex:0]];
-                            
+                        if (trailerIDArray) {
+                            if ([trailerIDArray count] > 0) {
+                                cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"ID", @""), [trailerIDArray objectAtIndex:0]];
+                                if (!self.surveyModel) {
+                                    self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
+                                    
+                                }
+                                self.surveyModel.surveyTrailerId = [trailerIDArray objectAtIndex:0];
+                            }
+                            [self.navigationItem.rightBarButtonItem setEnabled:YES];
                         }
+                        
                         
                     } else {
                         cell.textLabel.text = NSLocalizedString(@"ID", @"");
@@ -443,9 +460,17 @@
                     cell.textLabel.shadowOffset = CGSizeMake(1, 1);
                     if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLACE]) {
                         NSArray *trailerIDArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLACE];
-                        if ([trailerIDArray count] > 0) {
-                            cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"PLACE", @""), [trailerIDArray objectAtIndex:0]];
+                        if (trailerIDArray) {
+                            if ([trailerIDArray count] > 0) {
+                                cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"PLACE", @""), [trailerIDArray objectAtIndex:0]];
+                                if (!self.surveyModel) {
+                                    self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
+                                    
+                                }
+                                self.surveyModel.surveyPlace = [trailerIDArray objectAtIndex:0];
+                            }
                         }
+                        
                         
                     } else {
                         cell.textLabel.text = NSLocalizedString(@"PLACE", @"");
@@ -493,9 +518,16 @@
                     
                     if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLATES]) {
                         NSArray *trailerIDArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLATES];
-                        if ([trailerIDArray count] > 0) {
-                            cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"PLATES", @""), [trailerIDArray objectAtIndex:0]];
+                        if (trailerIDArray) {
+                            if ([trailerIDArray count] > 0) {
+                                cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"PLATES", @""), [trailerIDArray objectAtIndex:0]];
+                                if (!self.surveyModel) {
+                                    self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
+                                }
+                                self.surveyModel.surveyPlace = [trailerIDArray objectAtIndex:0];
+                            }
                         }
+                        
                         
                     } else {
                         cell.textLabel.text = NSLocalizedString(@"PLATES", @"");
@@ -517,9 +549,16 @@
                     
                     if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_STRAPS]) {
                         NSArray *trailerIDArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_STRAPS];
-                        if ([trailerIDArray count] > 0) {
-                            cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"STRAPS", @""), [trailerIDArray objectAtIndex:0]];
+                        if (trailerIDArray) {
+                            if ([trailerIDArray count] > 0) {
+                                cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"STRAPS", @""), [trailerIDArray objectAtIndex:0]];
+                                if (!self.surveyModel) {
+                                    self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
+                                }
+                                self.surveyModel.surveyStraps = [trailerIDArray objectAtIndex:0];
+                            }
                         }
+                        
                         
                     } else {
                         cell.textLabel.text = NSLocalizedString(@"STRAPS", @"");
