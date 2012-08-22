@@ -1,0 +1,748 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D71E55CF15E1125900FE1CB1 /* DCDamageModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55CE15E1125900FE1CB1 /* DCDamageModel.m */; };
+		D71E55D315E1572800FE1CB1 /* DCLoginModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55D215E1572800FE1CB1 /* DCLoginModel.m */; };
+		D75DE3EB15DFA48F00AC8483 /* DCSurveyModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D75DE3EA15DFA48F00AC8483 /* DCSurveyModel.m */; };
+		D77722C115D9124D0071FD06 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D77722C015D9124D0071FD06 /* UIKit.framework */; };
+		D77722C315D9124D0071FD06 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D77722C215D9124D0071FD06 /* Foundation.framework */; };
+		D77722C515D9124D0071FD06 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D77722C415D9124D0071FD06 /* CoreGraphics.framework */; };
+		D77722CD15D9124D0071FD06 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D77722CC15D9124D0071FD06 /* main.m */; };
+		D77722D115D9124D0071FD06 /* DCAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D77722D015D9124D0071FD06 /* DCAppDelegate.m */; };
+		D77722D415D9124D0071FD06 /* DCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D77722D315D9124D0071FD06 /* DCViewController.m */; };
+		D77722F115D915460071FD06 /* RequestHeaders.m in Sources */ = {isa = PBXBuildFile; fileRef = D77722F015D915460071FD06 /* RequestHeaders.m */; };
+		D77722F615D917210071FD06 /* HTTPService.m in Sources */ = {isa = PBXBuildFile; fileRef = D77722F515D917210071FD06 /* HTTPService.m */; };
+		D777230A15D91B890071FD06 /* DCLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D777230915D91B890071FD06 /* DCLoginViewController.m */; };
+		D777230E15D91D7D0071FD06 /* DCURLConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = D777230D15D91D7D0071FD06 /* DCURLConnection.m */; };
+		D777231215D91E000071FD06 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = D777231115D91E000071FD06 /* MBProgressHUD.m */; };
+		D78FC61415DBFB5A0003C823 /* CustomCellImageDamageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61315DBFB5A0003C823 /* CustomCellImageDamageView.xib */; };
+		D78FC61615DC02010003C823 /* new.png in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61515DC02010003C823 /* new.png */; };
+		D78FC61915DC02520003C823 /* CustomCellNewImageDamageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61815DC02520003C823 /* CustomCellNewImageDamageView.xib */; };
+		D79590FE15DCAF3D008C5D77 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D79590FB15DCAF2A008C5D77 /* MobileCoreServices.framework */; };
+		D795910015DCDAE4008C5D77 /* settings.png in Resources */ = {isa = PBXBuildFile; fileRef = D79590FF15DCDAE4008C5D77 /* settings.png */; };
+		D7992A0115DFC1B600ACD417 /* DCDamageListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7992A0015DFC1B600ACD417 /* DCDamageListViewController.m */; };
+		D7992A0415DFC1E300ACD417 /* DamageListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7992A0315DFC1E300ACD417 /* DamageListView.xib */; };
+		D7992A0C15DFD62E00ACD417 /* UIImage+Alpha.m in Sources */ = {isa = PBXBuildFile; fileRef = D7992A0715DFD62E00ACD417 /* UIImage+Alpha.m */; };
+		D7992A0D15DFD62E00ACD417 /* UIImage+Resize.m in Sources */ = {isa = PBXBuildFile; fileRef = D7992A0915DFD62E00ACD417 /* UIImage+Resize.m */; };
+		D7992A0E15DFD62E00ACD417 /* UIImage+RoundedCorner.m in Sources */ = {isa = PBXBuildFile; fileRef = D7992A0B15DFD62E00ACD417 /* UIImage+RoundedCorner.m */; };
+		D7992A1015DFF58C00ACD417 /* CustomCellAddNewItemView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7992A0F15DFF58B00ACD417 /* CustomCellAddNewItemView.xib */; };
+		D7F2918E15D95802000D1B0E /* DCSurveyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7F2918D15D95802000D1B0E /* DCSurveyViewController.m */; };
+		D7F2919015D95813000D1B0E /* SurveyView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2918F15D95813000D1B0E /* SurveyView.xib */; };
+		D7F2919315D95CF2000D1B0E /* CustomCellSegmentedView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919215D95CF2000D1B0E /* CustomCellSegmentedView.xib */; };
+		D7F2919515D95E72000D1B0E /* CustomCellTextFieldView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919415D95E72000D1B0E /* CustomCellTextFieldView.xib */; };
+		D7F2919615D964F9000D1B0E /* LoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919715D964F9000D1B0E /* LoginView.xib */; };
+		D7F2919A15D96520000D1B0E /* CustomCellLoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919B15D96520000D1B0E /* CustomCellLoginView.xib */; };
+		D7F2919C15D96529000D1B0E /* DCViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919D15D96529000D1B0E /* DCViewController.xib */; };
+		D7F291A615D96CD9000D1B0E /* DamageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F291A515D96CD9000D1B0E /* DamageView.xib */; };
+		D7F291A915D96D01000D1B0E /* DCDamageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7F291A815D96D01000D1B0E /* DCDamageViewController.m */; };
+		D7F291E915D97201000D1B0E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D7F291EA15D97201000D1B0E /* InfoPlist.strings */; };
+		D7F291EB15D975A5000D1B0E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D7F291EC15D975A5000D1B0E /* Localizable.strings */; };
+		D7F291EE15D976C6000D1B0E /* survey.png in Resources */ = {isa = PBXBuildFile; fileRef = D7F291ED15D976C6000D1B0E /* survey.png */; };
+		D7F291F015D976D8000D1B0E /* damage.png in Resources */ = {isa = PBXBuildFile; fileRef = D7F291EF15D976D8000D1B0E /* damage.png */; };
+		D7FD97B815DA6022000D0AE2 /* PickListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7FD97B715DA6022000D0AE2 /* PickListView.xib */; };
+		D7FD97BC15DA60D5000D0AE2 /* CustomCellPickListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7FD97BB15DA60D5000D0AE2 /* CustomCellPickListView.xib */; };
+		D7FD97BF15DA60F5000D0AE2 /* DCPickListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7FD97BE15DA60F5000D0AE2 /* DCPickListViewController.m */; };
+		D7FD97D715DA7E15000D0AE2 /* flag.png in Resources */ = {isa = PBXBuildFile; fileRef = D7FD97D615DA7E15000D0AE2 /* flag.png */; };
+		D7FD97E015DA8AAF000D0AE2 /* DCSharedObject.m in Sources */ = {isa = PBXBuildFile; fileRef = D7FD97DF15DA8AAF000D0AE2 /* DCSharedObject.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		D71E55CD15E1125900FE1CB1 /* DCDamageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageModel.h; sourceTree = "<group>"; };
+		D71E55CE15E1125900FE1CB1 /* DCDamageModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageModel.m; sourceTree = "<group>"; };
+		D71E55D115E1572800FE1CB1 /* DCLoginModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCLoginModel.h; sourceTree = "<group>"; };
+		D71E55D215E1572800FE1CB1 /* DCLoginModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCLoginModel.m; sourceTree = "<group>"; };
+		D75DE3E915DFA48F00AC8483 /* DCSurveyModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCSurveyModel.h; sourceTree = "<group>"; };
+		D75DE3EA15DFA48F00AC8483 /* DCSurveyModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCSurveyModel.m; sourceTree = "<group>"; };
+		D77722BC15D9124D0071FD06 /* DamageClaim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DamageClaim.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D77722C015D9124D0071FD06 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		D77722C215D9124D0071FD06 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		D77722C415D9124D0071FD06 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		D77722C815D9124D0071FD06 /* DamageClaim-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DamageClaim-Info.plist"; sourceTree = "<group>"; };
+		D77722CC15D9124D0071FD06 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		D77722CE15D9124D0071FD06 /* DamageClaim-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DamageClaim-Prefix.pch"; sourceTree = "<group>"; };
+		D77722CF15D9124D0071FD06 /* DCAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DCAppDelegate.h; sourceTree = "<group>"; };
+		D77722D015D9124D0071FD06 /* DCAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DCAppDelegate.m; sourceTree = "<group>"; };
+		D77722D215D9124D0071FD06 /* DCViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DCViewController.h; sourceTree = "<group>"; };
+		D77722D315D9124D0071FD06 /* DCViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DCViewController.m; sourceTree = "<group>"; };
+		D77722EF15D915460071FD06 /* RequestHeaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RequestHeaders.h; sourceTree = "<group>"; };
+		D77722F015D915460071FD06 /* RequestHeaders.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RequestHeaders.m; sourceTree = "<group>"; };
+		D77722F215D915520071FD06 /* Const.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Const.h; sourceTree = "<group>"; };
+		D77722F415D917210071FD06 /* HTTPService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTTPService.h; sourceTree = "<group>"; };
+		D77722F515D917210071FD06 /* HTTPService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HTTPService.m; sourceTree = "<group>"; };
+		D777230815D91B890071FD06 /* DCLoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCLoginViewController.h; sourceTree = "<group>"; };
+		D777230915D91B890071FD06 /* DCLoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCLoginViewController.m; sourceTree = "<group>"; };
+		D777230C15D91D7D0071FD06 /* DCURLConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCURLConnection.h; sourceTree = "<group>"; };
+		D777230D15D91D7D0071FD06 /* DCURLConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCURLConnection.m; sourceTree = "<group>"; };
+		D777231015D91E000071FD06 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
+		D777231115D91E000071FD06 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		D78FC61315DBFB5A0003C823 /* CustomCellImageDamageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellImageDamageView.xib; sourceTree = "<group>"; };
+		D78FC61515DC02010003C823 /* new.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = new.png; sourceTree = "<group>"; };
+		D78FC61815DC02520003C823 /* CustomCellNewImageDamageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellNewImageDamageView.xib; sourceTree = "<group>"; };
+		D79590FB15DCAF2A008C5D77 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		D79590FF15DCDAE4008C5D77 /* settings.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings.png; sourceTree = "<group>"; };
+		D79929FF15DFC1B600ACD417 /* DCDamageListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageListViewController.h; sourceTree = "<group>"; };
+		D7992A0015DFC1B600ACD417 /* DCDamageListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageListViewController.m; sourceTree = "<group>"; };
+		D7992A0315DFC1E300ACD417 /* DamageListView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DamageListView.xib; sourceTree = "<group>"; };
+		D7992A0615DFD62E00ACD417 /* UIImage+Alpha.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Alpha.h"; sourceTree = "<group>"; };
+		D7992A0715DFD62E00ACD417 /* UIImage+Alpha.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Alpha.m"; sourceTree = "<group>"; };
+		D7992A0815DFD62E00ACD417 /* UIImage+Resize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Resize.h"; sourceTree = "<group>"; };
+		D7992A0915DFD62E00ACD417 /* UIImage+Resize.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Resize.m"; sourceTree = "<group>"; };
+		D7992A0A15DFD62E00ACD417 /* UIImage+RoundedCorner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+RoundedCorner.h"; sourceTree = "<group>"; };
+		D7992A0B15DFD62E00ACD417 /* UIImage+RoundedCorner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+RoundedCorner.m"; sourceTree = "<group>"; };
+		D7992A0F15DFF58B00ACD417 /* CustomCellAddNewItemView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellAddNewItemView.xib; sourceTree = "<group>"; };
+		D7F2918C15D95802000D1B0E /* DCSurveyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCSurveyViewController.h; sourceTree = "<group>"; };
+		D7F2918D15D95802000D1B0E /* DCSurveyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCSurveyViewController.m; sourceTree = "<group>"; };
+		D7F2918F15D95813000D1B0E /* SurveyView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SurveyView.xib; sourceTree = "<group>"; };
+		D7F2919215D95CF2000D1B0E /* CustomCellSegmentedView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellSegmentedView.xib; sourceTree = "<group>"; };
+		D7F2919415D95E72000D1B0E /* CustomCellTextFieldView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellTextFieldView.xib; sourceTree = "<group>"; };
+		D7F2919715D964F9000D1B0E /* LoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoginView.xib; sourceTree = "<group>"; };
+		D7F2919B15D96520000D1B0E /* CustomCellLoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CustomCellLoginView.xib; sourceTree = "<group>"; };
+		D7F2919D15D96529000D1B0E /* DCViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DCViewController.xib; sourceTree = "<group>"; };
+		D7F291A515D96CD9000D1B0E /* DamageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DamageView.xib; sourceTree = "<group>"; };
+		D7F291A715D96D01000D1B0E /* DCDamageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageViewController.h; sourceTree = "<group>"; };
+		D7F291A815D96D01000D1B0E /* DCDamageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageViewController.m; sourceTree = "<group>"; };
+		D7F291EA15D97201000D1B0E /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
+		D7F291EC15D975A5000D1B0E /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
+		D7F291ED15D976C6000D1B0E /* survey.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = survey.png; sourceTree = "<group>"; };
+		D7F291EF15D976D8000D1B0E /* damage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = damage.png; sourceTree = "<group>"; };
+		D7FD97B715DA6022000D0AE2 /* PickListView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickListView.xib; sourceTree = "<group>"; };
+		D7FD97BB15DA60D5000D0AE2 /* CustomCellPickListView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellPickListView.xib; sourceTree = "<group>"; };
+		D7FD97BD15DA60F5000D0AE2 /* DCPickListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCPickListViewController.h; sourceTree = "<group>"; };
+		D7FD97BE15DA60F5000D0AE2 /* DCPickListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCPickListViewController.m; sourceTree = "<group>"; };
+		D7FD97D615DA7E15000D0AE2 /* flag.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = flag.png; sourceTree = "<group>"; };
+		D7FD97DE15DA8AAF000D0AE2 /* DCSharedObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCSharedObject.h; sourceTree = "<group>"; };
+		D7FD97DF15DA8AAF000D0AE2 /* DCSharedObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCSharedObject.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D77722B915D9124D0071FD06 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D79590FE15DCAF3D008C5D77 /* MobileCoreServices.framework in Frameworks */,
+				D77722C115D9124D0071FD06 /* UIKit.framework in Frameworks */,
+				D77722C315D9124D0071FD06 /* Foundation.framework in Frameworks */,
+				D77722C515D9124D0071FD06 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D71E55CB15E1123E00FE1CB1 /* DamageModel */ = {
+			isa = PBXGroup;
+			children = (
+				D71E55CD15E1125900FE1CB1 /* DCDamageModel.h */,
+				D71E55CE15E1125900FE1CB1 /* DCDamageModel.m */,
+			);
+			name = DamageModel;
+			sourceTree = "<group>";
+		};
+		D71E55D015E1570F00FE1CB1 /* LoginModel */ = {
+			isa = PBXGroup;
+			children = (
+				D71E55D115E1572800FE1CB1 /* DCLoginModel.h */,
+				D71E55D215E1572800FE1CB1 /* DCLoginModel.m */,
+			);
+			name = LoginModel;
+			sourceTree = "<group>";
+		};
+		D75DE3E715DFA46800AC8483 /* SurveyModel */ = {
+			isa = PBXGroup;
+			children = (
+				D75DE3E915DFA48F00AC8483 /* DCSurveyModel.h */,
+				D75DE3EA15DFA48F00AC8483 /* DCSurveyModel.m */,
+			);
+			name = SurveyModel;
+			sourceTree = "<group>";
+		};
+		D77722B115D9124D0071FD06 = {
+			isa = PBXGroup;
+			children = (
+				D77722C615D9124D0071FD06 /* DamageClaim */,
+				D77722BF15D9124D0071FD06 /* Frameworks */,
+				D77722BD15D9124D0071FD06 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D77722BD15D9124D0071FD06 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D77722BC15D9124D0071FD06 /* DamageClaim.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D77722BF15D9124D0071FD06 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D79590FB15DCAF2A008C5D77 /* MobileCoreServices.framework */,
+				D77722C015D9124D0071FD06 /* UIKit.framework */,
+				D77722C215D9124D0071FD06 /* Foundation.framework */,
+				D77722C415D9124D0071FD06 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D77722C615D9124D0071FD06 /* DamageClaim */ = {
+			isa = PBXGroup;
+			children = (
+				D77722DF15D912C00071FD06 /* Classes */,
+				D77722E015D912C70071FD06 /* Resources */,
+				D77722C715D9124D0071FD06 /* Supporting Files */,
+			);
+			path = DamageClaim;
+			sourceTree = "<group>";
+		};
+		D77722C715D9124D0071FD06 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				D77722C815D9124D0071FD06 /* DamageClaim-Info.plist */,
+				D7F291EA15D97201000D1B0E /* InfoPlist.strings */,
+				D77722CC15D9124D0071FD06 /* main.m */,
+				D77722CE15D9124D0071FD06 /* DamageClaim-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		D77722DF15D912C00071FD06 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				D77722EA15D914520071FD06 /* Controllers */,
+				D77722E915D9144D0071FD06 /* Models */,
+				D77722E815D913980071FD06 /* Dependecies */,
+				D77722E715D913200071FD06 /* Services */,
+				D77722E615D913140071FD06 /* Others */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		D77722E015D912C70071FD06 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D77722E515D912FB0071FD06 /* Nibs */,
+				D77722E415D912F50071FD06 /* Images */,
+				D77722E315D912EF0071FD06 /* Localizations */,
+				D77722E215D912EA0071FD06 /* Fonts */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		D77722E215D912EA0071FD06 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Fonts;
+			sourceTree = "<group>";
+		};
+		D77722E315D912EF0071FD06 /* Localizations */ = {
+			isa = PBXGroup;
+			children = (
+				D7F291EC15D975A5000D1B0E /* Localizable.strings */,
+			);
+			name = Localizations;
+			sourceTree = "<group>";
+		};
+		D77722E415D912F50071FD06 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				D79590FF15DCDAE4008C5D77 /* settings.png */,
+				D78FC61515DC02010003C823 /* new.png */,
+				D7FD97D615DA7E15000D0AE2 /* flag.png */,
+				D7F291ED15D976C6000D1B0E /* survey.png */,
+				D7F291EF15D976D8000D1B0E /* damage.png */,
+			);
+			name = Images;
+			sourceTree = "<group>";
+		};
+		D77722E515D912FB0071FD06 /* Nibs */ = {
+			isa = PBXGroup;
+			children = (
+				D7992A0215DFC1CC00ACD417 /* DamageListView */,
+				D7FD97B515DA6005000D0AE2 /* PickListView */,
+				D7F2918A15D957B7000D1B0E /* DamageView */,
+				D7F2918915D957AD000D1B0E /* SurveyView */,
+				D777231315D925F00071FD06 /* LoginView */,
+				D7F2919D15D96529000D1B0E /* DCViewController.xib */,
+				D7992A0F15DFF58B00ACD417 /* CustomCellAddNewItemView.xib */,
+			);
+			name = Nibs;
+			sourceTree = "<group>";
+		};
+		D77722E615D913140071FD06 /* Others */ = {
+			isa = PBXGroup;
+			children = (
+				D77722F215D915520071FD06 /* Const.h */,
+				D77722EE15D915340071FD06 /* RequestHeaders */,
+				D77722EC15D914830071FD06 /* AppDelegate */,
+			);
+			name = Others;
+			sourceTree = "<group>";
+		};
+		D77722E715D913200071FD06 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				D777230B15D91D670071FD06 /* DCURLConnection */,
+				D77722F315D9170E0071FD06 /* HTTPService */,
+			);
+			name = Services;
+			sourceTree = "<group>";
+		};
+		D77722E815D913980071FD06 /* Dependecies */ = {
+			isa = PBXGroup;
+			children = (
+				D7992A0515DFD61F00ACD417 /* ImageLib */,
+				D7FD97DD15DA8AA1000D0AE2 /* SharedObject */,
+				D777230F15D91DF00071FD06 /* MBProgressHUD */,
+			);
+			name = Dependecies;
+			sourceTree = "<group>";
+		};
+		D77722E915D9144D0071FD06 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D71E55D015E1570F00FE1CB1 /* LoginModel */,
+				D71E55CB15E1123E00FE1CB1 /* DamageModel */,
+				D75DE3E715DFA46800AC8483 /* SurveyModel */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		D77722EA15D914520071FD06 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				D79929FD15DFC19600ACD417 /* DamageListViewController */,
+				D7F2918B15D957C1000D1B0E /* DamageViewController */,
+				D777230715D91B6F0071FD06 /* LoginViewController */,
+				D7FD97B915DA6030000D0AE2 /* PickListViewController */,
+				D7F2918715D957A1000D1B0E /* SurveyViewController */,
+				D77722EB15D914730071FD06 /* ViewController */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
+		D77722EB15D914730071FD06 /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				D77722D215D9124D0071FD06 /* DCViewController.h */,
+				D77722D315D9124D0071FD06 /* DCViewController.m */,
+			);
+			name = ViewController;
+			sourceTree = "<group>";
+		};
+		D77722EC15D914830071FD06 /* AppDelegate */ = {
+			isa = PBXGroup;
+			children = (
+				D77722CF15D9124D0071FD06 /* DCAppDelegate.h */,
+				D77722D015D9124D0071FD06 /* DCAppDelegate.m */,
+			);
+			name = AppDelegate;
+			sourceTree = "<group>";
+		};
+		D77722EE15D915340071FD06 /* RequestHeaders */ = {
+			isa = PBXGroup;
+			children = (
+				D77722EF15D915460071FD06 /* RequestHeaders.h */,
+				D77722F015D915460071FD06 /* RequestHeaders.m */,
+			);
+			name = RequestHeaders;
+			sourceTree = "<group>";
+		};
+		D77722F315D9170E0071FD06 /* HTTPService */ = {
+			isa = PBXGroup;
+			children = (
+				D77722F415D917210071FD06 /* HTTPService.h */,
+				D77722F515D917210071FD06 /* HTTPService.m */,
+			);
+			name = HTTPService;
+			sourceTree = "<group>";
+		};
+		D777230715D91B6F0071FD06 /* LoginViewController */ = {
+			isa = PBXGroup;
+			children = (
+				D777230815D91B890071FD06 /* DCLoginViewController.h */,
+				D777230915D91B890071FD06 /* DCLoginViewController.m */,
+			);
+			name = LoginViewController;
+			sourceTree = "<group>";
+		};
+		D777230B15D91D670071FD06 /* DCURLConnection */ = {
+			isa = PBXGroup;
+			children = (
+				D777230C15D91D7D0071FD06 /* DCURLConnection.h */,
+				D777230D15D91D7D0071FD06 /* DCURLConnection.m */,
+			);
+			name = DCURLConnection;
+			sourceTree = "<group>";
+		};
+		D777230F15D91DF00071FD06 /* MBProgressHUD */ = {
+			isa = PBXGroup;
+			children = (
+				D777231015D91E000071FD06 /* MBProgressHUD.h */,
+				D777231115D91E000071FD06 /* MBProgressHUD.m */,
+			);
+			name = MBProgressHUD;
+			sourceTree = "<group>";
+		};
+		D777231315D925F00071FD06 /* LoginView */ = {
+			isa = PBXGroup;
+			children = (
+				D7F2919715D964F9000D1B0E /* LoginView.xib */,
+				D7F2919B15D96520000D1B0E /* CustomCellLoginView.xib */,
+			);
+			name = LoginView;
+			sourceTree = "<group>";
+		};
+		D78FC61115DBFB360003C823 /* CustomCellImageDamageView */ = {
+			isa = PBXGroup;
+			children = (
+				D78FC61315DBFB5A0003C823 /* CustomCellImageDamageView.xib */,
+			);
+			name = CustomCellImageDamageView;
+			sourceTree = "<group>";
+		};
+		D78FC61715DC021A0003C823 /* CustomCellNewImageDamageView */ = {
+			isa = PBXGroup;
+			children = (
+				D78FC61815DC02520003C823 /* CustomCellNewImageDamageView.xib */,
+			);
+			name = CustomCellNewImageDamageView;
+			sourceTree = "<group>";
+		};
+		D79929FD15DFC19600ACD417 /* DamageListViewController */ = {
+			isa = PBXGroup;
+			children = (
+				D79929FF15DFC1B600ACD417 /* DCDamageListViewController.h */,
+				D7992A0015DFC1B600ACD417 /* DCDamageListViewController.m */,
+			);
+			name = DamageListViewController;
+			sourceTree = "<group>";
+		};
+		D7992A0215DFC1CC00ACD417 /* DamageListView */ = {
+			isa = PBXGroup;
+			children = (
+				D7992A0315DFC1E300ACD417 /* DamageListView.xib */,
+			);
+			name = DamageListView;
+			sourceTree = "<group>";
+		};
+		D7992A0515DFD61F00ACD417 /* ImageLib */ = {
+			isa = PBXGroup;
+			children = (
+				D7992A0615DFD62E00ACD417 /* UIImage+Alpha.h */,
+				D7992A0715DFD62E00ACD417 /* UIImage+Alpha.m */,
+				D7992A0815DFD62E00ACD417 /* UIImage+Resize.h */,
+				D7992A0915DFD62E00ACD417 /* UIImage+Resize.m */,
+				D7992A0A15DFD62E00ACD417 /* UIImage+RoundedCorner.h */,
+				D7992A0B15DFD62E00ACD417 /* UIImage+RoundedCorner.m */,
+			);
+			name = ImageLib;
+			sourceTree = "<group>";
+		};
+		D7F2918715D957A1000D1B0E /* SurveyViewController */ = {
+			isa = PBXGroup;
+			children = (
+				D7F2918C15D95802000D1B0E /* DCSurveyViewController.h */,
+				D7F2918D15D95802000D1B0E /* DCSurveyViewController.m */,
+			);
+			name = SurveyViewController;
+			sourceTree = "<group>";
+		};
+		D7F2918915D957AD000D1B0E /* SurveyView */ = {
+			isa = PBXGroup;
+			children = (
+				D7F2919115D95C45000D1B0E /* CustomCellSurveyView */,
+				D7F2918F15D95813000D1B0E /* SurveyView.xib */,
+			);
+			name = SurveyView;
+			sourceTree = "<group>";
+		};
+		D7F2918A15D957B7000D1B0E /* DamageView */ = {
+			isa = PBXGroup;
+			children = (
+				D78FC61715DC021A0003C823 /* CustomCellNewImageDamageView */,
+				D78FC61115DBFB360003C823 /* CustomCellImageDamageView */,
+				D7F291A515D96CD9000D1B0E /* DamageView.xib */,
+			);
+			name = DamageView;
+			sourceTree = "<group>";
+		};
+		D7F2918B15D957C1000D1B0E /* DamageViewController */ = {
+			isa = PBXGroup;
+			children = (
+				D7F291A715D96D01000D1B0E /* DCDamageViewController.h */,
+				D7F291A815D96D01000D1B0E /* DCDamageViewController.m */,
+			);
+			name = DamageViewController;
+			sourceTree = "<group>";
+		};
+		D7F2919115D95C45000D1B0E /* CustomCellSurveyView */ = {
+			isa = PBXGroup;
+			children = (
+				D7F2919215D95CF2000D1B0E /* CustomCellSegmentedView.xib */,
+				D7F2919415D95E72000D1B0E /* CustomCellTextFieldView.xib */,
+			);
+			name = CustomCellSurveyView;
+			sourceTree = "<group>";
+		};
+		D7FD97B515DA6005000D0AE2 /* PickListView */ = {
+			isa = PBXGroup;
+			children = (
+				D7FD97BA15DA60C0000D0AE2 /* CustomCellPickListView */,
+				D7FD97B715DA6022000D0AE2 /* PickListView.xib */,
+			);
+			name = PickListView;
+			sourceTree = "<group>";
+		};
+		D7FD97B915DA6030000D0AE2 /* PickListViewController */ = {
+			isa = PBXGroup;
+			children = (
+				D7FD97BD15DA60F5000D0AE2 /* DCPickListViewController.h */,
+				D7FD97BE15DA60F5000D0AE2 /* DCPickListViewController.m */,
+			);
+			name = PickListViewController;
+			sourceTree = "<group>";
+		};
+		D7FD97BA15DA60C0000D0AE2 /* CustomCellPickListView */ = {
+			isa = PBXGroup;
+			children = (
+				D7FD97BB15DA60D5000D0AE2 /* CustomCellPickListView.xib */,
+			);
+			name = CustomCellPickListView;
+			sourceTree = "<group>";
+		};
+		D7FD97DD15DA8AA1000D0AE2 /* SharedObject */ = {
+			isa = PBXGroup;
+			children = (
+				D7FD97DE15DA8AAF000D0AE2 /* DCSharedObject.h */,
+				D7FD97DF15DA8AAF000D0AE2 /* DCSharedObject.m */,
+			);
+			name = SharedObject;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D77722BB15D9124D0071FD06 /* DamageClaim */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D77722DA15D9124D0071FD06 /* Build configuration list for PBXNativeTarget "DamageClaim" */;
+			buildPhases = (
+				D77722B815D9124D0071FD06 /* Sources */,
+				D77722B915D9124D0071FD06 /* Frameworks */,
+				D77722BA15D9124D0071FD06 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DamageClaim;
+			productName = DamageClaim;
+			productReference = D77722BC15D9124D0071FD06 /* DamageClaim.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D77722B315D9124D0071FD06 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = DC;
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = D77722B615D9124D0071FD06 /* Build configuration list for PBXProject "DamageClaim" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				"sv-SE",
+			);
+			mainGroup = D77722B115D9124D0071FD06;
+			productRefGroup = D77722BD15D9124D0071FD06 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D77722BB15D9124D0071FD06 /* DamageClaim */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D77722BA15D9124D0071FD06 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7F291E915D97201000D1B0E /* InfoPlist.strings in Resources */,
+				D7F2919C15D96529000D1B0E /* DCViewController.xib in Resources */,
+				D7F2919615D964F9000D1B0E /* LoginView.xib in Resources */,
+				D7F291EB15D975A5000D1B0E /* Localizable.strings in Resources */,
+				D7F2919A15D96520000D1B0E /* CustomCellLoginView.xib in Resources */,
+				D7F2919015D95813000D1B0E /* SurveyView.xib in Resources */,
+				D7F2919315D95CF2000D1B0E /* CustomCellSegmentedView.xib in Resources */,
+				D7F2919515D95E72000D1B0E /* CustomCellTextFieldView.xib in Resources */,
+				D7F291A615D96CD9000D1B0E /* DamageView.xib in Resources */,
+				D7F291EE15D976C6000D1B0E /* survey.png in Resources */,
+				D7F291F015D976D8000D1B0E /* damage.png in Resources */,
+				D7FD97B815DA6022000D0AE2 /* PickListView.xib in Resources */,
+				D7FD97BC15DA60D5000D0AE2 /* CustomCellPickListView.xib in Resources */,
+				D7FD97D715DA7E15000D0AE2 /* flag.png in Resources */,
+				D78FC61415DBFB5A0003C823 /* CustomCellImageDamageView.xib in Resources */,
+				D78FC61615DC02010003C823 /* new.png in Resources */,
+				D78FC61915DC02520003C823 /* CustomCellNewImageDamageView.xib in Resources */,
+				D795910015DCDAE4008C5D77 /* settings.png in Resources */,
+				D7992A0415DFC1E300ACD417 /* DamageListView.xib in Resources */,
+				D7992A1015DFF58C00ACD417 /* CustomCellAddNewItemView.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D77722B815D9124D0071FD06 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D77722CD15D9124D0071FD06 /* main.m in Sources */,
+				D77722D115D9124D0071FD06 /* DCAppDelegate.m in Sources */,
+				D77722D415D9124D0071FD06 /* DCViewController.m in Sources */,
+				D77722F115D915460071FD06 /* RequestHeaders.m in Sources */,
+				D77722F615D917210071FD06 /* HTTPService.m in Sources */,
+				D777230A15D91B890071FD06 /* DCLoginViewController.m in Sources */,
+				D777230E15D91D7D0071FD06 /* DCURLConnection.m in Sources */,
+				D777231215D91E000071FD06 /* MBProgressHUD.m in Sources */,
+				D7F2918E15D95802000D1B0E /* DCSurveyViewController.m in Sources */,
+				D7F291A915D96D01000D1B0E /* DCDamageViewController.m in Sources */,
+				D7FD97BF15DA60F5000D0AE2 /* DCPickListViewController.m in Sources */,
+				D7FD97E015DA8AAF000D0AE2 /* DCSharedObject.m in Sources */,
+				D75DE3EB15DFA48F00AC8483 /* DCSurveyModel.m in Sources */,
+				D7992A0115DFC1B600ACD417 /* DCDamageListViewController.m in Sources */,
+				D7992A0C15DFD62E00ACD417 /* UIImage+Alpha.m in Sources */,
+				D7992A0D15DFD62E00ACD417 /* UIImage+Resize.m in Sources */,
+				D7992A0E15DFD62E00ACD417 /* UIImage+RoundedCorner.m in Sources */,
+				D71E55CF15E1125900FE1CB1 /* DCDamageModel.m in Sources */,
+				D71E55D315E1572800FE1CB1 /* DCLoginModel.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		D77722D815D9124D0071FD06 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					"$(ARCHS_STANDARD_32_BIT)",
+					armv6,
+				);
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		D77722D915D9124D0071FD06 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					"$(ARCHS_STANDARD_32_BIT)",
+					armv6,
+				);
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D77722DB15D9124D0071FD06 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD_32_BIT)",
+					armv6,
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "DamageClaim/DamageClaim-Prefix.pch";
+				INFOPLIST_FILE = "DamageClaim/DamageClaim-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		D77722DC15D9124D0071FD06 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD_32_BIT)",
+					armv6,
+				);
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "DamageClaim/DamageClaim-Prefix.pch";
+				INFOPLIST_FILE = "DamageClaim/DamageClaim-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D77722B615D9124D0071FD06 /* Build configuration list for PBXProject "DamageClaim" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D77722D815D9124D0071FD06 /* Debug */,
+				D77722D915D9124D0071FD06 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D77722DA15D9124D0071FD06 /* Build configuration list for PBXNativeTarget "DamageClaim" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D77722DB15D9124D0071FD06 /* Debug */,
+				D77722DC15D9124D0071FD06 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D77722B315D9124D0071FD06 /* Project object */;
+}
