@@ -21,6 +21,7 @@
 @property (retain, nonatomic) NSArray *modelArray;
 @property (retain, nonatomic) NSString *storageKey;
 @property (retain, nonatomic) NSMutableArray *selectedObjects;
+@property (nonatomic, getter = isSingleValue) BOOL singleValue;
 
 -(void) customizeNavigationBar;
 -(void) storeSelectedValues;
@@ -33,6 +34,7 @@
 @synthesize modelArray = _modelArray;
 @synthesize storageKey = _storageKey;
 @synthesize selectedObjects = _selectedObjects;
+@synthesize singleValue = _singleValue;
 
 #pragma mark - ViewLifeCycle methods
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -44,12 +46,13 @@
     return self;
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray storageKey:(NSString *)key{
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray storageKey:(NSString *)key isSingleValue:(BOOL)singleValue{
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
         _modelArray = modelArray; [_modelArray retain];
         _storageKey = key; [_storageKey retain];
+        _singleValue = singleValue;
     }
     return self;
 }
@@ -163,39 +166,68 @@
 #pragma mark - UITableViewDelegate methods
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     UIImageView *imageView = (UIImageView *)[[tableView cellForRowAtIndexPath:indexPath] viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
-    if ([imageView isHidden]) {
-        //select this row and unselect all other rows
-        imageView.hidden = NO;
-        
-        for (NSInteger i = 0 ; i < [self.modelArray count]; i++) {
-            if (i != indexPath.row) {
-                UITableViewCell *cell = [self.pickListTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:0]];
-                UIImageView *otherImageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
-                if (![otherImageView isHidden]) {
-                    otherImageView.hidden = YES;
+    if ([self isSingleValue]) {
+        if ([imageView isHidden]) {
+            //select this row and unselect all other rows
+            imageView.hidden = NO;
+            
+            for (NSInteger i = 0 ; i < [self.modelArray count]; i++) {
+                if (i != indexPath.row) {
+                    UITableViewCell *cell = [self.pickListTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:0]];
+                    UIImageView *otherImageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
+                    if (![otherImageView isHidden]) {
+                        otherImageView.hidden = YES;
+                    }
+                }
+                
+            }
+            if (!self.selectedObjects) {
+                self.selectedObjects = [[[NSMutableArray alloc] init] autorelease];
+            }
+            if (self.modelArray) {
+                if (indexPath.row < [self.modelArray count]) {
+                    [self.selectedObjects removeAllObjects];
+                    [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
                 }
             }
             
         }
-        if (!self.selectedObjects) {
-            self.selectedObjects = [[[NSMutableArray alloc] init] autorelease];
-        }
-        if (self.modelArray) {
-            if (indexPath.row < [self.modelArray count]) {
-                [self.selectedObjects removeAllObjects];
-                [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
+        [self storeSelectedValues];
+    } else {
+        if ([imageView isHidden]) {
+            //select this row and unselect all other rows
+            imageView.hidden = NO;
+            
+            for (NSInteger i = 0 ; i < [self.modelArray count]; i++) {
+                if (i != indexPath.row) {
+                    UITableViewCell *cell = [self.pickListTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:0]];
+                    UIImageView *otherImageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
+                    if (![otherImageView isHidden]) {
+                        otherImageView.hidden = YES;
+                    }
+                }
+                
+            }
+            if (!self.selectedObjects) {
+                self.selectedObjects = [[[NSMutableArray alloc] init] autorelease];
+            }
+            if (self.modelArray) {
+                if (indexPath.row < [self.modelArray count]) {
+                    [self.selectedObjects removeAllObjects];
+                    [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
+                }
+            }
+            
+        } else {
+            imageView.hidden = YES;
+            if (self.modelArray) {
+                if (indexPath.row < [self.modelArray count]) {
+                    [self.selectedObjects removeObject:[self.modelArray objectAtIndex:indexPath.row]];
+                }
             }
         }
-        
     }
-//    else {
-//        imageView.hidden = YES;
-//        if (self.modelArray) {
-//            if (indexPath.row < [self.modelArray count]) {
-//                [self.selectedObjects removeObject:[self.modelArray objectAtIndex:indexPath.row]];
-//            }
-//        }
-//    }
+    
 }
 
 @end

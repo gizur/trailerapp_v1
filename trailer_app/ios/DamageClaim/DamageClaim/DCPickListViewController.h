@@ -10,6 +10,6 @@
 
 @interface DCPickListViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray storageKey:(NSString *)key;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray storageKey:(NSString *)key isSingleValue:(BOOL) singleValue;
 
 @end

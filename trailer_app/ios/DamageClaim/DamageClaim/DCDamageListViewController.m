@@ -19,6 +19,7 @@
 @property (retain, nonatomic) IBOutlet UITableView *damageTableView;
 @property (nonatomic, retain) NSMutableArray *modelArray;
 
+-(void) logout;
 @end
 
 @implementation DCDamageListViewController
@@ -43,6 +44,10 @@
     
     //fill array with dummy values
     self.modelArray = [[[NSMutableArray alloc] init] autorelease];
+    
+    if (self.navigationItem) {
+        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"LOGOUT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(logout)] autorelease];
+    }
     
     {
     DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
@@ -111,21 +116,35 @@
     [super dealloc];
 }
 
+#pragma mark - Others
+-(void) logout {
+    
+}
+
 #pragma mark - UITableViewDataSource methods
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    return 2;
 }
 
 - (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (self.modelArray) {
-        return [self.modelArray count];
+    switch (section) {
+        case 0:
+            return 1;
+            break;
+        case 1:
+            if (self.modelArray) {
+                return [self.modelArray count];
+            }
+        default:
+            break;
     }
+    
     return 0;
 }
 
 -(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    if (section == 0) {
+    if (section == 1) {
         return NSLocalizedString(@"REPORTED_DAMAGES", @"");
     }
     return @"";
@@ -134,7 +153,7 @@
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     UITableViewCell *cell;
-    if (indexPath.row == 0) {
+    if (indexPath.section == 0) {
         cell = [tableView dequeueReusableCellWithIdentifier:@"SimpleCell"];
     } else {
         cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
@@ -142,7 +161,7 @@
     
     
     if (!cell) {
-        if (indexPath.row == 0) {
+        if (indexPath.section == 0) {
             NSArray *customCellAddNewItemView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellAddNewItemView" owner:nil options:nil];
             if (customCellAddNewItemView) {
                 if ([customCellAddNewItemView count] > 0) {
@@ -157,7 +176,7 @@
     
     cell.selectionStyle = UITableViewCellSelectionStyleGray;
     
-    if (indexPath.row == 0) {
+    if (indexPath.section == 0) {
         UILabel *titleLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG];
         titleLabel.text = NSLocalizedString(@"REPORT_NEW_DAMAGE", @"");
     } else if (indexPath.row < [self.modelArray count]) {
@@ -180,7 +199,7 @@
 
 #pragma mark - UITableViewDelegate methods
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.row == 0) {
+    if (indexPath.section == 0) {
         DCDamageViewController *damageViewController = [[[DCDamageViewController alloc] initWithNibName:@"DamageView" bundle:nil] autorelease];
         [self.navigationController pushViewController:damageViewController animated:YES];
     }

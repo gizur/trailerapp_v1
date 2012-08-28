@@ -10,6 +10,7 @@
 		D71E55CF15E1125900FE1CB1 /* DCDamageModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55CE15E1125900FE1CB1 /* DCDamageModel.m */; };
 		D71E55D315E1572800FE1CB1 /* DCLoginModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55D215E1572800FE1CB1 /* DCLoginModel.m */; };
 		D75DE3EB15DFA48F00AC8483 /* DCSurveyModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D75DE3EA15DFA48F00AC8483 /* DCSurveyModel.m */; };
+		D775EC7E15E3927500620706 /* check.png in Resources */ = {isa = PBXBuildFile; fileRef = D775EC7D15E3927500620706 /* check.png */; };
 		D77722C115D9124D0071FD06 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D77722C015D9124D0071FD06 /* UIKit.framework */; };
 		D77722C315D9124D0071FD06 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D77722C215D9124D0071FD06 /* Foundation.framework */; };
 		D77722C515D9124D0071FD06 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D77722C415D9124D0071FD06 /* CoreGraphics.framework */; };
@@ -59,6 +60,7 @@
 		D71E55D215E1572800FE1CB1 /* DCLoginModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCLoginModel.m; sourceTree = "<group>"; };
 		D75DE3E915DFA48F00AC8483 /* DCSurveyModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCSurveyModel.h; sourceTree = "<group>"; };
 		D75DE3EA15DFA48F00AC8483 /* DCSurveyModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCSurveyModel.m; sourceTree = "<group>"; };
+		D775EC7D15E3927500620706 /* check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = check.png; sourceTree = "<group>"; };
 		D77722BC15D9124D0071FD06 /* DamageClaim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DamageClaim.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D77722C015D9124D0071FD06 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		D77722C215D9124D0071FD06 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -254,6 +256,7 @@
 			children = (
 				D79590FF15DCDAE4008C5D77 /* settings.png */,
 				D78FC61515DC02010003C823 /* new.png */,
+				D775EC7D15E3927500620706 /* check.png */,
 				D7FD97D615DA7E15000D0AE2 /* flag.png */,
 				D7F291ED15D976C6000D1B0E /* survey.png */,
 				D7F291EF15D976D8000D1B0E /* damage.png */,
@@ -598,6 +601,7 @@
 				D795910015DCDAE4008C5D77 /* settings.png in Resources */,
 				D7992A0415DFC1E300ACD417 /* DamageListView.xib in Resources */,
 				D7992A1015DFF58C00ACD417 /* CustomCellAddNewItemView.xib in Resources */,
+				D775EC7E15E3927500620706 /* check.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -651,6 +655,7 @@
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -672,6 +677,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -694,6 +700,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DamageClaim/DamageClaim-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "DamageClaim/DamageClaim-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -712,6 +719,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DamageClaim/DamageClaim-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "DamageClaim/DamageClaim-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";

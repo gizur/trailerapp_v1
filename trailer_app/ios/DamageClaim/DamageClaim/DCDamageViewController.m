@@ -439,13 +439,13 @@
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section == 0 && indexPath.row == 0) {
         NSArray *array = [NSArray arrayWithObjects:@"Doors", @"Undercover", @"Lighting", @"Breaks", @"Outriggers", nil];
-        DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:array storageKey:DAMAGE_TYPE_KEY] autorelease];
+        DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:array storageKey:DAMAGE_TYPE_KEY isSingleValue:YES] autorelease];
         [self.navigationController pushViewController:pickListViewController animated:YES];
     }
     
     if (indexPath.section == 0 && indexPath.row == 1) {
         NSArray *array = [NSArray arrayWithObjects:@"Left Side",@"Right Side", @"Front Side", @"Device Hood", @"Top Side", @"Bottom Side", nil];
-        DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:array storageKey:DAMAGE_POSITION_KEY] autorelease];
+        DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:array storageKey:DAMAGE_POSITION_KEY isSingleValue:YES] autorelease];
         [self.navigationController pushViewController:pickListViewController animated:YES];
     }
     

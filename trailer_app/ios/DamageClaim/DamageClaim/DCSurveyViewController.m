@@ -43,6 +43,7 @@
 -(void) toggleTrailerType:(id) sender;
 -(BOOL) isEmpty:(NSString *)string;
 -(void) openDamageList;
+-(void) logout;
 
 @end
 
@@ -126,7 +127,13 @@
 #endif
     if (self.navigationItem) {
         self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"REPORT_DAMAGE", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(openDamageList)] autorelease];
+        
+        self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"LOGOUT", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(logout)] autorelease];
     }
+    
+}
+
+-(void) logout {
     
 }
 
@@ -587,7 +594,7 @@
                 case 1: {
                     //dummy values
                     NSArray *trailerIdArray = [NSArray arrayWithObjects:@"TR031A", @"TR031B", @"TR031B", @"TR031B", nil];
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_TRAILER_ID] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_TRAILER_ID isSingleValue:YES] autorelease];
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;
@@ -595,7 +602,7 @@
                     //dummy values
                     NSArray *trailerIdArray = [NSArray arrayWithObjects:@"Place 1", @"Place 2", @"Place 3", @"Place 4", nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_PLACE] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_PLACE isSingleValue:YES] autorelease];
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;
@@ -609,7 +616,7 @@
                     //dummy values
                     NSArray *trailerIdArray = [NSArray arrayWithObjects:@"1", @"2", @"3", @"4", nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_PLATES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_PLATES isSingleValue:YES] autorelease];
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;
@@ -617,7 +624,7 @@
                     //dummy values
                     NSArray *trailerIdArray = [NSArray arrayWithObjects:@"1", @"2", @"3", @"4", nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_STRAPS] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_STRAPS isSingleValue:YES] autorelease];
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;
