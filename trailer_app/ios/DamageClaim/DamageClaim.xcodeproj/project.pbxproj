@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D71E55CF15E1125900FE1CB1 /* DCDamageModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55CE15E1125900FE1CB1 /* DCDamageModel.m */; };
+		D71E55CF15E1125900FE1CB1 /* DCDamageDetailModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55CE15E1125900FE1CB1 /* DCDamageDetailModel.m */; };
 		D71E55D315E1572800FE1CB1 /* DCLoginModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55D215E1572800FE1CB1 /* DCLoginModel.m */; };
 		D75DE3EB15DFA48F00AC8483 /* DCSurveyModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D75DE3EA15DFA48F00AC8483 /* DCSurveyModel.m */; };
 		D775EC7E15E3927500620706 /* check.png in Resources */ = {isa = PBXBuildFile; fileRef = D775EC7D15E3927500620706 /* check.png */; };
@@ -22,17 +22,19 @@
 		D777230A15D91B890071FD06 /* DCLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D777230915D91B890071FD06 /* DCLoginViewController.m */; };
 		D777230E15D91D7D0071FD06 /* DCURLConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = D777230D15D91D7D0071FD06 /* DCURLConnection.m */; };
 		D777231215D91E000071FD06 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = D777231115D91E000071FD06 /* MBProgressHUD.m */; };
-		D78FC61415DBFB5A0003C823 /* CustomCellImageDamageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61315DBFB5A0003C823 /* CustomCellImageDamageView.xib */; };
+		D78FC61415DBFB5A0003C823 /* CustomCellImageDamageDetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61315DBFB5A0003C823 /* CustomCellImageDamageDetailView.xib */; };
 		D78FC61615DC02010003C823 /* new.png in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61515DC02010003C823 /* new.png */; };
-		D78FC61915DC02520003C823 /* CustomCellNewImageDamageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61815DC02520003C823 /* CustomCellNewImageDamageView.xib */; };
+		D78FC61915DC02520003C823 /* CustomCellNewImageDamageDetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61815DC02520003C823 /* CustomCellNewImageDamageDetailView.xib */; };
 		D79590FE15DCAF3D008C5D77 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D79590FB15DCAF2A008C5D77 /* MobileCoreServices.framework */; };
 		D795910015DCDAE4008C5D77 /* settings.png in Resources */ = {isa = PBXBuildFile; fileRef = D79590FF15DCDAE4008C5D77 /* settings.png */; };
-		D7992A0115DFC1B600ACD417 /* DCDamageListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7992A0015DFC1B600ACD417 /* DCDamageListViewController.m */; };
-		D7992A0415DFC1E300ACD417 /* DamageListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7992A0315DFC1E300ACD417 /* DamageListView.xib */; };
+		D7992A0115DFC1B600ACD417 /* DCDamageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7992A0015DFC1B600ACD417 /* DCDamageViewController.m */; };
+		D7992A0415DFC1E300ACD417 /* DamageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7992A0315DFC1E300ACD417 /* DamageView.xib */; };
 		D7992A0C15DFD62E00ACD417 /* UIImage+Alpha.m in Sources */ = {isa = PBXBuildFile; fileRef = D7992A0715DFD62E00ACD417 /* UIImage+Alpha.m */; };
 		D7992A0D15DFD62E00ACD417 /* UIImage+Resize.m in Sources */ = {isa = PBXBuildFile; fileRef = D7992A0915DFD62E00ACD417 /* UIImage+Resize.m */; };
 		D7992A0E15DFD62E00ACD417 /* UIImage+RoundedCorner.m in Sources */ = {isa = PBXBuildFile; fileRef = D7992A0B15DFD62E00ACD417 /* UIImage+RoundedCorner.m */; };
 		D7992A1015DFF58C00ACD417 /* CustomCellAddNewItemView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7992A0F15DFF58B00ACD417 /* CustomCellAddNewItemView.xib */; };
+		D7ADF97115EDDDBE0000BB4D /* DCDamageListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7ADF97015EDDDBE0000BB4D /* DCDamageListViewController.m */; };
+		D7ADF97415EDDDD70000BB4D /* DamageListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7ADF97315EDDDD70000BB4D /* DamageListView.xib */; };
 		D7F2918E15D95802000D1B0E /* DCSurveyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7F2918D15D95802000D1B0E /* DCSurveyViewController.m */; };
 		D7F2919015D95813000D1B0E /* SurveyView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2918F15D95813000D1B0E /* SurveyView.xib */; };
 		D7F2919315D95CF2000D1B0E /* CustomCellSegmentedView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919215D95CF2000D1B0E /* CustomCellSegmentedView.xib */; };
@@ -40,8 +42,8 @@
 		D7F2919615D964F9000D1B0E /* LoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919715D964F9000D1B0E /* LoginView.xib */; };
 		D7F2919A15D96520000D1B0E /* CustomCellLoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919B15D96520000D1B0E /* CustomCellLoginView.xib */; };
 		D7F2919C15D96529000D1B0E /* DCViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919D15D96529000D1B0E /* DCViewController.xib */; };
-		D7F291A615D96CD9000D1B0E /* DamageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F291A515D96CD9000D1B0E /* DamageView.xib */; };
-		D7F291A915D96D01000D1B0E /* DCDamageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7F291A815D96D01000D1B0E /* DCDamageViewController.m */; };
+		D7F291A615D96CD9000D1B0E /* DamageDetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F291A515D96CD9000D1B0E /* DamageDetailView.xib */; };
+		D7F291A915D96D01000D1B0E /* DCDamageDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7F291A815D96D01000D1B0E /* DCDamageDetailViewController.m */; };
 		D7F291E915D97201000D1B0E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D7F291EA15D97201000D1B0E /* InfoPlist.strings */; };
 		D7F291EB15D975A5000D1B0E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D7F291EC15D975A5000D1B0E /* Localizable.strings */; };
 		D7F291EE15D976C6000D1B0E /* survey.png in Resources */ = {isa = PBXBuildFile; fileRef = D7F291ED15D976C6000D1B0E /* survey.png */; };
@@ -54,8 +56,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		D71E55CD15E1125900FE1CB1 /* DCDamageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageModel.h; sourceTree = "<group>"; };
-		D71E55CE15E1125900FE1CB1 /* DCDamageModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageModel.m; sourceTree = "<group>"; };
+		D71E55CD15E1125900FE1CB1 /* DCDamageDetailModel.h */ = {isa = PBXFileReference; fileEncoding = 4; path = DCDamageDetailModel.h; sourceTree = "<group>"; };
+		D71E55CE15E1125900FE1CB1 /* DCDamageDetailModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageDetailModel.m; sourceTree = "<group>"; };
 		D71E55D115E1572800FE1CB1 /* DCLoginModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCLoginModel.h; sourceTree = "<group>"; };
 		D71E55D215E1572800FE1CB1 /* DCLoginModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCLoginModel.m; sourceTree = "<group>"; };
 		D75DE3E915DFA48F00AC8483 /* DCSurveyModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCSurveyModel.h; sourceTree = "<group>"; };
@@ -83,14 +85,14 @@
 		D777230D15D91D7D0071FD06 /* DCURLConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCURLConnection.m; sourceTree = "<group>"; };
 		D777231015D91E000071FD06 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		D777231115D91E000071FD06 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
-		D78FC61315DBFB5A0003C823 /* CustomCellImageDamageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellImageDamageView.xib; sourceTree = "<group>"; };
+		D78FC61315DBFB5A0003C823 /* CustomCellImageDamageDetailView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellImageDamageDetailView.xib; sourceTree = "<group>"; };
 		D78FC61515DC02010003C823 /* new.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = new.png; sourceTree = "<group>"; };
-		D78FC61815DC02520003C823 /* CustomCellNewImageDamageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellNewImageDamageView.xib; sourceTree = "<group>"; };
+		D78FC61815DC02520003C823 /* CustomCellNewImageDamageDetailView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellNewImageDamageDetailView.xib; sourceTree = "<group>"; };
 		D79590FB15DCAF2A008C5D77 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		D79590FF15DCDAE4008C5D77 /* settings.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings.png; sourceTree = "<group>"; };
-		D79929FF15DFC1B600ACD417 /* DCDamageListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageListViewController.h; sourceTree = "<group>"; };
-		D7992A0015DFC1B600ACD417 /* DCDamageListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageListViewController.m; sourceTree = "<group>"; };
-		D7992A0315DFC1E300ACD417 /* DamageListView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DamageListView.xib; sourceTree = "<group>"; };
+		D79929FF15DFC1B600ACD417 /* DCDamageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageViewController.h; sourceTree = "<group>"; };
+		D7992A0015DFC1B600ACD417 /* DCDamageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageViewController.m; sourceTree = "<group>"; };
+		D7992A0315DFC1E300ACD417 /* DamageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DamageView.xib; sourceTree = "<group>"; };
 		D7992A0615DFD62E00ACD417 /* UIImage+Alpha.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Alpha.h"; sourceTree = "<group>"; };
 		D7992A0715DFD62E00ACD417 /* UIImage+Alpha.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Alpha.m"; sourceTree = "<group>"; };
 		D7992A0815DFD62E00ACD417 /* UIImage+Resize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Resize.h"; sourceTree = "<group>"; };
@@ -98,6 +100,9 @@
 		D7992A0A15DFD62E00ACD417 /* UIImage+RoundedCorner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+RoundedCorner.h"; sourceTree = "<group>"; };
 		D7992A0B15DFD62E00ACD417 /* UIImage+RoundedCorner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+RoundedCorner.m"; sourceTree = "<group>"; };
 		D7992A0F15DFF58B00ACD417 /* CustomCellAddNewItemView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellAddNewItemView.xib; sourceTree = "<group>"; };
+		D7ADF96F15EDDDBE0000BB4D /* DCDamageListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageListViewController.h; sourceTree = "<group>"; };
+		D7ADF97015EDDDBE0000BB4D /* DCDamageListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageListViewController.m; sourceTree = "<group>"; };
+		D7ADF97315EDDDD70000BB4D /* DamageListView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DamageListView.xib; sourceTree = "<group>"; };
 		D7F2918C15D95802000D1B0E /* DCSurveyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCSurveyViewController.h; sourceTree = "<group>"; };
 		D7F2918D15D95802000D1B0E /* DCSurveyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCSurveyViewController.m; sourceTree = "<group>"; };
 		D7F2918F15D95813000D1B0E /* SurveyView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SurveyView.xib; sourceTree = "<group>"; };
@@ -106,9 +111,9 @@
 		D7F2919715D964F9000D1B0E /* LoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoginView.xib; sourceTree = "<group>"; };
 		D7F2919B15D96520000D1B0E /* CustomCellLoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CustomCellLoginView.xib; sourceTree = "<group>"; };
 		D7F2919D15D96529000D1B0E /* DCViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DCViewController.xib; sourceTree = "<group>"; };
-		D7F291A515D96CD9000D1B0E /* DamageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DamageView.xib; sourceTree = "<group>"; };
-		D7F291A715D96D01000D1B0E /* DCDamageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageViewController.h; sourceTree = "<group>"; };
-		D7F291A815D96D01000D1B0E /* DCDamageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageViewController.m; sourceTree = "<group>"; };
+		D7F291A515D96CD9000D1B0E /* DamageDetailView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DamageDetailView.xib; sourceTree = "<group>"; };
+		D7F291A715D96D01000D1B0E /* DCDamageDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageDetailViewController.h; sourceTree = "<group>"; };
+		D7F291A815D96D01000D1B0E /* DCDamageDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageDetailViewController.m; sourceTree = "<group>"; };
 		D7F291EA15D97201000D1B0E /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
 		D7F291EC15D975A5000D1B0E /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		D7F291ED15D976C6000D1B0E /* survey.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = survey.png; sourceTree = "<group>"; };
@@ -137,13 +142,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D71E55CB15E1123E00FE1CB1 /* DamageModel */ = {
+		D71E55CB15E1123E00FE1CB1 /* DamageDetailModel */ = {
 			isa = PBXGroup;
 			children = (
-				D71E55CD15E1125900FE1CB1 /* DCDamageModel.h */,
-				D71E55CE15E1125900FE1CB1 /* DCDamageModel.m */,
+				D71E55CD15E1125900FE1CB1 /* DCDamageDetailModel.h */,
+				D71E55CE15E1125900FE1CB1 /* DCDamageDetailModel.m */,
 			);
-			name = DamageModel;
+			name = DamageDetailModel;
 			sourceTree = "<group>";
 		};
 		D71E55D015E1570F00FE1CB1 /* LoginModel */ = {
@@ -267,9 +272,10 @@
 		D77722E515D912FB0071FD06 /* Nibs */ = {
 			isa = PBXGroup;
 			children = (
-				D7992A0215DFC1CC00ACD417 /* DamageListView */,
+				D7ADF97215EDDDC40000BB4D /* DamageListView */,
+				D7992A0215DFC1CC00ACD417 /* DamageView */,
 				D7FD97B515DA6005000D0AE2 /* PickListView */,
-				D7F2918A15D957B7000D1B0E /* DamageView */,
+				D7F2918A15D957B7000D1B0E /* DamageDetailView */,
 				D7F2918915D957AD000D1B0E /* SurveyView */,
 				D777231315D925F00071FD06 /* LoginView */,
 				D7F2919D15D96529000D1B0E /* DCViewController.xib */,
@@ -311,7 +317,7 @@
 			isa = PBXGroup;
 			children = (
 				D71E55D015E1570F00FE1CB1 /* LoginModel */,
-				D71E55CB15E1123E00FE1CB1 /* DamageModel */,
+				D71E55CB15E1123E00FE1CB1 /* DamageDetailModel */,
 				D75DE3E715DFA46800AC8483 /* SurveyModel */,
 			);
 			name = Models;
@@ -320,8 +326,9 @@
 		D77722EA15D914520071FD06 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				D79929FD15DFC19600ACD417 /* DamageListViewController */,
-				D7F2918B15D957C1000D1B0E /* DamageViewController */,
+				D7ADF96E15EDDD900000BB4D /* DamageListViewController */,
+				D79929FD15DFC19600ACD417 /* DamageViewController */,
+				D7F2918B15D957C1000D1B0E /* DamageDetailViewController */,
 				D777230715D91B6F0071FD06 /* LoginViewController */,
 				D7FD97B915DA6030000D0AE2 /* PickListViewController */,
 				D7F2918715D957A1000D1B0E /* SurveyViewController */,
@@ -405,7 +412,7 @@
 		D78FC61115DBFB360003C823 /* CustomCellImageDamageView */ = {
 			isa = PBXGroup;
 			children = (
-				D78FC61315DBFB5A0003C823 /* CustomCellImageDamageView.xib */,
+				D78FC61315DBFB5A0003C823 /* CustomCellImageDamageDetailView.xib */,
 			);
 			name = CustomCellImageDamageView;
 			sourceTree = "<group>";
@@ -413,26 +420,26 @@
 		D78FC61715DC021A0003C823 /* CustomCellNewImageDamageView */ = {
 			isa = PBXGroup;
 			children = (
-				D78FC61815DC02520003C823 /* CustomCellNewImageDamageView.xib */,
+				D78FC61815DC02520003C823 /* CustomCellNewImageDamageDetailView.xib */,
 			);
 			name = CustomCellNewImageDamageView;
 			sourceTree = "<group>";
 		};
-		D79929FD15DFC19600ACD417 /* DamageListViewController */ = {
+		D79929FD15DFC19600ACD417 /* DamageViewController */ = {
 			isa = PBXGroup;
 			children = (
-				D79929FF15DFC1B600ACD417 /* DCDamageListViewController.h */,
-				D7992A0015DFC1B600ACD417 /* DCDamageListViewController.m */,
+				D79929FF15DFC1B600ACD417 /* DCDamageViewController.h */,
+				D7992A0015DFC1B600ACD417 /* DCDamageViewController.m */,
 			);
-			name = DamageListViewController;
+			name = DamageViewController;
 			sourceTree = "<group>";
 		};
-		D7992A0215DFC1CC00ACD417 /* DamageListView */ = {
+		D7992A0215DFC1CC00ACD417 /* DamageView */ = {
 			isa = PBXGroup;
 			children = (
-				D7992A0315DFC1E300ACD417 /* DamageListView.xib */,
+				D7992A0315DFC1E300ACD417 /* DamageView.xib */,
 			);
-			name = DamageListView;
+			name = DamageView;
 			sourceTree = "<group>";
 		};
 		D7992A0515DFD61F00ACD417 /* ImageLib */ = {
@@ -446,6 +453,23 @@
 				D7992A0B15DFD62E00ACD417 /* UIImage+RoundedCorner.m */,
 			);
 			name = ImageLib;
+			sourceTree = "<group>";
+		};
+		D7ADF96E15EDDD900000BB4D /* DamageListViewController */ = {
+			isa = PBXGroup;
+			children = (
+				D7ADF96F15EDDDBE0000BB4D /* DCDamageListViewController.h */,
+				D7ADF97015EDDDBE0000BB4D /* DCDamageListViewController.m */,
+			);
+			name = DamageListViewController;
+			sourceTree = "<group>";
+		};
+		D7ADF97215EDDDC40000BB4D /* DamageListView */ = {
+			isa = PBXGroup;
+			children = (
+				D7ADF97315EDDDD70000BB4D /* DamageListView.xib */,
+			);
+			name = DamageListView;
 			sourceTree = "<group>";
 		};
 		D7F2918715D957A1000D1B0E /* SurveyViewController */ = {
@@ -466,23 +490,23 @@
 			name = SurveyView;
 			sourceTree = "<group>";
 		};
-		D7F2918A15D957B7000D1B0E /* DamageView */ = {
+		D7F2918A15D957B7000D1B0E /* DamageDetailView */ = {
 			isa = PBXGroup;
 			children = (
 				D78FC61715DC021A0003C823 /* CustomCellNewImageDamageView */,
 				D78FC61115DBFB360003C823 /* CustomCellImageDamageView */,
-				D7F291A515D96CD9000D1B0E /* DamageView.xib */,
+				D7F291A515D96CD9000D1B0E /* DamageDetailView.xib */,
 			);
-			name = DamageView;
+			name = DamageDetailView;
 			sourceTree = "<group>";
 		};
-		D7F2918B15D957C1000D1B0E /* DamageViewController */ = {
+		D7F2918B15D957C1000D1B0E /* DamageDetailViewController */ = {
 			isa = PBXGroup;
 			children = (
-				D7F291A715D96D01000D1B0E /* DCDamageViewController.h */,
-				D7F291A815D96D01000D1B0E /* DCDamageViewController.m */,
+				D7F291A715D96D01000D1B0E /* DCDamageDetailViewController.h */,
+				D7F291A815D96D01000D1B0E /* DCDamageDetailViewController.m */,
 			);
-			name = DamageViewController;
+			name = DamageDetailViewController;
 			sourceTree = "<group>";
 		};
 		D7F2919115D95C45000D1B0E /* CustomCellSurveyView */ = {
@@ -589,19 +613,20 @@
 				D7F2919015D95813000D1B0E /* SurveyView.xib in Resources */,
 				D7F2919315D95CF2000D1B0E /* CustomCellSegmentedView.xib in Resources */,
 				D7F2919515D95E72000D1B0E /* CustomCellTextFieldView.xib in Resources */,
-				D7F291A615D96CD9000D1B0E /* DamageView.xib in Resources */,
+				D7F291A615D96CD9000D1B0E /* DamageDetailView.xib in Resources */,
 				D7F291EE15D976C6000D1B0E /* survey.png in Resources */,
 				D7F291F015D976D8000D1B0E /* damage.png in Resources */,
 				D7FD97B815DA6022000D0AE2 /* PickListView.xib in Resources */,
 				D7FD97BC15DA60D5000D0AE2 /* CustomCellPickListView.xib in Resources */,
 				D7FD97D715DA7E15000D0AE2 /* flag.png in Resources */,
-				D78FC61415DBFB5A0003C823 /* CustomCellImageDamageView.xib in Resources */,
+				D78FC61415DBFB5A0003C823 /* CustomCellImageDamageDetailView.xib in Resources */,
 				D78FC61615DC02010003C823 /* new.png in Resources */,
-				D78FC61915DC02520003C823 /* CustomCellNewImageDamageView.xib in Resources */,
+				D78FC61915DC02520003C823 /* CustomCellNewImageDamageDetailView.xib in Resources */,
 				D795910015DCDAE4008C5D77 /* settings.png in Resources */,
-				D7992A0415DFC1E300ACD417 /* DamageListView.xib in Resources */,
+				D7992A0415DFC1E300ACD417 /* DamageView.xib in Resources */,
 				D7992A1015DFF58C00ACD417 /* CustomCellAddNewItemView.xib in Resources */,
 				D775EC7E15E3927500620706 /* check.png in Resources */,
+				D7ADF97415EDDDD70000BB4D /* DamageListView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -621,16 +646,17 @@
 				D777230E15D91D7D0071FD06 /* DCURLConnection.m in Sources */,
 				D777231215D91E000071FD06 /* MBProgressHUD.m in Sources */,
 				D7F2918E15D95802000D1B0E /* DCSurveyViewController.m in Sources */,
-				D7F291A915D96D01000D1B0E /* DCDamageViewController.m in Sources */,
+				D7F291A915D96D01000D1B0E /* DCDamageDetailViewController.m in Sources */,
 				D7FD97BF15DA60F5000D0AE2 /* DCPickListViewController.m in Sources */,
 				D7FD97E015DA8AAF000D0AE2 /* DCSharedObject.m in Sources */,
 				D75DE3EB15DFA48F00AC8483 /* DCSurveyModel.m in Sources */,
-				D7992A0115DFC1B600ACD417 /* DCDamageListViewController.m in Sources */,
+				D7992A0115DFC1B600ACD417 /* DCDamageViewController.m in Sources */,
 				D7992A0C15DFD62E00ACD417 /* UIImage+Alpha.m in Sources */,
 				D7992A0D15DFD62E00ACD417 /* UIImage+Resize.m in Sources */,
 				D7992A0E15DFD62E00ACD417 /* UIImage+RoundedCorner.m in Sources */,
-				D71E55CF15E1125900FE1CB1 /* DCDamageModel.m in Sources */,
+				D71E55CF15E1125900FE1CB1 /* DCDamageDetailModel.m in Sources */,
 				D71E55D315E1572800FE1CB1 /* DCLoginModel.m in Sources */,
+				D7ADF97115EDDDBE0000BB4D /* DCDamageListViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

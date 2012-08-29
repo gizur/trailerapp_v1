@@ -9,7 +9,11 @@
 #import <Foundation/Foundation.h>
 
 @interface DCSharedObject : NSObject
+@property(nonatomic, retain) NSMutableDictionary *preferences;
+
+
 +(DCSharedObject *) sharedPreferences;
 +(void)showAlertWithMessage:(NSString *)alertMessage;
-@property(nonatomic, retain) NSMutableDictionary *preferences;
++(NSString *) generateSignatureForRequest:(NSURLRequest *)urlRequest model:(NSString *)model requestType:(NSString *)requestType;
+
 @end

@@ -1,5 +1,5 @@
 //
-//  DCDamageModel.h
+//  DCDamageDetailModel.h
 //  DamageClaim
 //
 //  Created by Dev on 19/08/12.
@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface DCDamageModel : NSObject
+@interface DCDamageDetailModel : NSObject
 
 @property (nonatomic, retain) NSString *damageType;
 @property (nonatomic, retain) NSString *damagePosition;

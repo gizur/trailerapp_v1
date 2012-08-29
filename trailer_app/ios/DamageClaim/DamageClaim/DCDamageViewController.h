@@ -1,5 +1,5 @@
 //
-//  DCDamageListViewController.h
+//  DCDamageViewController.h
 //  DamageClaim
 //
 //  Created by Dev on 18/08/12.
@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface DCDamageListViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
+@interface DCDamageViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
 
 @end

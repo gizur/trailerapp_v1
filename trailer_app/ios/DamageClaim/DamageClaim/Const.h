@@ -13,39 +13,7 @@
 
 #define kBuildDate 20120805 //(yyyymmdd)
 
-#if kLocalServer
-
-#define SIGNUP_URL @"http://192.168.0.99:3001/register"
-#define CREATE_HIVE_URL @"http://192.168.0.99:3001/hive/create"
-#define RECOMMENDATIONS_URL  @"http://192.168.0.99:3001/recommendations"
-#define GET_CATEGORIES_URL @"http://192.168.0.99:3001/category/get"
-#define SUBMIT_REVIEW_URL @"http://192.168.0.99:3001/review/create"
-#define UPDATE_SETTINGS @"http://192.168.0.99:3001/user/update"
-#define INVITE_CONTACT @"http://192.168.0.99:3001/invite"
-#define GET_MY_PLUNKS_URL @"http://192.168.0.99:3001/plunk/get"
-#define ADD_RECOMMENDATION_URL @"http://192.168.0.99:3001/recommendation/create"
-#define UPDATE_PLUNK_URL @"http://192.168.0.99:3001/plunk/update"
-#define SEARCH_WEB_URL @"http://192.168.0.99:3001/search_web"
-#define GET_HIVE_URL @"http://192.168.0.99:3001/hive/get"
-#define SERVER_DOMAIN @"192.168.0.99"
-
-#else
-
-#define SIGNUP_URL @"http://188.65.63.142:3002/register"
-#define CREATE_HIVE_URL @"http://188.65.63.142:3002/hive/create"
-#define RECOMMENDATIONS_URL  @"http://188.65.63.142:3002/recommendations"
-#define GET_CATEGORIES_URL @"http://188.65.63.142:3002/category/get"
-#define SUBMIT_REVIEW_URL @"http://188.65.63.142:3002/review/create"
-#define UPDATE_SETTINGS @"http://188.65.63.142:3002/user/update"
-#define INVITE_CONTACT @"http://188.65.63.142:3002/invite"
-#define GET_MY_PLUNKS_URL @"http://188.65.63.142:3002/plunk/get"
-#define ADD_RECOMMENDATION_URL @"http://188.65.63.142:3002/recommendation/create"
-#define UPDATE_PLUNK_URL @"http://188.65.63.142:3002/plunk/update"
-#define SEARCH_WEB_URL @"http://188.65.63.142:3002/search_web"
-#define GET_HIVE_URL @"http://188.65.63.142:3002/hive/get"
-#define SERVER_DOMAIN @"188.65.63.142"
-
-#endif
+#define kTestingAPI TRUE
 
 typedef enum {
 SIGNUP_URL_CALL_TYPE,
@@ -125,4 +93,32 @@ enum CUSTOM_CELL_PICK_LIST_VIEW_TAGS {
 enum CUSTOM_CELL_ADD_NEW_ITEM_TAGS {
     CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG = -1
     };
+
+#define GET @"GET"
+#define POST @"POST"
+
+#define USER_NAME @"USER_NAME"
+#define PASSWORD @"PASSWORD"
+
+#define GIZURCLOUD_SECRET_KEY @"GIZURCLOUD_SECRET_KEY"
+#define GIZURCLOUD_API_KEY @"GIZURCLOUD_API_KEY"
+
+//List of all the models
+#define ASSETS @"Assets"
+#define HELPDESK @"HelpDesk"
+#define AUTHENTICATE @"Authenticate"
+#define DOCUMENTS_ATTACHMENT @"DocumentsAttachment"
+
+
+//header strings
+#define HOST @"Host"
+#define HTTP_X_SIGNATURE @"Http_x_signature"
+#define HTTP_X_USERNAME @"Http_x_username"
+#define HTTP_X_PASSWORD @"Http_x_password"
+#define HTTP_X_TIMESTAMP @"Http_x_timestamp"
+#define HTTP_X_GIZUR_API_KEY @"Http_x_gizurcloud_api_key"
+
+//URLS
+#define AUTHENTICATE_LOGIN @"Authenticate/login"
+
 

@@ -1,12 +1,12 @@
 //
-//  DCDamageViewController.m
+//  DCDamageDetailViewController.m
 //  DamageClaim
 //
 //  Created by Dev on 13/08/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //  This ViewController is used to submit new Damage Report
 
-#import "DCDamageViewController.h"
+#import "DCDamageDetailViewController.h"
 
 #import "Const.h"
 
@@ -27,7 +27,7 @@
 
 #define NEW_DAMAGE_NUMBER_OF_IMAGES @"NEW_DAMAGE_NUMBER_OF_IMAGES"
 
-@interface DCDamageViewController ()
+@interface DCDamageDetailViewController ()
 
 @property (retain, nonatomic) IBOutlet UITableViewCell *customCellImageDamageView;
 @property (retain, nonatomic) IBOutlet UITableViewCell *customCellNewImageDamageView;
@@ -35,11 +35,11 @@
 @property (retain, nonatomic) UIImagePickerController *imagePickerController;
 @property (nonatomic) NSInteger numberOfImages;
 -(void) customizeNavigationBar;
--(void) submitDamageReport;
+-(void) addDamageDetail;
 -(void) goBack;
 @end
 
-@implementation DCDamageViewController
+@implementation DCDamageDetailViewController
 @synthesize customCellImageDamageView = _customCellImageDamageView;
 @synthesize customCellNewImageDamageView = _customCellNewImageDamageView;
 @synthesize damageTableView = _damageTableView;
@@ -93,12 +93,12 @@
 #pragma mark - Others
 -(void) customizeNavigationBar {
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SUBMIT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(submitDamageReport)] autorelease];
+    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DONE", @"") style:UIBarButtonItemStylePlain target:self action:@selector(addDamageDetail)] autorelease];
     self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"CANCEL", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(goBack)] autorelease];
 }
 
 //sends the damage report to the server
--(void) submitDamageReport {
+-(void) addDamageDetail {
     
 }
 
@@ -294,18 +294,18 @@
                     }
                 }
             } else {
-                NSArray *customCellImageDamageView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellImageDamageView" owner:nil options:nil];
-                if (customCellImageDamageView) {
-                    if ([customCellImageDamageView count] > 0) {
-                        cell = [customCellImageDamageView objectAtIndex:0];
+                NSArray *customCellImageDamageDetailView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellImageDamageDetailView" owner:nil options:nil];
+                if (customCellImageDamageDetailView) {
+                    if ([customCellImageDamageDetailView count] > 0) {
+                        cell = [customCellImageDamageDetailView objectAtIndex:0];
                     }
                 }
             }
         } else {
-            NSArray *customCellImageDamageView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellAddNewItemView" owner:nil options:nil];
-            if (customCellImageDamageView) {
-                if ([customCellImageDamageView count] > 0) {
-                    cell = [customCellImageDamageView objectAtIndex:0];
+            NSArray *customCellAddNewItemView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellAddNewItemView" owner:nil options:nil];
+            if (customCellAddNewItemView) {
+                if ([customCellAddNewItemView count] > 0) {
+                    cell = [customCellAddNewItemView objectAtIndex:0];
                 }
             }
         }
@@ -345,18 +345,18 @@
                         }
                     }
                 } else {
-                    NSArray *customCellImageDamageView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellImageDamageView" owner:nil options:nil];
-                    if (customCellImageDamageView) {
-                        if ([customCellImageDamageView count] > 0) {
-                            cell = [customCellImageDamageView objectAtIndex:0];
+                    NSArray *customCellImageDamageDetailView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellImageDamageDetailView" owner:nil options:nil];
+                    if (customCellImageDamageDetailView) {
+                        if ([customCellImageDamageDetailView count] > 0) {
+                            cell = [customCellImageDamageDetailView objectAtIndex:0];
                         }
                     }
                 }
             } else {
-                NSArray *customCellImageDamageView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellAddNewItemView" owner:nil options:nil];
-                if (customCellImageDamageView) {
-                    if ([customCellImageDamageView count] > 0) {
-                        cell = [customCellImageDamageView objectAtIndex:0];
+                NSArray *customCellAddNewItemView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellAddNewItemView" owner:nil options:nil];
+                if (customCellAddNewItemView) {
+                    if ([customCellAddNewItemView count] > 0) {
+                        cell = [customCellAddNewItemView objectAtIndex:0];
                     }
                 }
             }

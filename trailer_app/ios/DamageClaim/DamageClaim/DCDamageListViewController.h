@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface DCDamageListViewController : UIViewController
+@interface DCDamageListViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
 
 @end

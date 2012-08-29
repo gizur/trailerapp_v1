@@ -7,12 +7,26 @@
 
 #import "RequestHeaders.h"
 
+#import "Const.h"
+
 
 @implementation RequestHeaders
 
 +(NSDictionary *)commonHeaders {
 	
-   NSDictionary *headerDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"Plunk for iPhone v.1.0",@"User-Agent", @"application/json", @"Accept", @"application/json", @"Content-Type", nil];
+    NSString *username = [[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME];
+    NSString *password = [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD];
+    NSString *timestamp = [[NSDate date] description];
+    NSString *apiKey = [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_KEY];
+    
+    NSDictionary *headerDictionary = [NSDictionary dictionaryWithObjectsAndKeys: 
+                                      @"text/json", @"Accept", 
+                                      username, HTTP_X_USERNAME, 
+                                      password, HTTP_X_PASSWORD, 
+                                      timestamp, HTTP_X_TIMESTAMP, 
+                                      apiKey, HTTP_X_GIZUR_API_KEY, 
+                                      @"sv,en-us,en;q=0.5", @"Accept-Language", 
+                                      nil];
     
     return headerDictionary;
 }

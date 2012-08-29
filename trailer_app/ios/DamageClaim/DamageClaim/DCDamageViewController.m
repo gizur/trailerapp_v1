@@ -1,5 +1,5 @@
 //
-//  DCDamageListViewController.m
+//  DCDamageViewController.m
 //  DamageClaim
 //
 //  Created by Dev on 18/08/12.
@@ -7,22 +7,24 @@
 //  This class shows the list of 
 //  all the damages filed for a particular truck
 
-#import "DCDamageListViewController.h"
+#import "DCDamageViewController.h"
 
-#import "DCDamageModel.h"
+#import "DCDamageDetailModel.h"
 
 #import "Const.h"
 
-#import "DCDamageViewController.h"
+#import "DCDamageDetailViewController.h"
 
-@interface DCDamageListViewController ()
+@interface DCDamageViewController ()
 @property (retain, nonatomic) IBOutlet UITableView *damageTableView;
 @property (nonatomic, retain) NSMutableArray *modelArray;
 
+-(void) customizeNavigationBar;
 -(void) logout;
+-(void) submitDamageReport;
 @end
 
-@implementation DCDamageListViewController
+@implementation DCDamageViewController
 @synthesize damageTableView = _damageTableView;
 @synthesize modelArray = _modelArray;
 
@@ -45,49 +47,47 @@
     //fill array with dummy values
     self.modelArray = [[[NSMutableArray alloc] init] autorelease];
     
-    if (self.navigationItem) {
-        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"LOGOUT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(logout)] autorelease];
-    }
+    [self customizeNavigationBar];
     
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
+    DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
     damageModel.damageType = @"Type: Door";
     damageModel.damagePosition = @"Position: Right Side";
     [self.modelArray addObject:damageModel];
     }
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
+    DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
     damageModel.damageType = @"Type: Lighting";
     damageModel.damagePosition = @"Position: Rear Side";
     [self.modelArray addObject:damageModel];
     }
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
+    DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
     damageModel.damageType = @"Type: Chasis";
     damageModel.damagePosition = @"Position: Right Side";
     [self.modelArray addObject:damageModel];
     }
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
+    DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
     damageModel.damageType = @"Type: Bumper";
     damageModel.damagePosition = @"Position: Front Side";
     [self.modelArray addObject:damageModel];
     }
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
+    DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
     damageModel.damageType = @"Type: Lighting";
     damageModel.damagePosition = @"Position: Front Side";
     [self.modelArray addObject:damageModel];
     }
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
+    DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
     damageModel.damageType = @"Type: Indicator";
     damageModel.damagePosition = @"Position: Left Side";
     [self.modelArray addObject:damageModel];
     }
     
 #if kDebug
-    for (DCDamageModel *damage in self.modelArray) {
+    for (DCDamageDetailModel *damage in self.modelArray) {
         NSLog(@"%@", damage.damageType);
     }
     
@@ -121,6 +121,23 @@
     
 }
 
+-(void) customizeNavigationBar {
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SUBMIT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(submitDamageReport)] autorelease];
+    //self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"CANCEL", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(goBack)] autorelease];
+    
+//    if (self.navigationItem) {
+//        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"LOGOUT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(logout)] autorelease];
+//    }
+}
+
+//sends the damage report to the server
+-(void) submitDamageReport {
+    
+}
+
+
+
 #pragma mark - UITableViewDataSource methods
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
@@ -145,7 +162,7 @@
 
 -(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     if (section == 1) {
-        return NSLocalizedString(@"REPORTED_DAMAGES", @"");
+        return NSLocalizedString(@"DAMAGE_DETAILS", @"");
     }
     return @"";
 }
@@ -178,11 +195,11 @@
     
     if (indexPath.section == 0) {
         UILabel *titleLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG];
-        titleLabel.text = NSLocalizedString(@"REPORT_NEW_DAMAGE", @"");
+        titleLabel.text = NSLocalizedString(@"ADD_NEW_DAMAGE_DETAIL", @"");
     } else if (indexPath.row < [self.modelArray count]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         
-        DCDamageModel *damageModel = [self.modelArray objectAtIndex:indexPath.row];
+        DCDamageDetailModel *damageModel = [self.modelArray objectAtIndex:indexPath.row];
         
         cell.textLabel.text = @"";
         if (damageModel.damageType) {
@@ -200,8 +217,8 @@
 #pragma mark - UITableViewDelegate methods
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section == 0) {
-        DCDamageViewController *damageViewController = [[[DCDamageViewController alloc] initWithNibName:@"DamageView" bundle:nil] autorelease];
-        [self.navigationController pushViewController:damageViewController animated:YES];
+        DCDamageDetailViewController *damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil] autorelease];
+        [self.navigationController pushViewController:damageDetailViewController animated:YES];
     }
 }
 

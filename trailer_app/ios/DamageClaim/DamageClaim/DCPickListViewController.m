@@ -89,10 +89,10 @@
 
 #pragma mark - Others
 -(void) customizeNavigationBar {
-    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-    if (self.navigationItem) {
-        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DONE", @"") style:UIBarButtonItemStylePlain target:self action:@selector(storeSelectedValues)] autorelease];
-    }
+//    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+//    if (self.navigationItem) {
+//        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DONE", @"") style:UIBarButtonItemStylePlain target:self action:@selector(storeSelectedValues)] autorelease];
+//    }
     
 }
 

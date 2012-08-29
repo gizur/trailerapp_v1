@@ -37,7 +37,7 @@
 			<string>com.gslab.${PRODUCT_NAME:rfc1034identifier}</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>http</string>
+				<string>gizur</string>
 			</array>
 		</dict>
 	</array>

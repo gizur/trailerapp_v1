@@ -12,15 +12,24 @@
 
 #import "DCLoginModel.h"
 
+#import "DCSharedObject.h"
+
+#import "RequestHeaders.h"
+
+#import "MBProgressHUD.h"
+
 @interface DCLoginViewController ()
 @property (retain, nonatomic) IBOutlet UIView *parentView;
 @property (retain, nonatomic) IBOutlet UITableView *loginTableView;
 @property (retain, nonatomic) IBOutlet UITableViewCell *customCellLoginView;
 @property (retain, nonatomic) DCLoginModel *loginModel;
+@property (nonatomic) NSInteger httpStatusCode;
+@property (retain, nonatomic) HTTPService *httpService;
 
 -(void) keyboardWillShow:(NSNotification *)notification;
 -(void) keyboardWillHide:(NSNotification *)notification;
 - (IBAction)login:(id)sender;
+-(void) parseResponse:(NSString *)responseString forURLString:(NSString *)urlString;
 
 
 @end
@@ -30,6 +39,8 @@
 @synthesize loginTableView = _loginTableView;
 @synthesize customCellLoginView = _customCellLoginView;
 @synthesize loginModel = _loginModel;
+@synthesize httpStatusCode = _httpStatusCode;
+@synthesize httpService = _httpService;
 
 #pragma mark - View LifeCycle methods
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -53,6 +64,20 @@
     if (!self.loginModel) {
         self.loginModel = [[[DCLoginModel alloc] init] autorelease];
     }
+    
+    [self.loginTableView reloadData];
+    
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME]) {
+        UITextField *usernameTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]] viewWithTag:LOGIN_USERNAME_TEXTFIELD_TAG];
+        usernameTextField.text = [[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME];
+    }
+    
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD]) {
+        UITextField *passwordTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]] viewWithTag:LOGIN_PASSWORD_TEXTFIELD_TAG];
+        passwordTextField.text = [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD];
+    }
+    
+    
 }
 
 - (void)viewDidUnload
@@ -76,6 +101,7 @@
     [_customCellLoginView release];
     [_parentView release];
     [_loginModel release];
+    [_httpService release];
     [super dealloc];
 }
 
@@ -113,8 +139,64 @@
 }
 
 - (IBAction)login:(id)sender {
+    //[self dismissModalViewControllerAnimated:YES];
+    NSString *model = @"Authenticate";
+    NSString *action = @"login";
+    NSString *urlString = [NSString stringWithFormat:@"http://gizurtrailerapp-env.elasticbeanstalk.com/api/index.php/api/%@/%@", model, action];
+    self.httpService = [[HTTPService alloc] initWithURLString:urlString headers:[RequestHeaders commonHeaders] body:nil delegate:self requestMethod:kRequestMethodPOST];
+    NSURLRequest *request = [self.httpService request];
+    NSString *signature;
+    if ([self.httpService serviceRequestMethod] == kRequestMethodPOST) {
+       signature  = [DCSharedObject generateSignatureForRequest:request model:model requestType:POST];
+    } else {
+        signature = [DCSharedObject generateSignatureForRequest:request model:model requestType:GET];
+    }
+#if kDebug
+    NSLog(@"%@", signature);
+#endif
+    
+    if (signature) {
+        [[self.httpService headersDictionary] setValue:signature forKey:HTTP_X_SIGNATURE];
+        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        hud.animationType = MBProgressHUDAnimationFade;
+        hud.labelText = NSLocalizedString(@"LOADING_MESSAGE", @"");
+        [self.httpService startService];
+#if kDebug
+        NSLog(@"%@", [[self.httpService headersDictionary] description]);
+#endif
+
+    } else {
+        //something went wrong
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
+    
+}
+
+-(void) parseResponse:(NSString *)responseString forURLString:(NSString *)urlString {
     [self dismissModalViewControllerAnimated:YES];
 }
+
+#pragma mark - HTTPServiceDelegate
+-(void) responseCode:(int)code {
+    self.httpStatusCode = code;
+}
+
+-(void) didReceiveResponse:(NSData *)data forURLString:(NSString *)urlString {
+    if (self.httpStatusCode == 200) {
+        NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+#if kDebug
+        NSLog(@"%@", responseString);
+#endif
+        
+        [self parseResponse:responseString forURLString:urlString];
+    }
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+}
+
+-(void) serviceDidFailWithError:(NSError *)error forURLString:(NSString *)urlString {
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+}
+
 
 #pragma mark - UITextFieldDelegate
 

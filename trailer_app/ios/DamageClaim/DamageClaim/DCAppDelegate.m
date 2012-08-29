@@ -11,7 +11,9 @@
 
 #import "DCSurveyViewController.h"
 
-#import "DCDamageViewController.h"
+#import "DCDamageDetailViewController.h"
+
+#import "Const.h"
 
 
 @implementation DCAppDelegate
@@ -38,6 +40,13 @@
     
 //    DCDamageViewController *d = [[[DCDamageViewController alloc] initWithNibName:@"DamageView" bundle:nil] autorelease];
 //    self.navigationController = [[[UINavigationController alloc] initWithRootViewController:d] autorelease];
+#if kTestingAPI
+    [[NSUserDefaults standardUserDefaults] setValue:@"cloud3@gizur.com" forKey:USER_NAME];
+    [[NSUserDefaults standardUserDefaults] setValue:@"rksh2jjf" forKey:PASSWORD];
+    [[NSUserDefaults standardUserDefaults] setValue:@"9b45e67513cb3377b0b18958c4de55be" forKey:GIZURCLOUD_SECRET_KEY];
+    [[NSUserDefaults standardUserDefaults] setValue:@"GZCLDFC4B35B" forKey:GIZURCLOUD_API_KEY];
+    
+#endif
     
     self.window.rootViewController = self.navigationController;
     [self.window makeKeyAndVisible];
