@@ -18,6 +18,8 @@
 
 #import "MBProgressHUD.h"
 
+#import "JSONKit.h"
+
 @interface DCLoginViewController ()
 @property (retain, nonatomic) IBOutlet UIView *parentView;
 @property (retain, nonatomic) IBOutlet UITableView *loginTableView;
@@ -29,7 +31,7 @@
 -(void) keyboardWillShow:(NSNotification *)notification;
 -(void) keyboardWillHide:(NSNotification *)notification;
 - (IBAction)login:(id)sender;
--(void) parseResponse:(NSString *)responseString forURLString:(NSString *)urlString;
+-(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier;
 
 
 @end
@@ -143,7 +145,7 @@
     NSString *model = @"Authenticate";
     NSString *action = @"login";
     NSString *urlString = [NSString stringWithFormat:@"http://gizurtrailerapp-env.elasticbeanstalk.com/api/index.php/api/%@/%@", model, action];
-    self.httpService = [[HTTPService alloc] initWithURLString:urlString headers:[RequestHeaders commonHeaders] body:nil delegate:self requestMethod:kRequestMethodPOST];
+    self.httpService = [[[HTTPService alloc] initWithURLString:urlString headers:[RequestHeaders commonHeaders] body:nil delegate:self requestMethod:kRequestMethodPOST identifier:AUTHENTICATE_LOGIN] autorelease];
     NSURLRequest *request = [self.httpService request];
     NSString *signature;
     if ([self.httpService serviceRequestMethod] == kRequestMethodPOST) {
@@ -156,7 +158,7 @@
 #endif
     
     if (signature) {
-        [[self.httpService headersDictionary] setValue:signature forKey:HTTP_X_SIGNATURE];
+        [[self.httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.animationType = MBProgressHUDAnimationFade;
         hud.labelText = NSLocalizedString(@"LOADING_MESSAGE", @"");
@@ -172,8 +174,15 @@
     
 }
 
--(void) parseResponse:(NSString *)responseString forURLString:(NSString *)urlString {
+-(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
+//    if ([identifier isEqualToString:AUTHENTICATE_LOGIN]) {
+//        NSDictionary *jsonDict = [responseString objectFromJSONString];
+//        if ((NSNull *)[jsonDict valueForKey:]) {
+//            
+//        }
+//    }
     [self dismissModalViewControllerAnimated:YES];
+    
 }
 
 #pragma mark - HTTPServiceDelegate
@@ -181,20 +190,24 @@
     self.httpStatusCode = code;
 }
 
--(void) didReceiveResponse:(NSData *)data forURLString:(NSString *)urlString {
+-(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
     if (self.httpStatusCode == 200) {
         NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 #if kDebug
         NSLog(@"%@", responseString);
 #endif
         
-        [self parseResponse:responseString forURLString:urlString];
+        [self parseResponse:responseString forIdentifier:identifier];
     }
     [MBProgressHUD hideHUDForView:self.view animated:YES];
 }
 
--(void) serviceDidFailWithError:(NSError *)error forURLString:(NSString *)urlString {
+-(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
     [MBProgressHUD hideHUDForView:self.view animated:YES];
+}
+
+-(void) storeResponse:(NSData *)data forIdentifier:(NSString *)identifier {
+    
 }
 
 

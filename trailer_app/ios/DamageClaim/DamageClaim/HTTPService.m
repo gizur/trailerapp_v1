@@ -12,7 +12,7 @@
 @implementation HTTPService
 
 @synthesize receivedData,connection ;
-@synthesize delegate,serviceURLString,headersDictionary,bodyString,isPOST,serviceRequestMethod, bodyData, request;
+@synthesize delegate,serviceURLString,headersDictionary,bodyString,isPOST,serviceRequestMethod, bodyData, request, identifier;
  
 - (id)init
 {
@@ -27,6 +27,19 @@
         bodyString = body ;[bodyString retain];
         delegate=serviceDelegate ;
         serviceRequestMethod = requestMethod;
+    }
+    return self ;
+}
+
+- (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
+               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod identifier:(NSString *)iden{
+    if (self=[super init]) {
+        serviceURLString = urlString ;[serviceURLString retain] ;
+        headersDictionary = [headers mutableCopy] ;//[headersDictionary retain] ;
+        bodyString = body; [bodyString retain];
+        delegate=serviceDelegate;
+        serviceRequestMethod = requestMethod;
+        identifier = iden; [identifier retain];
     }
     return self ;
 }
@@ -95,9 +108,9 @@
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     
-    [self.delegate didReceiveResponse:self.receivedData forURLString:self.serviceURLString];
+    [self.delegate didReceiveResponse:self.receivedData forIdentifier:self.identifier];
     if ([(UIViewController *)self.delegate respondsToSelector:@selector(storeResponse:forCallType:)]) {
-        [self.delegate storeResponse:self.receivedData forURLString:self.serviceURLString];
+        [self.delegate storeResponse:self.receivedData forIdentifier:self.identifier];
     }
 }
 
@@ -105,7 +118,7 @@
 #if kDebug
     NSLog(@"ERROR: %@", [error description]);
 #endif
-    [self.delegate serviceDidFailWithError:error forURLString:self.serviceURLString];
+    [self.delegate serviceDidFailWithError:error forIdentifier:self.identifier];
 }
 
 - (void)cancelHTTPService {

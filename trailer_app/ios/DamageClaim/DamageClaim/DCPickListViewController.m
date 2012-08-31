@@ -22,6 +22,7 @@
 @property (retain, nonatomic) NSString *storageKey;
 @property (retain, nonatomic) NSMutableArray *selectedObjects;
 @property (nonatomic, getter = isSingleValue) BOOL singleValue;
+@property (nonatomic) NSInteger type;
 
 -(void) customizeNavigationBar;
 -(void) storeSelectedValues;
@@ -35,7 +36,8 @@
 @synthesize storageKey = _storageKey;
 @synthesize selectedObjects = _selectedObjects;
 @synthesize singleValue = _singleValue;
-
+@synthesize type = _type;
+@synthesize delegate = _delegate;
 #pragma mark - ViewLifeCycle methods
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -56,6 +58,19 @@
     }
     return self;
 }
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray type:(NSInteger) type isSingleValue:(BOOL) singleValue {
+    // Custom initialization
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        _modelArray = modelArray; [_modelArray retain];
+        _type = type;
+        _singleValue = singleValue;
+    }
+    return self;
+}
+
 
 - (void)viewDidLoad
 {
@@ -78,6 +93,7 @@
 }
 
 - (void)dealloc {
+    _delegate = nil;
     [_customCellPickListView release];
     [_pickListTableView release];
     [_modelArray release];
@@ -98,14 +114,27 @@
 
 -(void) storeSelectedValues {
     if (self.selectedObjects && self.storageKey) {
-        if ([self.selectedObjects count] > 0) {
+        if ([self isSingleValue]) {
+            if ([self.selectedObjects count] > 0) {
+#if kDebug
+                NSLog(@"%@", [self.selectedObjects description]);
+#endif
+                [[[DCSharedObject sharedPreferences] preferences] setValue:[self.selectedObjects objectAtIndex:0] forKey:self.storageKey];
+            }
+        } else {
 #if kDebug
             NSLog(@"%@", [self.selectedObjects description]);
 #endif
-            
             [[[DCSharedObject sharedPreferences] preferences] setValue:self.selectedObjects forKey:self.storageKey];
+            
         }
     }
+    if (self.delegate) {
+        if ([self.delegate respondsToSelector:@selector(pickListDidPickItems:ofType:)]) {
+            [self.delegate pickListDidPickItems:self.selectedObjects ofType:self.type];
+        }
+    }
+    
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -188,6 +217,11 @@
                 if (indexPath.row < [self.modelArray count]) {
                     [self.selectedObjects removeAllObjects];
                     [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
+                }
+            }
+            if (self.delegate) {
+                if ([self.delegate respondsToSelector:@selector(pickListDidPickItem:ofType:)]) {
+                    [self.delegate pickListDidPickItem:[self.modelArray objectAtIndex:indexPath.row] ofType:self.type];
                 }
             }
             

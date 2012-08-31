@@ -8,9 +8,9 @@
 
 #import "DCDamageDetailViewController.h"
 
-#import "Const.h"
+#import "DCDamageDetailModel.h"
 
-#import "DCPickListViewController.h"
+#import "Const.h"
 
 #import "DCSharedObject.h"
 
@@ -33,6 +33,7 @@
 @property (retain, nonatomic) IBOutlet UITableViewCell *customCellNewImageDamageView;
 @property (retain, nonatomic) IBOutlet UITableView *damageTableView;
 @property (retain, nonatomic) UIImagePickerController *imagePickerController;
+@property (retain, nonatomic) DCDamageDetailModel *damageDetailModel;
 @property (nonatomic) NSInteger numberOfImages;
 -(void) customizeNavigationBar;
 -(void) addDamageDetail;
@@ -45,6 +46,7 @@
 @synthesize damageTableView = _damageTableView;
 @synthesize imagePickerController = _imagePickerController;
 @synthesize numberOfImages = _numberOfImages;
+@synthesize damageDetailModel = _damageDetailModel;
 
 #pragma mark - View LifeCycle
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -55,6 +57,17 @@
     }
     return self;
 }
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil damageDetailModel:(DCDamageDetailModel *)damageDetailModel
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        _damageDetailModel = damageDetailModel; [_damageDetailModel retain];
+    }
+    return self;
+}
+
 
 - (void)viewDidLoad
 {
@@ -87,6 +100,7 @@
     [_customCellImageDamageView release];
     [_customCellNewImageDamageView release];
     [_imagePickerController release];
+    [_damageDetailModel release];
     [super dealloc];
 }
 
@@ -99,7 +113,10 @@
 
 //sends the damage report to the server
 -(void) addDamageDetail {
-    
+    if (self.damageDetailModel) {
+        [[[DCSharedObject sharedPreferences] preferences] setValue:self.damageDetailModel forKey:DAMAGE_DETAIL_MODEL];
+    }
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void) goBack {
@@ -120,6 +137,29 @@
         }
     }
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+#pragma mark - DCPickListViewControllerDelegate
+-(void) pickListDidPickItem:(id)item ofType:(NSInteger)type {
+    switch (type) {
+        case DCPickListItemTypeDamageType:
+            if (!self.damageDetailModel) {
+                self.damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
+            }
+            self.damageDetailModel.damageType = item;
+            break;
+        case DCPickListItemTypeDamagePosition:
+            if (!self.damageDetailModel) {
+                self.damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
+            }
+            self.damageDetailModel.damagePosition = item;
+        default:
+            break;
+    }
+}
+
+-(void) pickListDidPickItems:(NSArray *)items ofType:(NSInteger)type {
+    
 }
 
 #pragma mark - UITextFieldDelegate
@@ -368,12 +408,8 @@
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.textLabel.shadowColor = [UIColor whiteColor];
         cell.textLabel.shadowOffset = CGSizeMake(1, 1);
-        if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_TYPE_KEY]) {
-            NSArray *damageArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_TYPE_KEY];
-            if ([damageArray count] > 0) {
-                cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"DAMAGE_TYPE", @""), [damageArray objectAtIndex:0]];
-            }
-            
+        if (self.damageDetailModel.damageType) {
+            cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"DAMAGE_TYPE", @""), self.damageDetailModel.damageType];
         } else {
             cell.textLabel.text = NSLocalizedString(@"DAMAGE_TYPE", @"");
         }
@@ -384,12 +420,8 @@
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.textLabel.shadowColor = [UIColor whiteColor];
         cell.textLabel.shadowOffset = CGSizeMake(1, 1);
-        if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_KEY]) {
-            NSArray *damageArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_KEY];
-            if ([damageArray count] > 0) {
-                cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"DAMAGE_POSITION", @""), [damageArray objectAtIndex:0]];
-            }
-            
+        if (self.damageDetailModel.damagePosition) {
+            cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"DAMAGE_POSITION", @""), self.damageDetailModel.damagePosition];
         } else {
             cell.textLabel.text = NSLocalizedString(@"DAMAGE_POSITION", @"");
         }
@@ -399,13 +431,7 @@
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
         if (self.numberOfImages > 0) {
             if (indexPath.row != 0) {
-                //read the contents of image file and load it in UIImageView
-//                UITextField *captionTextField = (UITextField *)[cell viewWithTag:CUSTOM_CELL_TEXT_FIELD_NEW_IMAGE_DAMAGE_TAG];
-//                captionTextField.delegate = self;
-//                captionTextField.autocapitalizationType = UITextAutocapitalizationTypeWords;
-//                captionTextField.clearButtonMode = UITextFieldViewModeAlways;
-//                captionTextField.returnKeyType = UIReturnKeyDone;
-                
+                //read the contents of image file and load it in UIImageView                
                 NSArray *pathArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDirectory, YES);
                 if (pathArray) {
                     if ([pathArray count] > 0) {
@@ -439,13 +465,15 @@
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section == 0 && indexPath.row == 0) {
         NSArray *array = [NSArray arrayWithObjects:@"Doors", @"Undercover", @"Lighting", @"Breaks", @"Outriggers", nil];
-        DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:array storageKey:DAMAGE_TYPE_KEY isSingleValue:YES] autorelease];
+        DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:array type:DCPickListItemTypeDamageType isSingleValue:YES] autorelease];
+        pickListViewController.delegate = self;
         [self.navigationController pushViewController:pickListViewController animated:YES];
     }
     
     if (indexPath.section == 0 && indexPath.row == 1) {
         NSArray *array = [NSArray arrayWithObjects:@"Left Side",@"Right Side", @"Front Side", @"Device Hood", @"Top Side", @"Bottom Side", nil];
-        DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:array storageKey:DAMAGE_POSITION_KEY isSingleValue:YES] autorelease];
+        DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:array type:DCPickListItemTypeDamagePosition isSingleValue:YES] autorelease];
+        pickListViewController.delegate = self;
         [self.navigationController pushViewController:pickListViewController animated:YES];
     }
     

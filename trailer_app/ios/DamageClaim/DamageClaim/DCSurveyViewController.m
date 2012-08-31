@@ -161,7 +161,6 @@
     //reset trailer id
     UITableViewCell *idCell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
     idCell.textLabel.text = NSLocalizedString(@"ID", @"");
-    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:SURVEY_TRAILER_ID];
     if (self.surveyModel.surveyTrailerId) {
         self.surveyModel.surveyTrailerId = nil;
     }
@@ -169,7 +168,6 @@
     //reset survey place
     UITableViewCell *placeCell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0]];
     placeCell.textLabel.text = NSLocalizedString(@"PLACE", @"");
-    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:SURVEY_PLACE];
     if (self.surveyModel.surveyPlace) {
         self.surveyModel.surveyPlace = nil;
     }
@@ -177,7 +175,6 @@
     //reset survey plates
     UITableViewCell *platesCell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1]];
     platesCell.textLabel.text = NSLocalizedString(@"PLATES", @"");
-    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:SURVEY_PLATES];
     if (self.surveyModel.surveyPlates) {
         self.surveyModel.surveyPlates = nil;
     }
@@ -185,7 +182,6 @@
     //reset survey straps
     UITableViewCell *strapsCell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:1]];
     strapsCell.textLabel.text = NSLocalizedString(@"STRAPS", @"");
-    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:SURVEY_STRAPS];
     if (self.surveyModel.surveyStraps) {
         self.surveyModel.surveyStraps = nil;
     }
@@ -269,6 +265,41 @@
         return YES;
     }
     return NO;
+}
+#pragma mark - DCPickListViewControllerDelegate
+-(void) pickListDidPickItem:(id)item ofType:(NSInteger)type {
+    switch (type) {
+        case DCPickListItemSurveyTrailerId:
+            if (!self.surveyModel) {
+                self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
+            }
+            self.surveyModel.surveyTrailerId = item;
+            break;
+        case DCPickListItemSurveyPlace:
+            if (!self.surveyModel) {
+                self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
+            }
+            self.surveyModel.surveyPlace = item;
+            break;
+        case DCPickListItemSurveyPlates:
+            if (!self.surveyModel) {
+                self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
+            }
+            self.surveyModel.surveyPlates = item;
+            break;
+        case DCPickListItemSurveyStraps:
+            if (!self.surveyModel) {
+                self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
+            }
+            self.surveyModel.surveyStraps = item;
+            break;
+        default:
+            break;
+    }
+}
+
+-(void) pickListDidPickItems:(NSArray *)items ofType:(NSInteger)type {
+    
 }
 
 #pragma mark - UITextFieldDelegate method
@@ -391,12 +422,6 @@
         }
         
         if ((indexPath.section == 0 && (indexPath.row == 1 || indexPath.row == 2)) || indexPath.section == 1) {
-//            NSArray *customCellTextFieldView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellTextFieldView" owner:nil options:nil];
-//            if (customCellTextFieldView) {
-//                if ([customCellTextFieldView count] > 0) {
-//                    cell = [customCellTextFieldView objectAtIndex:0];
-//                }
-//            }
             cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SimpleCell"] autorelease];
             
         }
@@ -412,73 +437,34 @@
                     UISegmentedControl *segmentedControl = (UISegmentedControl *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
                     [segmentedControl setTitle:NSLocalizedString(@"OWN", @"") forSegmentAtIndex:0];
                     [segmentedControl setTitle:NSLocalizedString(@"RENTED", @"") forSegmentAtIndex:1];
-                    if ([[self.surveyModel.surveyTrailerType lowercaseString] isEqualToString:@"rented"]) {
+                    if ([[self.surveyModel.surveyTrailerType lowercaseString] isEqualToString:NSLocalizedString(@"RENTED", @"")]) {
                         [segmentedControl setSelectedSegmentIndex:1];
                     }
                     [segmentedControl addTarget:self action:@selector(toggleTrailerType:) forControlEvents:UIControlEventValueChanged];
                 }
                     break;
                 case 1: {
-//                    UITextField *idTextField = (UITextField *)[cell viewWithTag:CUSTOM_CELL_TEXTFIELD_TEXTFIELD_TAG];
-//                    idTextField.placeholder = NSLocalizedString(@"ID", @"");
-//                    idTextField.delegate = self;
-//                    idTextField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-//                    idTextField.clearButtonMode = UITextFieldViewModeAlways;
-//                    idTextField.returnKeyType = UIReturnKeyNext;
-//                    //overwriting textField tag
-//                    idTextField.tag = TEXT_FIELD_ID_TAG;
                     cell.selectionStyle = UITableViewCellSelectionStyleGray;
                     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     
                     cell.textLabel.shadowColor = [UIColor whiteColor];
                     cell.textLabel.shadowOffset = CGSizeMake(1, 1);
-                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_TRAILER_ID]) {
-                        NSArray *trailerIDArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_TRAILER_ID];
-                        if (trailerIDArray) {
-                            if ([trailerIDArray count] > 0) {
-                                cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"ID", @""), [trailerIDArray objectAtIndex:0]];
-                                if (!self.surveyModel) {
-                                    self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
-                                    
-                                }
-                                self.surveyModel.surveyTrailerId = [trailerIDArray objectAtIndex:0];
-                            }
-                            [self.navigationItem.rightBarButtonItem setEnabled:YES];
-                        }
-                        
+                    if (self.surveyModel.surveyTrailerId) {
+                        cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"ID", @""), self.surveyModel.surveyTrailerId];
+                         [self.navigationItem.rightBarButtonItem setEnabled:YES];
                         
                     } else {
                         cell.textLabel.text = NSLocalizedString(@"ID", @"");
                     }
                 }
                     break;
-                case 2: {
-//                    UITextField *textField = (UITextField *)[cell viewWithTag:CUSTOM_CELL_TEXTFIELD_TEXTFIELD_TAG];
-//                    textField.placeholder = NSLocalizedString(@"PLACE", @"");
-//                    textField.delegate = self;
-//                    textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-//                    textField.clearButtonMode = UITextFieldViewModeAlways;
-//                    //overwriting textField tag
-//                    textField.tag = TEXT_FIELD_PLACE_TAG;
-                    
+                case 2: {                    
                     cell.selectionStyle = UITableViewCellSelectionStyleGray;
                     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     cell.textLabel.shadowColor = [UIColor whiteColor];
                     cell.textLabel.shadowOffset = CGSizeMake(1, 1);
-                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLACE]) {
-                        NSArray *trailerIDArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLACE];
-                        if (trailerIDArray) {
-                            if ([trailerIDArray count] > 0) {
-                                cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"PLACE", @""), [trailerIDArray objectAtIndex:0]];
-                                if (!self.surveyModel) {
-                                    self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
-                                    
-                                }
-                                self.surveyModel.surveyPlace = [trailerIDArray objectAtIndex:0];
-                            }
-                        }
-                        
-                        
+                    if (self.surveyModel.surveyPlace) {
+                        cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"PLACE", @""), self.surveyModel.surveyPlace];
                     } else {
                         cell.textLabel.text = NSLocalizedString(@"PLACE", @"");
                     }
@@ -510,63 +496,26 @@
         case 1:
             switch (indexPath.row) {
                 case 0: {
-//                    UITextField *textField = (UITextField *)[cell viewWithTag:CUSTOM_CELL_TEXTFIELD_TEXTFIELD_TAG];
-//                    textField.placeholder = NSLocalizedString(@"PLATES", @"");
-//                    textField.delegate = self;
-//                    textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-//                    textField.clearButtonMode = UITextFieldViewModeAlways;
-//                    textField.returnKeyType = UIReturnKeyNext;
-//                    //overwriting textField tag
-//                    textField.tag = TEXT_FIELD_PLATES_TAG;
                     cell.selectionStyle = UITableViewCellSelectionStyleGray;
                     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     cell.textLabel.shadowColor = [UIColor whiteColor];
                     cell.textLabel.shadowOffset = CGSizeMake(1, 1);
                     
-                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLATES]) {
-                        NSArray *trailerIDArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLATES];
-                        if (trailerIDArray) {
-                            if ([trailerIDArray count] > 0) {
-                                cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"PLATES", @""), [trailerIDArray objectAtIndex:0]];
-                                if (!self.surveyModel) {
-                                    self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
-                                }
-                                self.surveyModel.surveyPlace = [trailerIDArray objectAtIndex:0];
-                            }
-                        }
-                        
-                        
-                    } else {
+                    if (self.surveyModel.surveyPlates) {
+                        cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"PLATES", @""), self.surveyModel.surveyPlates];
+                        } else {
                         cell.textLabel.text = NSLocalizedString(@"PLATES", @"");
                     }
                 }
                     break;
                 case 1: {
-//                    UITextField *textField = (UITextField *)[cell viewWithTag:CUSTOM_CELL_TEXTFIELD_TEXTFIELD_TAG];
-//                    textField.placeholder = NSLocalizedString(@"STRAPS", @"");
-//                    textField.delegate = self;
-//                    textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-//                    textField.clearButtonMode = UITextFieldViewModeAlways;
-//                    //overwriting textField tag
-//                    textField.tag = TEXT_FIELD_STRAPS_TAG;
                     cell.selectionStyle = UITableViewCellSelectionStyleGray;
                     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     cell.textLabel.shadowColor = [UIColor whiteColor];
                     cell.textLabel.shadowOffset = CGSizeMake(1, 1);
                     
-                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_STRAPS]) {
-                        NSArray *trailerIDArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_STRAPS];
-                        if (trailerIDArray) {
-                            if ([trailerIDArray count] > 0) {
-                                cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"STRAPS", @""), [trailerIDArray objectAtIndex:0]];
-                                if (!self.surveyModel) {
-                                    self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
-                                }
-                                self.surveyModel.surveyStraps = [trailerIDArray objectAtIndex:0];
-                            }
-                        }
-                        
-                        
+                    if (self.surveyModel.surveyStraps) {
+                        cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"STRAPS", @""), self.surveyModel.surveyStraps];
                     } else {
                         cell.textLabel.text = NSLocalizedString(@"STRAPS", @"");
                     }
@@ -594,7 +543,8 @@
                 case 1: {
                     //dummy values
                     NSArray *trailerIdArray = [NSArray arrayWithObjects:@"TR031A", @"TR031B", @"TR031B", @"TR031B", nil];
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_TRAILER_ID isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyTrailerId isSingleValue:YES] autorelease];
+                    pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;
@@ -602,7 +552,8 @@
                     //dummy values
                     NSArray *trailerIdArray = [NSArray arrayWithObjects:@"Place 1", @"Place 2", @"Place 3", @"Place 4", nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_PLACE isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyPlace isSingleValue:YES] autorelease];
+                    pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;
@@ -616,7 +567,8 @@
                     //dummy values
                     NSArray *trailerIdArray = [NSArray arrayWithObjects:@"1", @"2", @"3", @"4", nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_PLATES isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyPlates isSingleValue:YES] autorelease];
+                    pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;
@@ -624,7 +576,8 @@
                     //dummy values
                     NSArray *trailerIdArray = [NSArray arrayWithObjects:@"1", @"2", @"3", @"4", nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray storageKey:SURVEY_STRAPS isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyStraps isSingleValue:YES] autorelease];
+                    pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;

@@ -32,13 +32,8 @@ GET_HIVE_URL_CALL_TYPE
 } DC_URL_CALL_TYPE;
 
 
-
-#define DAMAGE_TYPE_KEY @"DAMAGE_TYPE_KEY"
-#define DAMAGE_POSITION_KEY @"DAMAGE_POSITION_KEY"
-#define SURVEY_TRAILER_ID @"SURVEY_TRAILER_ID"
-#define SURVEY_PLACE @"SURVEY_PLACE"
-#define SURVEY_PLATES @"SURVEY_PLATES"
-#define SURVEY_STRAPS @"SURVEY_STRAPS"
+//Keys to share data across the app
+#define DAMAGE_DETAIL_MODEL @"DAMAGE_DETAIL_MODEL"
 
 #define DAMAGE_IMAGE_NAME @"IMAGE"
 #define DAMAGE_THUMBNAIL_IMAGE_NAME @"THUMBNAILIMAGE"
@@ -94,6 +89,16 @@ enum CUSTOM_CELL_ADD_NEW_ITEM_TAGS {
     CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG = -1
     };
 
+enum DCPickListItemTypes {
+    DCPickListItemSurveyTrailerId,
+    DCPickListItemSurveyPlace,
+    DCPickListItemSurveyPlates,
+    DCPickListItemSurveyStraps,
+    DCPickListItemTypeDamageType,
+    DCPickListItemTypeDamagePosition
+    
+    };
+
 #define GET @"GET"
 #define POST @"POST"
 
@@ -112,13 +117,14 @@ enum CUSTOM_CELL_ADD_NEW_ITEM_TAGS {
 
 //header strings
 #define HOST @"Host"
-#define HTTP_X_SIGNATURE @"Http_x_signature"
-#define HTTP_X_USERNAME @"Http_x_username"
-#define HTTP_X_PASSWORD @"Http_x_password"
-#define HTTP_X_TIMESTAMP @"Http_x_timestamp"
-#define HTTP_X_GIZUR_API_KEY @"Http_x_gizurcloud_api_key"
+#define X_SIGNATURE @"x_signature"
+#define X_USERNAME @"x_username"
+#define X_PASSWORD @"x_password"
+#define X_TIMESTAMP @"x_timestamp"
+#define X_GIZUR_API_KEY @"x_gizurcloud_api_key"
 
-//URLS
+
+//URLS identifiers
 #define AUTHENTICATE_LOGIN @"Authenticate/login"
 
 

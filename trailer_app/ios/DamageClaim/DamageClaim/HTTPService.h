@@ -11,12 +11,12 @@
 
 @protocol HTTPServiceDelegate
 - (void)responseCode:(int)code;
--(void) storeResponse:(NSData *)data forURLString:(NSString *)urlString;
+-(void) storeResponse:(NSData *)data forIdentifier:(NSString *) identifier;
 
 @required
-- (void)didReceiveResponse :(NSData *)data forURLString:(NSString *)urlString;
+- (void)didReceiveResponse :(NSData *)data forIdentifier:(NSString *) identifier;
 @required
-- (void)serviceDidFailWithError : (NSError *)error forURLString:(NSString *)urlString;
+- (void)serviceDidFailWithError : (NSError *)error forIdentifier:(NSString *) identifier;
 
 
 @end
@@ -37,13 +37,14 @@ typedef enum {
 
 @interface HTTPService : NSObject
 
-@property(nonatomic, retain) NSMutableData *receivedData;
-@property(nonatomic, retain) NSURLConnection *connection;
-@property(nonatomic, assign) id<HTTPServiceDelegate>delegate;
-@property(nonatomic, retain) NSString *serviceURLString;
-@property(nonatomic, retain) NSMutableDictionary *headersDictionary;
-@property(nonatomic, retain) NSString *bodyString;
+@property (nonatomic, retain) NSMutableData *receivedData;
+@property (nonatomic, retain) NSURLConnection *connection;
+@property (nonatomic, assign) id<HTTPServiceDelegate>delegate;
+@property (nonatomic, retain) NSString *serviceURLString;
+@property (nonatomic, retain) NSMutableDictionary *headersDictionary;
+@property (nonatomic, retain) NSString *bodyString;
 @property (nonatomic, retain) NSMutableURLRequest *request;
+@property (nonatomic, retain) NSString *identifier;
 
 //the bodyString when converted to NSData is stored here.
 //The dev can also set the data directly
@@ -54,6 +55,10 @@ typedef enum {
 
 - (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
                delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod;
+
+- (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
+               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod identifier:(NSString *)iden;
+
 
 - (void)startService;
 - (void)cancelHTTPService ;

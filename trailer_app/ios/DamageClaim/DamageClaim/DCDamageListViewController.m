@@ -50,38 +50,38 @@
     
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-        damageModel.damageType = @"Type: Door";
-        damageModel.damagePosition = @"Position: Right Side";
+        damageModel.damageType = @"9 Damages Reported";
+        damageModel.damagePosition = @"2 Days ago";
         [self.modelArray addObject:damageModel];
     }
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-        damageModel.damageType = @"Type: Lighting";
-        damageModel.damagePosition = @"Position: Rear Side";
+        damageModel.damageType = @"2 Damages Reported";
+        damageModel.damagePosition = @"11 Days ago";
         [self.modelArray addObject:damageModel];
     }
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-        damageModel.damageType = @"Type: Chasis";
-        damageModel.damagePosition = @"Position: Right Side";
+        damageModel.damageType = @"7 Damages Reported";
+        damageModel.damagePosition = @"15 Days ago";
         [self.modelArray addObject:damageModel];
     }
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-        damageModel.damageType = @"Type: Bumper";
-        damageModel.damagePosition = @"Position: Front Side";
+        damageModel.damageType = @"3 Damages Reported";
+        damageModel.damagePosition = @"2 Months ago";
         [self.modelArray addObject:damageModel];
     }
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-        damageModel.damageType = @"Type: Lighting";
-        damageModel.damagePosition = @"Position: Front Side";
+        damageModel.damageType = @"1 Damage Reported";
+        damageModel.damagePosition = @"6 Months ago";
         [self.modelArray addObject:damageModel];
     }
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-        damageModel.damageType = @"Type: Indicator";
-        damageModel.damagePosition = @"Position: Left Side";
+        damageModel.damageType = @"5 Damages Reported";
+        damageModel.damagePosition = @"2 Years ago";
         [self.modelArray addObject:damageModel];
     }
     
@@ -116,8 +116,8 @@
 #pragma mark - Others
 -(void) customizeNavigationBar {
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SUBMIT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(submitDamageReport)] autorelease];
-    //self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"CANCEL", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(goBack)] autorelease];
+//self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SUBMIT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(submitDamageReport)] autorelease];
+//self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"CANCEL", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(goBack)] autorelease];
     
     //    if (self.navigationItem) {
     //        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"LOGOUT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(logout)] autorelease];

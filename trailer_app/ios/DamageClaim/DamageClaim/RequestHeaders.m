@@ -21,10 +21,10 @@
     
     NSDictionary *headerDictionary = [NSDictionary dictionaryWithObjectsAndKeys: 
                                       @"text/json", @"Accept", 
-                                      username, HTTP_X_USERNAME, 
-                                      password, HTTP_X_PASSWORD, 
-                                      timestamp, HTTP_X_TIMESTAMP, 
-                                      apiKey, HTTP_X_GIZUR_API_KEY, 
+                                      username, X_USERNAME, 
+                                      password, X_PASSWORD, 
+                                      timestamp, X_TIMESTAMP, 
+                                      apiKey, X_GIZUR_API_KEY, 
                                       @"sv,en-us,en;q=0.5", @"Accept-Language", 
                                       nil];
     

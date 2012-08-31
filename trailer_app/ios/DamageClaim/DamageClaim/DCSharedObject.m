@@ -10,6 +10,7 @@
 #import "Const.h"
 #include <CommonCrypto/CommonDigest.h>
 #include <CommonCrypto/CommonHMAC.h>
+#import "NSData+Base64.h"
 
 static DCSharedObject *sharedPreferences = nil;
 
@@ -84,11 +85,11 @@ static DCSharedObject *sharedPreferences = nil;
     NSString *publicKey = [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_KEY];
     
     if (verb && apiVersion && timestamp && publicKey) {
-        NSString *inputString = [NSString stringWithFormat:@"KEYID%@Model%@Timestamp%@Verb%@Version%@", publicKey, model, timestamp, verb, apiVersion];
+        NSString *inputString = [NSString stringWithFormat:@"KeyID%@Model%@Timestamp%@Verb%@Version%@", publicKey, model, timestamp, verb, apiVersion];
 #if kDebug
         NSLog(@"%@", inputString);
 #endif
-        NSString *signature = [DCSharedObject hmacWithSecret:@"9b45e67513cb3377b0b18958c4de55be" forString:inputString];
+        NSString *signature = [DCSharedObject hmacSHA256WithKey:@"9b45e67513cb3377b0b18958c4de55be" andInputString:inputString];
         if (signature) {
             return signature;
         } else {
@@ -97,28 +98,23 @@ static DCSharedObject *sharedPreferences = nil;
     }
     return nil;
 }
-
-+ (NSString*) hmacWithSecret:(NSString*) secret forString:(NSString *)string
-{
-    CCHmacContext    ctx;
-    const char       *key = [secret UTF8String];
-    const char       *str = [string UTF8String];
-    unsigned char    mac[CC_MD5_DIGEST_LENGTH];
-    char             hexmac[2 * CC_MD5_DIGEST_LENGTH + 1];
-    char             *p;
++ (NSString *)hmacSHA256WithKey:(NSString *)key andInputString:(NSString *)inputString {
     
-    CCHmacInit( &ctx, kCCHmacAlgMD5, key, strlen( key ));
-    CCHmacUpdate( &ctx, str, strlen(str) );
-    CCHmacFinal( &ctx, mac);
+    const char *cKey  = [key cStringUsingEncoding:NSASCIIStringEncoding];
+    const char *cData = [inputString cStringUsingEncoding:NSASCIIStringEncoding];
     
-    p = hexmac;
-    for (int i = 0; i < CC_MD5_DIGEST_LENGTH; i++ ) {
-        snprintf( p, 3, "%02x", mac[ i ] );
-        p += 2;
-    }
+    unsigned char cHMAC[CC_SHA256_DIGEST_LENGTH];
     
-    return [NSString stringWithUTF8String:hexmac];
+    CCHmac(kCCHmacAlgSHA256, cKey, strlen(cKey), cData, strlen(cData), cHMAC);
+    
+    NSData *HMAC = [[NSData alloc] initWithBytes:cHMAC
+                                          length:sizeof(cHMAC)];
+    
+    return [HMAC base64EncodedString];
+    
+    
 }
+
 
 
 @end
