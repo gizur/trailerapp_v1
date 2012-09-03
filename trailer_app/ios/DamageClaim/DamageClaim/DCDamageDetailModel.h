@@ -12,6 +12,10 @@
 
 @property (nonatomic, retain) NSString *damageType;
 @property (nonatomic, retain) NSString *damagePosition;
-@property (nonatomic, retain) NSMutableArray *damageImages;
+
+//These are kept Sets and not Array because
+//they need to be merged eliminating duplicates quite often
+@property (nonatomic, retain) NSMutableSet *damageImagePaths;
+@property (nonatomic, retain) NSMutableSet *damageThumbnailImagePaths;
 
 @end

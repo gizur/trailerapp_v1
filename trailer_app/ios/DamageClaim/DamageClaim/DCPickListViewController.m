@@ -48,23 +48,23 @@
     return self;
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray storageKey:(NSString *)key isSingleValue:(BOOL)singleValue{
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArrayOrNil storageKey:(NSString *)key isSingleValue:(BOOL)singleValue{
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        _modelArray = modelArray; [_modelArray retain];
+        _modelArray = modelArrayOrNil; [_modelArray retain];
         _storageKey = key; [_storageKey retain];
         _singleValue = singleValue;
     }
     return self;
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray type:(NSInteger) type isSingleValue:(BOOL) singleValue {
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArrayOrNil type:(NSInteger) type isSingleValue:(BOOL) singleValue {
     // Custom initialization
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        _modelArray = modelArray; [_modelArray retain];
+        _modelArray = modelArrayOrNil; [_modelArray retain];
         _type = type;
         _singleValue = singleValue;
     }

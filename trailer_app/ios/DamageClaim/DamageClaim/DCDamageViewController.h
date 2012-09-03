@@ -10,4 +10,6 @@
 
 @interface DCDamageViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
 
+
+-(id) initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil reportedDamageDetails:(NSMutableArray *) reportedDamageDetailArrayOrNil;
 @end

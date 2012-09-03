@@ -17,7 +17,7 @@
 
 @interface DCDamageListViewController ()
 @property (retain, nonatomic) IBOutlet UITableView *damageTableView;
-@property (nonatomic, retain) NSMutableArray *modelArray;
+@property (nonatomic, retain) NSMutableArray *damageListModelArray;
 
 -(void) customizeNavigationBar;
 -(void) logout;
@@ -27,7 +27,7 @@
 
 @implementation DCDamageListViewController
 @synthesize damageTableView = _damageTableView;
-@synthesize modelArray = _modelArray;
+@synthesize damageListModelArray = _damageListModelArray;
 
 #pragma mark - View LifeCycle methods
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -44,7 +44,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     //fill array with dummy values
-    self.modelArray = [[[NSMutableArray alloc] init] autorelease];
+    self.damageListModelArray = [[[NSMutableArray alloc] init] autorelease];
     
     [self customizeNavigationBar];
     
@@ -52,41 +52,41 @@
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
         damageModel.damageType = @"9 Damages Reported";
         damageModel.damagePosition = @"2 Days ago";
-        [self.modelArray addObject:damageModel];
+        [self.damageListModelArray addObject:damageModel];
     }
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
         damageModel.damageType = @"2 Damages Reported";
         damageModel.damagePosition = @"11 Days ago";
-        [self.modelArray addObject:damageModel];
+        [self.damageListModelArray addObject:damageModel];
     }
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
         damageModel.damageType = @"7 Damages Reported";
         damageModel.damagePosition = @"15 Days ago";
-        [self.modelArray addObject:damageModel];
+        [self.damageListModelArray addObject:damageModel];
     }
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
         damageModel.damageType = @"3 Damages Reported";
         damageModel.damagePosition = @"2 Months ago";
-        [self.modelArray addObject:damageModel];
+        [self.damageListModelArray addObject:damageModel];
     }
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
         damageModel.damageType = @"1 Damage Reported";
         damageModel.damagePosition = @"6 Months ago";
-        [self.modelArray addObject:damageModel];
+        [self.damageListModelArray addObject:damageModel];
     }
     {
         DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
         damageModel.damageType = @"5 Damages Reported";
         damageModel.damagePosition = @"2 Years ago";
-        [self.modelArray addObject:damageModel];
+        [self.damageListModelArray addObject:damageModel];
     }
     
 #if kDebug
-    for (DCDamageDetailModel *damage in self.modelArray) {
+    for (DCDamageDetailModel *damage in self.damageListModelArray) {
         NSLog(@"%@", damage.damageType);
     }
     
@@ -108,7 +108,7 @@
 
 -(void) dealloc {
     [_damageTableView release];
-    [_modelArray release];
+    [_damageListModelArray release];
     [super dealloc];
 
 }
@@ -116,12 +116,6 @@
 #pragma mark - Others
 -(void) customizeNavigationBar {
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-//self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SUBMIT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(submitDamageReport)] autorelease];
-//self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"CANCEL", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(goBack)] autorelease];
-    
-    //    if (self.navigationItem) {
-    //        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"LOGOUT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(logout)] autorelease];
-    //    }
 }
 
 -(void) logout {
@@ -146,8 +140,8 @@
             return 1;
             break;
         case 1:
-            if (self.modelArray) {
-                return [self.modelArray count];
+            if (self.damageListModelArray) {
+                return [self.damageListModelArray count];
             }
         default:
             break;
@@ -192,10 +186,10 @@
     if (indexPath.section == 0) {
         UILabel *titleLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG];
         titleLabel.text = NSLocalizedString(@"REPORT_NEW_DAMAGE", @"");
-    } else if (indexPath.row < [self.modelArray count]) {
+    } else if (indexPath.row < [self.damageListModelArray count]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         
-        DCDamageDetailModel *damageModel = [self.modelArray objectAtIndex:indexPath.row];
+        DCDamageDetailModel *damageModel = [self.damageListModelArray objectAtIndex:indexPath.row];
         
         cell.textLabel.text = @"";
         if (damageModel.damageType) {
@@ -210,11 +204,19 @@
     return cell;
 }
 
+#pragma mark -
+//TODO: Uncomment the else part
 #pragma mark - UITableViewDelegate methods
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section == 0) {
         DCDamageViewController *damageViewController = [[[DCDamageViewController alloc] initWithNibName:@"DamageView" bundle:nil] autorelease];
         [self.navigationController pushViewController:damageViewController animated:YES];
+    } else {
+//        if (indexPath.row < [self.damageListModelArray count]) {
+//            DCDamageViewController *damageViewController = [[[DCDamageViewController alloc] initWithNibName:@"DamageView" bundle:nil reportedDamageDetails:[self.damageListModelArray objectAtIndex:indexPath.row]] autorelease];
+//            [self.navigationController pushViewController:damageViewController animated:YES];
+//        }
+        
     }
 }
 

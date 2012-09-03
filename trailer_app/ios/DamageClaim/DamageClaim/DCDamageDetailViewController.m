@@ -54,16 +54,17 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        _damageDetailModel = nil;
     }
     return self;
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil damageDetailModel:(DCDamageDetailModel *)damageDetailModel
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil damageDetailModel:(DCDamageDetailModel *)damageDetailModelOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        _damageDetailModel = damageDetailModel; [_damageDetailModel retain];
+        _damageDetailModel = damageDetailModelOrNil; [_damageDetailModel retain];
     }
     return self;
 }
@@ -73,7 +74,6 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.numberOfImages = 0;
     [self customizeNavigationBar];
 }
 
@@ -120,22 +120,22 @@
 }
 
 -(void) goBack {
-    //user cancelled damage claim procedure.
-    //delete all the locally stored images;
-    if (self.numberOfImages > 0) {
-        for (NSInteger i = 0; i < self.numberOfImages; i++) {
-            NSArray *pathArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDirectory, YES);
-            if (pathArray) {
-                if ([pathArray count] > 0) {
-                    NSString *docDirURL = [pathArray objectAtIndex:0];
-                    NSString *thumbnailImageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, i]];
-                    NSString *imageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, i]];
-                    [[NSFileManager defaultManager] removeItemAtPath:imageNamePath error:nil];
-                    [[NSFileManager defaultManager] removeItemAtPath:thumbnailImageNamePath error:nil];
-                }
-            }
-        }
-    }
+//    //user cancelled damage claim procedure.
+//    //delete all the locally stored images;
+//    if (self.numberOfImages > 0) {
+//        for (NSInteger i = 0; i < self.numberOfImages; i++) {
+//            NSArray *pathArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDirectory, YES);
+//            if (pathArray) {
+//                if ([pathArray count] > 0) {
+//                    NSString *docDirURL = [pathArray objectAtIndex:0];
+//                    NSString *thumbnailImageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, i]];
+//                    NSString *imageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, i]];
+//                    [[NSFileManager defaultManager] removeItemAtPath:imageNamePath error:nil];
+//                    [[NSFileManager defaultManager] removeItemAtPath:thumbnailImageNamePath error:nil];
+//                }
+//            }
+//        }
+//    }
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -227,46 +227,75 @@
             //it as thumbnail. load the thumbnails instead of 
             //actual big images.
             
-            NSArray *urlArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDirectory, YES);;
+            NSArray *urlArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDirectory, YES);
             if ([urlArray count] > 0) {
                 NSString *docDirPath = [urlArray objectAtIndex:0];
                 NSString *imageNamePath;
                 NSString *thumbnailImagePath;
                 
-                MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-                hud.labelText = NSLocalizedString(@"SAVING_MESSAGE", @"");
-                hud.animationType = MBProgressHUDAnimationZoom;
+
                 //retrieve the number of images already stored using NSDefaultManager
                 //and name this image accordingly. number starts from 0.
-                imageNamePath = [docDirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_IMAGE_NAME, self.numberOfImages]];
-                thumbnailImagePath = [docDirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, self.numberOfImages]];
+                if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES]) {
+                    imageNamePath = [docDirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@0.png", DAMAGE_IMAGE_NAME]];
+                    thumbnailImagePath = [docDirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@0.png", DAMAGE_THUMBNAIL_IMAGE_NAME]];
+                } else {
+                    NSInteger numberOfImages = [(NSNumber *)[[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES] intValue];
+                    imageNamePath = [docDirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_IMAGE_NAME, numberOfImages]];
+                    thumbnailImagePath = [docDirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, numberOfImages]];
+                }
                 
+                
+                if ([[NSFileManager defaultManager] createFileAtPath:imageNamePath contents:imageData attributes:nil]) {
+                    
+                    if ([[NSFileManager defaultManager] createFileAtPath:thumbnailImagePath contents:thumbnailImageData attributes:nil]) {
+                        
+                        //update the number_of_images count only if images are saved properly
+                        if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES]) {
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:[NSNumber numberWithInt:1] forKey:NUMBER_OF_IMAGES];
+                        } else {
+                            NSInteger numberOfImages = [(NSNumber *)[[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES] intValue];
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:[NSNumber numberWithInt: numberOfImages + 1] forKey:NUMBER_OF_IMAGES];
+                        }
+                        
+                        //save the image paths in the damageDetailModel object
+                        if (!self.damageDetailModel) {
+                            self.damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
+                        }
+                        if (!self.damageDetailModel.damageImagePaths) {
+                            self.damageDetailModel.damageImagePaths = [[[NSMutableSet alloc] init] autorelease];
+                            self.damageDetailModel.damageThumbnailImagePaths = [[[NSMutableSet alloc] init] autorelease];
+                        }
+                        
+                        [self.damageDetailModel.damageImagePaths addObject:imageNamePath];
+                        [self.damageDetailModel.damageThumbnailImagePaths addObject:thumbnailImagePath];
 #if kDebug
-                NSLog(@"%@\n%@", imageNamePath, thumbnailImagePath);
+                        NSLog(@"%@\n%@", self.damageDetailModel.damageImagePaths, self.damageDetailModel.damageThumbnailImagePaths);
 #endif
-                if (![[NSFileManager defaultManager] createFileAtPath:imageNamePath contents:imageData attributes:nil]) {
+
+                        
+                        
+                        //insert a new row in tableview
+                        //always add the image as the first row after +add image button
+                        NSArray *indexPaths = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:1]];
+                        
+                        [self.damageTableView beginUpdates];
+                        [self.damageTableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
+                        [self.damageTableView endUpdates];
+                        
+                                            } else {
+#if kDebug
+                        NSLog(@"Some error occurred: %d, %s", errno, strerror(errno));
+#endif
+                    }
+                    
+                } else {
 #if kDebug
                     NSLog(@"Some error occurred: %d, %s", errno, strerror(errno));
 #endif
                 }
                 
-                if (![[NSFileManager defaultManager] createFileAtPath:thumbnailImagePath contents:thumbnailImageData attributes:nil]) {
-#if kDebug
-                    NSLog(@"Some error occurred: %d, %s", errno, strerror(errno));
-#endif
-                }
                 
-                self.numberOfImages++;
-                
-                [MBProgressHUD hideHUDForView:self.view animated:YES];
-                
-                //insert a new row in tableview
-                //always add the image as the first row after +add image button
-                NSArray *indexPaths = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:1]];
-                
-                [self.damageTableView beginUpdates];
-                [self.damageTableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
-                [self.damageTableView endUpdates];
             }
 #if kDebug
             NSLog(@"%@", urlArray);
@@ -277,7 +306,7 @@
         
     }
     
-    
+    self.imagePickerController = nil;
     [[self modalViewController] dismissModalViewControllerAnimated:YES];
 }
 
@@ -293,8 +322,8 @@
             return NEW_DAMAGE_SECTION_ONE_ROWS;
             break;
         case 1:
-            if (self.numberOfImages > 0 ) {
-                return self.numberOfImages + 1; //+ 1 for +add new image
+            if (self.damageDetailModel.damageThumbnailImagePaths) {
+                return [self.damageDetailModel.damageThumbnailImagePaths count] + 1;
             } else {
                 return 1;
             }
@@ -325,7 +354,7 @@
     }
     
     if (indexPath.section == 1) {
-        if (self.numberOfImages > 0) {
+        if (self.damageDetailModel.damageThumbnailImagePaths) {
             if (indexPath.row == 0) {
                 NSArray *customCellNewImageDamageView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellAddNewItemView" owner:nil options:nil];
                 if (customCellNewImageDamageView) {
@@ -375,7 +404,7 @@
         }
         
         if (indexPath.section == 1) {
-            if (self.numberOfImages) {
+            if (self.damageDetailModel.damageThumbnailImagePaths) {
                 if (indexPath.row == 0) {
                     
                     NSArray *customCellNewImageDamageView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellAddNewItemView" owner:nil options:nil];
@@ -429,19 +458,18 @@
     
     if (indexPath.section == 1) {
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
-        if (self.numberOfImages > 0) {
+        if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES]) {
             if (indexPath.row != 0) {
-                //read the contents of image file and load it in UIImageView                
-                NSArray *pathArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDirectory, YES);
-                if (pathArray) {
-                    if ([pathArray count] > 0) {
-                        NSString *docDirURL = [pathArray objectAtIndex:0];
-                        NSString *imageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, indexPath.row - 1]];
+                //read the contents of image file and load it in UIImageView  
+                if (self.damageDetailModel.damageThumbnailImagePaths) {
+                    if (indexPath.row < [self.damageDetailModel.damageThumbnailImagePaths count] + 1) {
+                        NSArray *thumbnailImagePathsArray = [self.damageDetailModel.damageThumbnailImagePaths allObjects];
+                        NSString *imageNamePath = [thumbnailImagePathsArray objectAtIndex:indexPath.row - 1];
 #if kDebug
-                        NSLog(@"%@", imageNamePath);
+                        NSLog(@"%@", self.damageDetailModel.damageThumbnailImagePaths);
 #endif
                         NSData *imageData = [[NSFileManager defaultManager] contentsAtPath:imageNamePath];
-
+                        
                         UIImage *image = [UIImage imageWithData:imageData];
                         
                         UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG];
@@ -478,7 +506,7 @@
     }
     
     if (indexPath.section == 1) {
-        if (self.numberOfImages > 0) {
+        if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES]) {
             if (indexPath.row == 0) {
                 UIActionSheet *actionSheet = [[[UIActionSheet alloc] initWithTitle:NSLocalizedString(@"ADD_PHOTO", @"") delegate:self cancelButtonTitle:NSLocalizedString(@"CANCEL", @"") destructiveButtonTitle:nil otherButtonTitles:NSLocalizedString(@"ADD_PHOTO_CAMERA", @""), NSLocalizedString(@"ADD_PHOTO_ALBUM", @""), NSLocalizedString(@"ADD_PHOTO_LIBRARY", @""), nil] autorelease];
                 [actionSheet showInView:self.view];

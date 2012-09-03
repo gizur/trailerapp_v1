@@ -20,8 +20,8 @@
 @property (assign, nonatomic) id<DCPickListViewControllerDelegate> delegate;
 
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray storageKey:(NSString *)key isSingleValue:(BOOL) singleValue;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArrayOrNil storageKey:(NSString *)key isSingleValue:(BOOL) singleValue;
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray type:(NSInteger)type isSingleValue:(BOOL) singleValue;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArrayOrNil type:(NSInteger)type isSingleValue:(BOOL) singleValue;
 
 @end

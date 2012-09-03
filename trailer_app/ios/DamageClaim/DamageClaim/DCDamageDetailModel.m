@@ -11,10 +11,12 @@
 @implementation DCDamageDetailModel
 @synthesize damageType = _damageType;
 @synthesize damagePosition = _damagePosition;
-@synthesize damageImages = _damageImages;
+@synthesize damageImagePaths = _damageImagePaths;
+@synthesize damageThumbnailImagePaths = _damageThumbnailImagePaths;
 
 -(void) dealloc {
-    [_damageImages release];
+    [_damageImagePaths release];
+    [_damageThumbnailImagePaths release];
     [_damagePosition release];
     [_damageType release];
     [super dealloc];
