@@ -431,6 +431,7 @@
         case 0:
             switch (indexPath.row) {
                 case 0: {
+                    cell.selectionStyle = UITableViewCellSelectionStyleNone;
                     UILabel *titleLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_TITE_LABEL_TAG];
                     titleLabel.text = NSLocalizedString(@"TRAILER_TYPE", @"");
                     
@@ -471,6 +472,8 @@
                 }
                     break;
                 case 3: {
+                    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+                    
                     UILabel *titleLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_TITE_LABEL_TAG];
                     titleLabel.text = NSLocalizedString(@"SEALED", @"");
                     

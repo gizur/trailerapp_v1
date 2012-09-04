@@ -22,10 +22,10 @@
 
 #import "MBProgressHUD.h"
 
+#import "DCImageViewerViewController.h"
+
 
 #define NEW_DAMAGE_SECTION_ONE_ROWS 2
-
-#define NEW_DAMAGE_NUMBER_OF_IMAGES @"NEW_DAMAGE_NUMBER_OF_IMAGES"
 
 @interface DCDamageDetailViewController ()
 
@@ -35,6 +35,7 @@
 @property (retain, nonatomic) UIImagePickerController *imagePickerController;
 @property (retain, nonatomic) DCDamageDetailModel *damageDetailModel;
 @property (nonatomic) NSInteger numberOfImages;
+@property (nonatomic, getter = isEditable) BOOL editable;
 -(void) customizeNavigationBar;
 -(void) addDamageDetail;
 -(void) goBack;
@@ -47,6 +48,7 @@
 @synthesize imagePickerController = _imagePickerController;
 @synthesize numberOfImages = _numberOfImages;
 @synthesize damageDetailModel = _damageDetailModel;
+@synthesize editable = _editable;
 
 #pragma mark - View LifeCycle
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -55,6 +57,7 @@
     if (self) {
         // Custom initialization
         _damageDetailModel = nil;
+        _editable = NO;
     }
     return self;
 }
@@ -65,9 +68,22 @@
     if (self) {
         // Custom initialization
         _damageDetailModel = damageDetailModelOrNil; [_damageDetailModel retain];
+        _editable = NO;
     }
     return self;
 }
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil damageDetailModel:(DCDamageDetailModel *)damageDetailModelOrNil isEditable:(BOOL)isEditable 
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        _damageDetailModel = damageDetailModelOrNil; [_damageDetailModel retain];
+        _editable = isEditable;
+    }
+    return self;
+}
+
 
 
 - (void)viewDidLoad
@@ -107,7 +123,10 @@
 #pragma mark - Others
 -(void) customizeNavigationBar {
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DONE", @"") style:UIBarButtonItemStylePlain target:self action:@selector(addDamageDetail)] autorelease];
+    if ([self isEditable]) {
+        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DONE", @"") style:UIBarButtonItemStylePlain target:self action:@selector(addDamageDetail)] autorelease];
+    }
+    
     self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"CANCEL", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(goBack)] autorelease];
 }
 
@@ -263,8 +282,8 @@
                             self.damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
                         }
                         if (!self.damageDetailModel.damageImagePaths) {
-                            self.damageDetailModel.damageImagePaths = [[[NSMutableSet alloc] init] autorelease];
-                            self.damageDetailModel.damageThumbnailImagePaths = [[[NSMutableSet alloc] init] autorelease];
+                            self.damageDetailModel.damageImagePaths = [[[NSMutableArray alloc] init] autorelease];
+                            self.damageDetailModel.damageThumbnailImagePaths = [[[NSMutableArray alloc] init] autorelease];
                         }
                         
                         [self.damageDetailModel.damageImagePaths addObject:imageNamePath];
@@ -317,21 +336,33 @@
 }
 
 -(NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    
     switch (section) {
         case 0:
             return NEW_DAMAGE_SECTION_ONE_ROWS;
             break;
         case 1:
-            if (self.damageDetailModel.damageThumbnailImagePaths) {
-                return [self.damageDetailModel.damageThumbnailImagePaths count] + 1;
+            if ([self isEditable]) {
+                if (self.damageDetailModel.damageThumbnailImagePaths) {
+                    return [self.damageDetailModel.damageThumbnailImagePaths count] + 1;
+                } else {
+                    return 1;
+                }
             } else {
-                return 1;
+                if (self.damageDetailModel.damageThumbnailImagePaths) {
+                    return [self.damageDetailModel.damageThumbnailImagePaths count];
+                } else {
+                    return 0;
+                }
             }
+            
             break;
         default:
             return 0;
             break;
     }
+    
+    return 0;
 }
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     switch (section) {
@@ -433,8 +464,14 @@
     }
     
     if (indexPath.section == 0 && indexPath.row == 0) {
-        cell.selectionStyle = UITableViewCellSelectionStyleGray;
-        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        
+        if ([self isEditable]) {
+            cell.selectionStyle = UITableViewCellSelectionStyleGray;
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        } else {
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        }
+        
         cell.textLabel.shadowColor = [UIColor whiteColor];
         cell.textLabel.shadowOffset = CGSizeMake(1, 1);
         if (self.damageDetailModel.damageType) {
@@ -445,8 +482,12 @@
     }
     
     if (indexPath.section == 0 && indexPath.row == 1) {
-        cell.selectionStyle = UITableViewCellSelectionStyleGray;
-        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        if ([self isEditable]) {
+            cell.selectionStyle = UITableViewCellSelectionStyleGray;
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        } else {
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        }
         cell.textLabel.shadowColor = [UIColor whiteColor];
         cell.textLabel.shadowOffset = CGSizeMake(1, 1);
         if (self.damageDetailModel.damagePosition) {
@@ -458,13 +499,40 @@
     
     if (indexPath.section == 1) {
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
-        if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES]) {
-            if (indexPath.row != 0) {
-                //read the contents of image file and load it in UIImageView  
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        if ([self isEditable]) {
+            if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES]) {
+                if (indexPath.row != 0) {
+                    //read the contents of image file and load it in UIImageView  
+                    if (self.damageDetailModel.damageThumbnailImagePaths) {
+                        if (indexPath.row < [self.damageDetailModel.damageThumbnailImagePaths count] + 1) {
+                            NSString *imageNamePath = [self.damageDetailModel.damageThumbnailImagePaths objectAtIndex:indexPath.row - 1];
+#if kDebug
+                            NSLog(@"%@", self.damageDetailModel.damageThumbnailImagePaths);
+#endif
+                            NSData *imageData = [[NSFileManager defaultManager] contentsAtPath:imageNamePath];
+                            
+                            UIImage *image = [UIImage imageWithData:imageData];
+                            
+                            UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG];
+                            [imageView setImage:image];
+                        }
+                    }
+                } else {
+                    UILabel *label = (UILabel *)[cell viewWithTag:CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG];
+                    label.text = NSLocalizedString(@"ADD_NEW_IMAGE", @"");
+                }
+            } else {
+                UILabel *label = (UILabel *)[cell viewWithTag:CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG];
+                label.text = NSLocalizedString(@"ADD_NEW_IMAGE", @"");
+            }
+        } else {
+            
+            if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES]) {
                 if (self.damageDetailModel.damageThumbnailImagePaths) {
                     if (indexPath.row < [self.damageDetailModel.damageThumbnailImagePaths count] + 1) {
-                        NSArray *thumbnailImagePathsArray = [self.damageDetailModel.damageThumbnailImagePaths allObjects];
-                        NSString *imageNamePath = [thumbnailImagePathsArray objectAtIndex:indexPath.row - 1];
+                        ;
+                        NSString *imageNamePath = [self.damageDetailModel.damageThumbnailImagePaths objectAtIndex:indexPath.row - 1];
 #if kDebug
                         NSLog(@"%@", self.damageDetailModel.damageThumbnailImagePaths);
 #endif
@@ -476,29 +544,24 @@
                         [imageView setImage:image];
                     }
                 }
-            } else {
-                UILabel *label = (UILabel *)[cell viewWithTag:CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG];
-                label.text = NSLocalizedString(@"ADD_NEW_IMAGE", @"");
             }
-        } else {
-            UILabel *label = (UILabel *)[cell viewWithTag:CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG];
-            label.text = NSLocalizedString(@"ADD_NEW_IMAGE", @"");
         }
     }
     
     return cell;
 }
-
+#pragma mark -
+//TODO: Change NSSet to NSMutableArray
 #pragma mark - UITableViewDelegate
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == 0 && indexPath.row == 0) {
+    if (indexPath.section == 0 && indexPath.row == 0 && [self isEditable]) {
         NSArray *array = [NSArray arrayWithObjects:@"Doors", @"Undercover", @"Lighting", @"Breaks", @"Outriggers", nil];
         DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:array type:DCPickListItemTypeDamageType isSingleValue:YES] autorelease];
         pickListViewController.delegate = self;
         [self.navigationController pushViewController:pickListViewController animated:YES];
     }
     
-    if (indexPath.section == 0 && indexPath.row == 1) {
+    if (indexPath.section == 0 && indexPath.row == 1 && [self isEditable]) {
         NSArray *array = [NSArray arrayWithObjects:@"Left Side",@"Right Side", @"Front Side", @"Device Hood", @"Top Side", @"Bottom Side", nil];
         DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:array type:DCPickListItemTypeDamagePosition isSingleValue:YES] autorelease];
         pickListViewController.delegate = self;
@@ -507,13 +570,20 @@
     
     if (indexPath.section == 1) {
         if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES]) {
-            if (indexPath.row == 0) {
+            if (indexPath.row == 0 && [self isEditable]) {
                 UIActionSheet *actionSheet = [[[UIActionSheet alloc] initWithTitle:NSLocalizedString(@"ADD_PHOTO", @"") delegate:self cancelButtonTitle:NSLocalizedString(@"CANCEL", @"") destructiveButtonTitle:nil otherButtonTitles:NSLocalizedString(@"ADD_PHOTO_CAMERA", @""), NSLocalizedString(@"ADD_PHOTO_ALBUM", @""), NSLocalizedString(@"ADD_PHOTO_LIBRARY", @""), nil] autorelease];
                 [actionSheet showInView:self.view];
             } else {
-                //handle this case
+                if (self.damageDetailModel.damageImagePaths) {
+                    if (indexPath.row  < [self.damageDetailModel.damageImagePaths count] + 1) {
+                        
+                        NSString *filePath = [self.damageDetailModel.damageImagePaths objectAtIndex:indexPath.row - 1];
+                        DCImageViewerViewController *v = [[[DCImageViewerViewController alloc] initWithNibName:@"ImageViewerView" bundle:nil filePath:filePath] autorelease];
+                        [self.navigationController pushViewController:v animated:YES];
+                    }
+                }
             }
-        } else {
+        } else if ([self isEditable]){
             UIActionSheet *actionSheet = [[[UIActionSheet alloc] initWithTitle:NSLocalizedString(@"ADD_PHOTO", @"") delegate:self cancelButtonTitle:NSLocalizedString(@"CANCEL", @"") destructiveButtonTitle:nil otherButtonTitles:NSLocalizedString(@"ADD_PHOTO_CAMERA", @""), NSLocalizedString(@"ADD_PHOTO_ALBUM", @""), NSLocalizedString(@"ADD_PHOTO_LIBRARY", @""), nil] autorelease];
             [actionSheet showInView:self.view];
         }

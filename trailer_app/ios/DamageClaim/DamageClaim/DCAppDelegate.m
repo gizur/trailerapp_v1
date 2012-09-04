@@ -31,28 +31,6 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     
-//    NSMutableSet *set1, *set2;
-//    set1 = [NSMutableSet setWithObjects:@"1", @"2", @"3", nil];
-//    set2 = [NSMutableSet setWithObjects:@"2", @"3", @"4", nil];
-//    for (NSString *s in set1) {
-//        [set2 addObject:s];
-//    }
-//    
-//    
-//#if kDebug
-//    NSLog(@"%@", set2);
-//#endif
-  
-//    NSMutableArray *array = [NSMutableArray arrayWithObjects:[NSMutableArray arrayWithObjects:@"1", @"2", @"3", nil], [NSMutableArray arrayWithObjects:@"4", @"5", @"6",nil], nil];
-//    
-//    NSMutableArray *array2 = [array objectAtIndex:1];
-//    [array2 replaceObjectAtIndex:1 withObject:@"10"];
-//    
-//#if kDebug
-//    NSLog(@"%@", [array description]);
-//#endif
-    
-    
     
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     // Override point for customization after application launch.
