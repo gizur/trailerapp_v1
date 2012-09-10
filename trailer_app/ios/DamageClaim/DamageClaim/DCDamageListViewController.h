@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface DCDamageListViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
+#import "HTTPService.h"
+
+@interface DCDamageListViewController : UIViewController<UITableViewDelegate, UITableViewDataSource, HTTPServiceDelegate>
 
 @end

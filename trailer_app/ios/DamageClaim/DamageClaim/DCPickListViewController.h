@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import "HTTPService.h"
+
 @protocol DCPickListViewControllerDelegate <NSObject>
 
 @required
@@ -16,7 +18,7 @@
 
 @end
 
-@interface DCPickListViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
+@interface DCPickListViewController : UIViewController<UITableViewDelegate, UITableViewDataSource, HTTPServiceDelegate>
 @property (assign, nonatomic) id<DCPickListViewControllerDelegate> delegate;
 
 

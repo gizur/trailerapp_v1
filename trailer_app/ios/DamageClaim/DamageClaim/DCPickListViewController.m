@@ -15,17 +15,29 @@
 
 #import "Const.h"
 
+#import "MBProgressHUD.h"
+
+#import "JSONKit.h"
+
+#import "DCDamageDetailModel.h"
+
 @interface DCPickListViewController ()
 @property (retain, nonatomic) IBOutlet UITableViewCell *customCellPickListView;
 @property (retain, nonatomic) IBOutlet UITableView *pickListTableView;
-@property (retain, nonatomic) NSArray *modelArray;
+@property (retain, nonatomic) NSMutableArray *modelArray;
+@property (retain, nonatomic) NSMutableArray *labelArray;
+@property (retain, nonatomic) NSMutableArray *valueArray;
 @property (retain, nonatomic) NSString *storageKey;
 @property (retain, nonatomic) NSMutableArray *selectedObjects;
 @property (nonatomic, getter = isSingleValue) BOOL singleValue;
 @property (nonatomic) NSInteger type;
+@property (nonatomic) NSInteger httpStatusCode;
+@property (nonatomic, retain) HTTPService *httpService;
 
 -(void) customizeNavigationBar;
 -(void) storeSelectedValues;
+-(void) makeURLCall;
+-(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier;
 
 @end
 
@@ -33,11 +45,16 @@
 @synthesize customCellPickListView = _customCellPickListView;
 @synthesize pickListTableView = _pickListTableView;
 @synthesize modelArray = _modelArray;
+@synthesize labelArray = _labelArray;
+@synthesize valueArray = _valueArray;
 @synthesize storageKey = _storageKey;
 @synthesize selectedObjects = _selectedObjects;
 @synthesize singleValue = _singleValue;
 @synthesize type = _type;
 @synthesize delegate = _delegate;
+@synthesize httpService = _httpService;
+@synthesize httpStatusCode = _httpStatusCode;
+
 #pragma mark - ViewLifeCycle methods
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -52,7 +69,8 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        _modelArray = modelArrayOrNil; [_modelArray retain];
+        _labelArray = [modelArrayOrNil mutableCopy];
+        _valueArray = [modelArrayOrNil mutableCopy];
         _storageKey = key; [_storageKey retain];
         _singleValue = singleValue;
     }
@@ -64,7 +82,8 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        _modelArray = modelArrayOrNil; [_modelArray retain];
+        _labelArray = [modelArrayOrNil mutableCopy];
+        _valueArray = [modelArrayOrNil mutableCopy];
         _type = type;
         _singleValue = singleValue;
     }
@@ -77,7 +96,16 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     [self customizeNavigationBar];
+    [self makeURLCall];
 }
+
+-(void) viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    [self.httpService cancelHTTPService];
+    self.httpService = nil;
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+}
+
 
 - (void)viewDidUnload
 {
@@ -99,11 +127,144 @@
     [_modelArray release];
     [_storageKey release];
     [_selectedObjects release];
+    [_httpService release];
+    [_labelArray release];
+    [_valueArray release];
     [super dealloc];
 }
 
 
 #pragma mark - Others
+#pragma warning - Change the datatype of status
+-(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
+    if (responseString) {
+        NSDictionary *jsonDict = [responseString objectFromJSONString];
+        if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+            NSNumber *status = [jsonDict valueForKey:SUCCESS];
+            if ([status boolValue]) {
+                
+                if ([identifier isEqualToString:ASSETS]) {
+                    if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                        NSArray *assetsArray = [jsonDict valueForKey:@"result"];
+                        for (NSDictionary *assetDict in assetsArray) {
+                            if ((NSNull *)[assetDict valueForKey:@"id"] != [NSNull null]) {
+                                NSString *trailerId = [assetDict valueForKey:@"id"];
+                                
+                                if (!self.labelArray) {
+                                    self.labelArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [self.labelArray addObject:trailerId];
+                                
+                                if (!self.valueArray) {
+                                    self.valueArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [self.valueArray addObject:trailerId];
+                            }
+                        }
+                    }
+                }
+                
+                if ([identifier isEqualToString:HELPDESK_DAMAGETYPE]) {
+                    //since  damage positions are associated with a damage type, the damage type and its respective applicable 
+                    //positions are stored in an NSMutableDictionary with damage type as key and applicable damage positions as an array of values.
+                    //This NSMutableDictionary is then shared across the screen using the Singleton class DCSharedObject
+                    if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                        NSArray *damageTypeArray = [jsonDict valueForKey:@"result"];
+                        for (NSDictionary *damageTypeDict in damageTypeArray) {
+                            NSString *label;
+                            NSString *value;
+                            if ((NSNull *)[damageTypeDict valueForKey:@"label"] != [NSNull null]) {
+                                label = [damageTypeDict valueForKey:@"label"];
+                                if (!self.labelArray) {
+                                    self.labelArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [self.labelArray addObject:label];
+                            }
+                            if ((NSNull *)[damageTypeDict valueForKey:@"value"] != [NSNull null]) {
+                                value = [damageTypeDict valueForKey:@"value"];
+                                if (!self.valueArray) {
+                                    self.valueArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [self.valueArray addObject:value];
+                            }
+                            
+                            NSMutableArray *damagePositionLabelArray = [[[NSMutableArray alloc] init] autorelease];
+                            NSMutableArray *damagePositionValueArray = [[[NSMutableArray alloc] init] autorelease];
+                            
+                            if ((NSNull *)[damageTypeDict valueForKey:@"dependency"] != [NSNull null]) {
+                                NSDictionary *dependencyDict = [damageTypeDict valueForKey:@"dependency"];
+                                if ((NSNull *)[dependencyDict valueForKey:@"damageposition"] != [NSNull null]) {
+                                    NSArray *damagePositionArray = [dependencyDict valueForKey:@"damageposition"];
+                                    for (NSDictionary *damagePositionDict in damagePositionArray) {
+                                        
+                                        if ((NSNull *)[damagePositionDict valueForKey:@"label"] != [NSNull null]) {
+                                            NSString *label = [damagePositionDict valueForKey:@"label"];
+                                            [damagePositionLabelArray addObject:label];
+                                        }
+                                        
+                                        if ((NSNull *)[damagePositionDict valueForKey:@"value"] != [NSNull null]) {
+                                            NSString *label = [damagePositionDict valueForKey:@"value"];
+                                            [damagePositionValueArray addObject:label];
+                                        }
+                                    }
+                                    if (label && [damagePositionLabelArray count] > 0) {
+                                        
+                                        NSMutableDictionary *damagePositionLabelDictionary;
+                                        NSMutableDictionary *damagePositionValueDictionary;
+                                        
+                                        if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_LABEL_DICTIONARY]) {
+                                            damagePositionLabelDictionary = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_LABEL_DICTIONARY];
+                                            [damagePositionLabelDictionary setValue:damagePositionLabelArray forKey:label];
+                                            
+                                            damagePositionValueDictionary = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_VALUE_DICTIONARY];
+                                            [damagePositionValueDictionary setValue:damagePositionValueArray forKey:value];
+                                        } else {
+                                            damagePositionLabelDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                                            [damagePositionLabelDictionary setValue:damagePositionLabelArray forKey:label];
+                                            
+                                            damagePositionValueDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                                            [damagePositionValueDictionary setValue:damagePositionValueArray forKey:value];
+                                        }
+                                        [[[DCSharedObject sharedPreferences] preferences] setValue:damagePositionLabelDictionary forKey:DAMAGE_POSITION_LABEL_DICTIONARY];
+                                        [[[DCSharedObject sharedPreferences] preferences] setValue:damagePositionValueDictionary forKey:DAMAGE_POSITION_VALUE_DICTIONARY];
+                                    }
+                                }
+                            }
+                        }
+#if kDebug
+                NSLog(@"%@", [[[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_VALUE_DICTIONARY] description]);
+#endif
+                    }
+                }
+                
+                if ([identifier isEqualToString:HELPDESK_DAMAGEPOSITION]) {
+                    if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                        NSArray *damageTypeArray = [jsonDict valueForKey:@"result"];
+                        for (NSDictionary *damageTypeDict in damageTypeArray) {
+                            if ((NSNull *)[damageTypeDict valueForKey:@"label"] != [NSNull null]) {
+                                NSString *label = [damageTypeDict valueForKey:@"label"];
+                                if (!self.labelArray) {
+                                    self.labelArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [self.labelArray addObject:label];
+                            }
+                            if ((NSNull *)[damageTypeDict valueForKey:@"value"] != [NSNull null]) {
+                                NSString *value = [damageTypeDict valueForKey:@"value"];
+                                if (!self.valueArray) {
+                                    self.valueArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [self.valueArray addObject:value];
+                            }
+                        }
+                    }
+                }
+                [self.pickListTableView reloadData];
+            } else {
+                [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+            }
+        }
+    }
+}
 -(void) customizeNavigationBar {
 //    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
 //    if (self.navigationItem) {
@@ -138,6 +299,63 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+-(void) makeURLCall {
+    switch (self.type) {
+        case DCPickListItemSurveyTrailerId:
+            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
+            break;
+        case DCPickListItemTypeDamagePosition:
+            //If somehow, the applicable list of damage positions could not be fetched from the server, make a URL call to fetch all the 
+            //positions from the server and let the user choose the appropriate position
+            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_LABEL_DICTIONARY]) {
+                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGEPOSITION requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+
+            }
+            break;
+        case DCPickListItemTypeDamageType:
+            
+            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGETYPE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+            
+            break;
+        default:
+            break;
+    }
+}
+
+#pragma mark - HTTPServiceDelegate methods
+
+-(void) responseCode:(int)code {
+    self.httpStatusCode = code;
+}
+
+-(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    if (self.httpStatusCode == 200) {
+        NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+#if kDebug
+        NSLog(@"%@", responseString);
+#endif
+        
+        [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
+    } else {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
+}
+
+-(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+    } else {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
+
+}
+
+-(void) storeResponse:(NSData *)data forIdentifier:(NSString *)identifier {
+    
+}
+
 
 #pragma mark - UITableViewDataSource methods
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
@@ -145,8 +363,8 @@
 }
 
 -(NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (self.modelArray) {
-        return [self.modelArray count];
+    if (self.labelArray) {
+        return [self.labelArray count];
     }
     return 0;
 }
@@ -164,18 +382,18 @@
     
     UILabel *nameLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_NAME_PICK_LIST_VIEW_TAG];
     nameLabel.text = @"";
-    if (self.modelArray) {
-        if (indexPath.row < [self.modelArray count]) {
-            nameLabel.text = [self.modelArray objectAtIndex:indexPath.row];
+    if (self.labelArray) {
+        if (indexPath.row < [self.labelArray count]) {
+            nameLabel.text = [self.labelArray objectAtIndex:indexPath.row];
         }
     }
     
     UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
     if (self.selectedObjects) {
         for (NSString *itemInSelectedObjects in self.selectedObjects) {
-            if (self.modelArray) {
-                if (indexPath.row < [self.modelArray count]) {
-                    NSString *currentItem = [self.modelArray objectAtIndex:indexPath.row];
+            if (self.labelArray) {
+                if (indexPath.row < [self.labelArray count]) {
+                    NSString *currentItem = [self.labelArray objectAtIndex:indexPath.row];
                     if ([[currentItem lowercaseString] isEqualToString:[itemInSelectedObjects lowercaseString]]) {
 #if kDebug
                         NSLog(@"%@, %@", currentItem, itemInSelectedObjects);
@@ -184,23 +402,22 @@
                     }
                 }
             }
-            
-            
         }
     }
-    
     return cell;
 }
 
 #pragma mark - UITableViewDelegate methods
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     UIImageView *imageView = (UIImageView *)[[tableView cellForRowAtIndexPath:indexPath] viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
+    
+    //value array is used to return the selected item
     if ([self isSingleValue]) {
         if ([imageView isHidden]) {
             //select this row and unselect all other rows
             imageView.hidden = NO;
             
-            for (NSInteger i = 0 ; i < [self.modelArray count]; i++) {
+            for (NSInteger i = 0 ; i < [self.valueArray count]; i++) {
                 if (i != indexPath.row) {
                     UITableViewCell *cell = [self.pickListTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:0]];
                     UIImageView *otherImageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
@@ -213,18 +430,17 @@
             if (!self.selectedObjects) {
                 self.selectedObjects = [[[NSMutableArray alloc] init] autorelease];
             }
-            if (self.modelArray) {
-                if (indexPath.row < [self.modelArray count]) {
+            if (self.valueArray) {
+                if (indexPath.row < [self.valueArray count]) {
                     [self.selectedObjects removeAllObjects];
-                    [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
+                    [self.selectedObjects addObject:[self.valueArray objectAtIndex:indexPath.row]];
                 }
             }
             if (self.delegate) {
                 if ([self.delegate respondsToSelector:@selector(pickListDidPickItem:ofType:)]) {
-                    [self.delegate pickListDidPickItem:[self.modelArray objectAtIndex:indexPath.row] ofType:self.type];
+                    [self.delegate pickListDidPickItem:[self.valueArray objectAtIndex:indexPath.row] ofType:self.type];
                 }
             }
-            
         }
         [self storeSelectedValues];
     } else {
@@ -232,7 +448,7 @@
             //select this row and unselect all other rows
             imageView.hidden = NO;
             
-            for (NSInteger i = 0 ; i < [self.modelArray count]; i++) {
+            for (NSInteger i = 0 ; i < [self.valueArray count]; i++) {
                 if (i != indexPath.row) {
                     UITableViewCell *cell = [self.pickListTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:0]];
                     UIImageView *otherImageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
@@ -240,23 +456,22 @@
                         otherImageView.hidden = YES;
                     }
                 }
-                
             }
             if (!self.selectedObjects) {
                 self.selectedObjects = [[[NSMutableArray alloc] init] autorelease];
             }
-            if (self.modelArray) {
-                if (indexPath.row < [self.modelArray count]) {
+            if (self.valueArray) {
+                if (indexPath.row < [self.valueArray count]) {
                     [self.selectedObjects removeAllObjects];
-                    [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
+                    [self.selectedObjects addObject:[self.valueArray objectAtIndex:indexPath.row]];
                 }
             }
             
         } else {
             imageView.hidden = YES;
-            if (self.modelArray) {
-                if (indexPath.row < [self.modelArray count]) {
-                    [self.selectedObjects removeObject:[self.modelArray objectAtIndex:indexPath.row]];
+            if (self.valueArray) {
+                if (indexPath.row < [self.valueArray count]) {
+                    [self.selectedObjects removeObject:[self.valueArray objectAtIndex:indexPath.row]];
                 }
             }
         }

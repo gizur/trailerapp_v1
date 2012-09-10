@@ -8,6 +8,8 @@
 
 #import "DCSurveyModel.h"
 
+#import "Const.h"
+
 @implementation DCSurveyModel
 @synthesize surveyPlace = _surveyPlace;
 @synthesize surveyPlates = _surveyPlates;
@@ -16,8 +18,13 @@
 @synthesize surveyTrailerType = _surveyTrailerType;
 @synthesize surveyTrailerSealed = _surveyTrailerSealed;
 
+
+
 -(void) dealloc {
-    [_surveyPlates release];
+#if kDebug
+    NSLog(@"Deallocating surveyPlates: %p", _surveyPlates);
+#endif
+    [_surveyPlace release];
     [_surveyPlates release];
     [_surveyStraps release];
     [_surveyTrailerId release];

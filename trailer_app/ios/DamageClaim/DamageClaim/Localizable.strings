@@ -38,7 +38,7 @@
 "ADD_PHOTO_ALBUM" = "Saved Photos";
 "CANCEL" = "Cancel";
 "DISMISS" = "Dismiss";
-"REPORT_DAMAGE" = "Report Damage";
+"REPORT_DAMAGE" = "Damages";
 "ADD_NEW_IMAGE" = "Add a new image";
 "REPORT_NEW_DAMAGE" = "Report a new damage";
 "REPORTED_DAMAGES" = "Reported Damages";
@@ -51,3 +51,13 @@
 "PREVIOUSLY_REPORTED_DAMAGES" = "Previously Reported Damages";
 "REPORTING_DAMAGE" = "Reporting Damage";
 "DAMAGE_TYPE_ALREADY_ADDED" = "You have already added this trailer part and type. The images will be added to the existing one.";
+"EDIT" = "Edit";
+"DONE" = "Done";
+"INTERNAL_SERVER_ERROR" = "There is some problem with the server. Please report this to developers.";
+"NETWORK_ERROR" = "Network Error. Please check if your network is available and try again later!";
+"SELECT_DAMAGE_TYPE" = "Please select a damage type.";
+"SUBMIT_DAMAGE_ERROR" = "Could not submit some of the damage claims. Please try again.";
+"SUBMITTING" = "Submitting...";
+"NO_API_KEY_ERROR" = "Error logging in! Please open the link you've received via text/mail to register properly.";
+"EMPTY_USERNAME_PASSWORD" = "Either the username or password is empty.";
+"INVALID_LOGIN" = "Could not verify your identity. Please note that you've to open this app from the link given to you via text/mail for the first time. If you've already done so, please contact your company.";

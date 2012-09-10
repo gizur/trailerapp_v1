@@ -8,12 +8,33 @@
 
 #import <Foundation/Foundation.h>
 
+#import "HTTPService.h"
+
+
 @interface DCSharedObject : NSObject
 @property(nonatomic, retain) NSMutableDictionary *preferences;
 
 
 +(DCSharedObject *) sharedPreferences;
-+(void)showAlertWithMessage:(NSString *)alertMessage;
-+(NSString *) generateSignatureForRequest:(NSURLRequest *)urlRequest model:(NSString *)model requestType:(NSString *)requestType;
 
++(void)showAlertWithMessage:(NSString *)alertMessage;
+
++(NSString *) generateSignatureFromModel:(NSString *)model requestType:(NSString *)requestType;
+
++(NSString *) createURLStringFromIdentifier:(NSString *)identifier;
+
++(NSString *) keyValuePairFromDictionary:(NSDictionary *)dict;
+
+//in case the body is name=value pairs
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil;
+
+//in case the body is NSData
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil;
+
+
++(NSString *) keyValuePairFromDictionary:(NSDictionary *)dict;
+
++(NSString *) decodeSwedishHTMLFromString:(NSString *)swedishString;
+
++(NSString *) strFromISO8601:(NSDate *) date;
 @end

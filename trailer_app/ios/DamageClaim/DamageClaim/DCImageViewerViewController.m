@@ -13,12 +13,15 @@
 @interface DCImageViewerViewController ()
 @property (retain, nonatomic) IBOutlet UIWebView *webView;
 @property (retain, nonatomic) NSString *filePath;
+@property (retain, nonatomic) UIImage *image;
 
 @end
 
 @implementation DCImageViewerViewController
 @synthesize webView = _webView;
 @synthesize filePath = _filePath;
+@synthesize image = _image;
+
 #pragma mark - View LifeCycle methods
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -41,6 +44,16 @@
     return self;
 }
 
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil image:(UIImage *)image
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        _image = image;[_image retain];
+    }
+    return self;
+}
+
 
 - (void)viewDidLoad
 {
@@ -51,6 +64,8 @@
         NSLog(@"%@", [NSURL fileURLWithPath:self.filePath]);
 #endif
         [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL fileURLWithPath:self.filePath]]];
+    } else if (self.image) {
+        
     }
 }
 
@@ -69,6 +84,7 @@
 - (void)dealloc {
     [_webView release];
     [_filePath release];
+    [_image release];
     [super dealloc];
 }
 

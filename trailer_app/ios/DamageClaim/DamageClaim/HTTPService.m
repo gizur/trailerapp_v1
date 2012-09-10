@@ -8,7 +8,6 @@
 
 #import "HTTPService.h"
 #import "Const.h"
-
 @implementation HTTPService
 
 @synthesize receivedData,connection ;
@@ -16,6 +15,7 @@
  
 - (id)init
 {
+
     return [self initWithURLString:nil headers:nil body:nil delegate:nil requestMethod:kRequestMethodNone];
 }
 
@@ -75,7 +75,7 @@
     self.connection = [[[NSURLConnection alloc] initWithRequest:self.request delegate:self startImmediately:YES] autorelease];
 
     if (!self.connection) {
-        [self.delegate serviceDidFailWithError:nil forURLString:self.serviceURLString];
+        [self.delegate serviceDidFailWithError:nil forIdentifier:self.identifier];
     }
 }
 
@@ -107,10 +107,13 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    
-    [self.delegate didReceiveResponse:self.receivedData forIdentifier:self.identifier];
+    if (self.delegate) {
+        [self.delegate didReceiveResponse:self.receivedData forIdentifier:self.identifier];
+    }
     if ([(UIViewController *)self.delegate respondsToSelector:@selector(storeResponse:forCallType:)]) {
-        [self.delegate storeResponse:self.receivedData forIdentifier:self.identifier];
+        if (self.delegate) {
+            [self.delegate storeResponse:self.receivedData forIdentifier:self.identifier];
+        }
     }
 }
 
@@ -118,7 +121,9 @@
 #if kDebug
     NSLog(@"ERROR: %@", [error description]);
 #endif
-    [self.delegate serviceDidFailWithError:error forIdentifier:self.identifier];
+    if (self.delegate) {
+        [self.delegate serviceDidFailWithError:error forIdentifier:self.identifier];
+    }
 }
 
 - (void)cancelHTTPService {
@@ -128,12 +133,14 @@
 - (void) connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response{
     NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
     int code = [httpResponse statusCode];
-    [self.delegate responseCode:code];
+    if (self.delegate) {
+        [self.delegate responseCode:code];
+    }
     
 }
-#pragma mark - 
 
 
+#pragma mark -
 - (void)dealloc {
     [receivedData release];
     delegate = nil;
@@ -148,3 +155,4 @@
 
 
 @end
+

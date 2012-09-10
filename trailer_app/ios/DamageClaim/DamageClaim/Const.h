@@ -13,7 +13,7 @@
 
 #define kBuildDate 20120805 //(yyyymmdd)
 
-#define kTestingAPI TRUE
+#define kTestingAPI FALSE
 
 typedef enum {
 SIGNUP_URL_CALL_TYPE,
@@ -31,15 +31,22 @@ SEARCH_WEB_URL_CALL_TYPE,
 GET_HIVE_URL_CALL_TYPE
 } DC_URL_CALL_TYPE;
 
+#define HTTP_URL @"http://gizurtrailerapp-env.elasticbeanstalk.com/api/index.php/api"
 
-//Keys to share data across the app
+
+#pragma mark - Keys to share data across the app
+
 #define DAMAGE_DETAIL_MODEL @"DAMAGE_DETAIL_MODEL"
 #define NUMBER_OF_IMAGES @"NUMBER_OF_IMAGES"
 
 #define DAMAGE_IMAGE_NAME @"IMAGE"
 #define DAMAGE_THUMBNAIL_IMAGE_NAME @"THUMBNAILIMAGE"
+#define SURVEY_MODEL @"SURVEY_MODEL"
 
-#define THUMBNAIL_IMAGE_SIZE 80
+
+#define DAMAGE_POSITION_LABEL_DICTIONARY @"DAMAGE_POSITION_LABEL_DICTIONARY"
+#define DAMAGE_POSITION_VALUE_DICTIONARY @"DAMAGE_POSITION_VALUE_DICTIONARY"
+
 
 enum ADD_PHOTO_ACTION {
     ADD_PHOTO_CAMERA = 0,
@@ -49,6 +56,7 @@ enum ADD_PHOTO_ACTION {
 };
 
 
+//layout file tags
 enum LOGIN_CELL_TEXT_FIELD_TAGS{
     LOGIN_USERNAME_TEXTFIELD_TAG = -1,
     LOGIN_PASSWORD_TEXTFIELD_TAG = -2
@@ -91,7 +99,7 @@ enum CUSTOM_CELL_ADD_NEW_ITEM_TAGS {
     };
 
 enum DCPickListItemTypes {
-    DCPickListItemSurveyTrailerId,
+    DCPickListItemSurveyTrailerId = 1,
     DCPickListItemSurveyPlace,
     DCPickListItemSurveyPlates,
     DCPickListItemSurveyStraps,
@@ -100,22 +108,35 @@ enum DCPickListItemTypes {
     
     };
 
+
+#pragma mark - Other Constants
+#define THUMBNAIL_IMAGE_SIZE 80
 #define GET @"GET"
 #define POST @"POST"
 
 #define USER_NAME @"USER_NAME"
 #define PASSWORD @"PASSWORD"
 
+#define SUCCESS @"success"
+#define ERROR @"error"
+#define TRUE_STATUS @"true"
+#define FALSE_STATUS @"false"
+
 #define GIZURCLOUD_SECRET_KEY @"GIZURCLOUD_SECRET_KEY"
 #define GIZURCLOUD_API_KEY @"GIZURCLOUD_API_KEY"
 
+#define ASSETS_LIST @"ASSETS_LIST"
+#define DAMAGE_TYPE_LIST @"DAMAGE_TYPE_LIST"
+#define DAMAGE_POSITION_LIST @"DAMAGE_POSITION_LIST"
+
+#pragma mark - List of all the models
 //List of all the models
 #define ASSETS @"Assets"
 #define HELPDESK @"HelpDesk"
 #define AUTHENTICATE @"Authenticate"
-#define DOCUMENTS_ATTACHMENT @"DocumentsAttachment"
+#define DOCUMENTATTACHMENTS @"DocumentAttachments"
 
-
+#pragma mark - header keys
 //header strings
 #define HOST @"Host"
 #define X_SIGNATURE @"x_signature"
@@ -124,8 +145,17 @@ enum DCPickListItemTypes {
 #define X_TIMESTAMP @"x_timestamp"
 #define X_GIZUR_API_KEY @"x_gizurcloud_api_key"
 
-
+#pragma mark - URL identifiers
 //URLS identifiers
 #define AUTHENTICATE_LOGIN @"Authenticate/login"
+#define HELPDESK @"HelpDesk"
+#define HELPDESK_ID @"HelpDesk/%@"
+#define HELPDESK_DAMAGETYPE @"HelpDesk/damagetype"
+#define HELPDESK_DAMAGEPOSITION @"HelpDesk/damageposition"
+#define HELPDESK_DAMAGED @"HelpDesk/damaged"
+#define ASSETS @"Assets"
+#define HELPDESK_SEALED @"HelpDesk/sealed"
+#define HELPDESK_TICKETTITLE @"HelpDesk/ticket_title"
+#define DOCUMENTATTACHMENTS_ID @"DocumentAttachments/%@"
 
 

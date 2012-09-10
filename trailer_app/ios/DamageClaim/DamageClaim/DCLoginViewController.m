@@ -32,7 +32,7 @@
 -(void) keyboardWillHide:(NSNotification *)notification;
 - (IBAction)login:(id)sender;
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier;
-
+-(BOOL) isEmpty:(NSString *)string;
 
 @end
 
@@ -81,6 +81,12 @@
     
     
 }
+
+-(void) viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [self.httpService cancelHTTPService];
+}
+
 
 - (void)viewDidUnload
 {
@@ -141,48 +147,61 @@
 }
 
 - (IBAction)login:(id)sender {
-    //[self dismissModalViewControllerAnimated:YES];
-    NSString *model = @"Authenticate";
-    NSString *action = @"login";
-    NSString *urlString = [NSString stringWithFormat:@"http://gizurtrailerapp-env.elasticbeanstalk.com/api/index.php/api/%@/%@", model, action];
-    self.httpService = [[[HTTPService alloc] initWithURLString:urlString headers:[RequestHeaders commonHeaders] body:nil delegate:self requestMethod:kRequestMethodPOST identifier:AUTHENTICATE_LOGIN] autorelease];
-    NSURLRequest *request = [self.httpService request];
-    NSString *signature;
-    if ([self.httpService serviceRequestMethod] == kRequestMethodPOST) {
-       signature  = [DCSharedObject generateSignatureForRequest:request model:model requestType:POST];
-    } else {
-        signature = [DCSharedObject generateSignatureForRequest:request model:model requestType:GET];
-    }
-#if kDebug
-    NSLog(@"%@", signature);
-#endif
+    //[self dismissModalViewControllerAnimated:YES];i]
+    //[DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, @"15x475"] requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
     
-    if (signature) {
-        [[self.httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
-        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        hud.animationType = MBProgressHUDAnimationFade;
-        hud.labelText = NSLocalizedString(@"LOADING_MESSAGE", @"");
-        [self.httpService startService];
-#if kDebug
-        NSLog(@"%@", [[self.httpService headersDictionary] description]);
-#endif
-
-    } else {
-        //something went wrong
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
-    }
+    UITextField *usernameTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]] viewWithTag:LOGIN_USERNAME_TEXTFIELD_TAG];
     
+    UITextField *passwordTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]] viewWithTag:LOGIN_PASSWORD_TEXTFIELD_TAG];
+    
+    //store the username temporariy to share amongst the objects
+    [[[DCSharedObject sharedPreferences] preferences] setValue:usernameTextField.text forKey:USER_NAME];
+    //store the username temporariy to share amongst the screen
+    [[[DCSharedObject sharedPreferences] preferences] setValue:passwordTextField.text forKey:PASSWORD];
+    
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_KEY] &&
+        [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_SECRET_KEY]) {
+        
+        if ([self isEmpty:usernameTextField.text] || [self isEmpty:passwordTextField.text]) {
+            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"EMPTY_USERNAME_PASSWORD", @"")];
+            
+        } else {
+            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:AUTHENTICATE_LOGIN requestMethod:kRequestMethodPOST model:AUTHENTICATE delegate:self viewController:self];
+        }
+    } else {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NO_API_KEY_ERROR", @"")];
+    }
 }
 
+-(BOOL) isEmpty:(NSString *)string {
+    NSCharacterSet *whiteSpaces = [NSCharacterSet whitespaceCharacterSet];
+    NSString *validatedString = [string stringByTrimmingCharactersInSet:whiteSpaces];
+    if ([validatedString length] == 0) {
+        return YES;
+    }
+    return NO;
+}
+
+
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
-//    if ([identifier isEqualToString:AUTHENTICATE_LOGIN]) {
-//        NSDictionary *jsonDict = [responseString objectFromJSONString];
-//        if ((NSNull *)[jsonDict valueForKey:]) {
-//            
-//        }
-//    }
-    [self dismissModalViewControllerAnimated:YES];
-    
+    if ([identifier isEqualToString:AUTHENTICATE_LOGIN]) {
+        NSDictionary *jsonDict = [responseString objectFromJSONString];
+        if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+            NSNumber *status = [jsonDict valueForKey:SUCCESS];
+            if ([status boolValue]) {
+                //store the info till the user logs out
+                if ([[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_KEY] &&
+                    [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_SECRET_KEY]) {
+                    
+                    [[NSUserDefaults standardUserDefaults] setValue:[[[DCSharedObject sharedPreferences] preferences] valueForKey:USER_NAME] forKey:USER_NAME];
+                    [[NSUserDefaults standardUserDefaults] setValue:[[[DCSharedObject sharedPreferences] preferences] valueForKey:PASSWORD] forKey:PASSWORD];
+                }
+                [self dismissModalViewControllerAnimated:YES];
+            } else {
+                [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INVALID_LOGIN", @"")];
+            }
+        }
+    }
 }
 
 #pragma mark - HTTPServiceDelegate
@@ -191,19 +210,27 @@
 }
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
-    if (self.httpStatusCode == 200) {
-        NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
-#if kDebug
-        NSLog(@"%@", responseString);
-#endif
-        
-        [self parseResponse:responseString forIdentifier:identifier];
-    }
     [MBProgressHUD hideHUDForView:self.view animated:YES];
+    NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+#if kDebug
+    NSLog(@"%@", responseString);
+#endif
+
+    if (self.httpStatusCode == 200) {        
+        [self parseResponse:responseString forIdentifier:identifier];
+    } else {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
+    
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
     [MBProgressHUD hideHUDForView:self.view animated:YES];
+    if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+    } else {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
 }
 
 -(void) storeResponse:(NSData *)data forIdentifier:(NSString *)identifier {
@@ -221,8 +248,9 @@
 #endif
         
         //assign it to the model
-        if (self.loginModel) {
+        if (self.loginModel && ![self isEmpty:textField.text]) {
             self.loginModel.loginUsername = textField.text;
+            
         }
     UITextField *passwordTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]] viewWithTag:LOGIN_PASSWORD_TEXTFIELD_TAG];
         [passwordTextField becomeFirstResponder];
@@ -233,8 +261,9 @@
         NSLog(@"Entered Password: %@", textField.text);
 #endif
         //assign it to the model
-        if (self.loginModel) {
+        if (self.loginModel && ![self isEmpty:textField.text]) {
             self.loginModel.loginPassword = textField.text;
+            
         }
         [textField resignFirstResponder];
     }

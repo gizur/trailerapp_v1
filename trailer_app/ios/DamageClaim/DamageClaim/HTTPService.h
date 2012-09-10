@@ -30,8 +30,9 @@ typedef enum {
 } RequestMethod;
 
 typedef enum {
-    kNetworkConnectionError = -1004,
+    kNetworkConnectionError = -1009,
     kServerTimeOutError = -1001,
+    kHostUnreachableError = -1004,
     kServerConnectionError
 }ConnectionError;
 

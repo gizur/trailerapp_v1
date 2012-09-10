@@ -44,7 +44,7 @@
 -(BOOL) isEmpty:(NSString *)string;
 -(void) openDamageList;
 -(void) logout;
-
+-(void) toggleReportDamageButton;
 @end
 
 @implementation DCSurveyViewController
@@ -85,9 +85,7 @@
         self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
     }
     
-    if (!self.surveyModel.surveyTrailerId) {
-        [self.navigationItem.rightBarButtonItem setEnabled:NO];
-    }
+    [self toggleReportDamageButton];
     
 }
 
@@ -97,6 +95,7 @@
     [self setCustomCellSegmentedView:nil];
     [self setCustomCellTextFieldView:nil];
     [super viewDidUnload];
+    
     // Release any retained subviews of the main view.
 }
 
@@ -139,6 +138,8 @@
 
 //open the damage report's list
 -(void) openDamageList {
+    //share the survey model with damageListViewController
+    [[[DCSharedObject sharedPreferences] preferences] setValue:self.surveyModel forKey:SURVEY_MODEL];
     DCDamageListViewController *damageListViewController = [[[DCDamageListViewController alloc] initWithNibName:@"DamageListView" bundle:nil] autorelease];
     [self.navigationController pushViewController:damageListViewController animated:YES];
 }
@@ -224,6 +225,11 @@
         //[self.surveyTableView reloadData];
         [self.surveyTableView endUpdates];
         
+        //reset the plates and straps if the trailer is sealed
+        self.surveyModel.surveyPlates = nil;
+        self.surveyModel.surveyStraps = nil;
+        
+        
         
     } else if ([segmentedControl selectedSegmentIndex] == 1 && ![self isTrailerInventoryVisible]) {
         //make inventory section visible
@@ -266,6 +272,15 @@
     }
     return NO;
 }
+
+
+-(void) toggleReportDamageButton {
+    if (self.surveyModel.surveyTrailerId) {
+        [self.navigationItem.rightBarButtonItem setEnabled:YES];
+    } else {
+        [self.navigationItem.rightBarButtonItem setEnabled:NO];
+    }
+}
 #pragma mark - DCPickListViewControllerDelegate
 -(void) pickListDidPickItem:(id)item ofType:(NSInteger)type {
     switch (type) {
@@ -296,6 +311,8 @@
         default:
             break;
     }
+    
+    [self toggleReportDamageButton];
 }
 
 -(void) pickListDidPickItems:(NSArray *)items ofType:(NSInteger)type {
@@ -544,9 +561,8 @@
         case 0:
             switch (indexPath.row) {
                 case 1: {
-                    //dummy values
-                    NSArray *trailerIdArray = [NSArray arrayWithObjects:@"TR031A", @"TR031B", @"TR031B", @"TR031B", nil];
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyTrailerId isSingleValue:YES] autorelease];
+                    
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:nil type:DCPickListItemSurveyTrailerId isSingleValue:YES] autorelease];
                     pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }

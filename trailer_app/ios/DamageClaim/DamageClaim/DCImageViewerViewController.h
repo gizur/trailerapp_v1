@@ -11,6 +11,6 @@
 @interface DCImageViewerViewController : UIViewController<UIWebViewDelegate>
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil filePath:(NSString *)filePathOrNil;
-
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil image:(UIImage *)image;
 
 @end
