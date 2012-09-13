@@ -30,6 +30,7 @@
 		D73F6BEB15FE643F0018B118 /* 10.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D73F6BD715FE643F0018B118 /* 10.tiff */; };
 		D73F6BEC15FE643F0018B118 /* 10@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D73F6BD815FE643F0018B118 /* 10@2x.tiff */; };
 		D75DE3EB15DFA48F00AC8483 /* DCSurveyModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D75DE3EA15DFA48F00AC8483 /* DCSurveyModel.m */; };
+		D75E4FCA16007D1000507C3A /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = D75E4FC916007D1000507C3A /* MBProgressHUD.m */; };
 		D775EC7E15E3927500620706 /* check.png in Resources */ = {isa = PBXBuildFile; fileRef = D775EC7D15E3927500620706 /* check.png */; };
 		D77722C115D9124D0071FD06 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D77722C015D9124D0071FD06 /* UIKit.framework */; };
 		D77722C315D9124D0071FD06 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D77722C215D9124D0071FD06 /* Foundation.framework */; };
@@ -41,7 +42,6 @@
 		D77722F615D917210071FD06 /* HTTPService.m in Sources */ = {isa = PBXBuildFile; fileRef = D77722F515D917210071FD06 /* HTTPService.m */; };
 		D777230A15D91B890071FD06 /* DCLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D777230915D91B890071FD06 /* DCLoginViewController.m */; };
 		D777230E15D91D7D0071FD06 /* DCURLConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = D777230D15D91D7D0071FD06 /* DCURLConnection.m */; };
-		D777231215D91E000071FD06 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = D777231115D91E000071FD06 /* MBProgressHUD.m */; };
 		D78FC61415DBFB5A0003C823 /* CustomCellImageDamageDetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61315DBFB5A0003C823 /* CustomCellImageDamageDetailView.xib */; };
 		D78FC61615DC02010003C823 /* new.png in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61515DC02010003C823 /* new.png */; };
 		D78FC61915DC02520003C823 /* CustomCellNewImageDamageDetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D78FC61815DC02520003C823 /* CustomCellNewImageDamageDetailView.xib */; };
@@ -108,6 +108,8 @@
 		D73F6BD815FE643F0018B118 /* 10@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "10@2x.tiff"; sourceTree = "<group>"; };
 		D75DE3E915DFA48F00AC8483 /* DCSurveyModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCSurveyModel.h; sourceTree = "<group>"; };
 		D75DE3EA15DFA48F00AC8483 /* DCSurveyModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCSurveyModel.m; sourceTree = "<group>"; };
+		D75E4FC816007D1000507C3A /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
+		D75E4FC916007D1000507C3A /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		D775EC7D15E3927500620706 /* check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = check.png; sourceTree = "<group>"; };
 		D77722BC15D9124D0071FD06 /* DamageClaim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DamageClaim.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D77722C015D9124D0071FD06 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -129,8 +131,6 @@
 		D777230915D91B890071FD06 /* DCLoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCLoginViewController.m; sourceTree = "<group>"; };
 		D777230C15D91D7D0071FD06 /* DCURLConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCURLConnection.h; sourceTree = "<group>"; };
 		D777230D15D91D7D0071FD06 /* DCURLConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCURLConnection.m; sourceTree = "<group>"; };
-		D777231015D91E000071FD06 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
-		D777231115D91E000071FD06 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		D78FC61315DBFB5A0003C823 /* CustomCellImageDamageDetailView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellImageDamageDetailView.xib; sourceTree = "<group>"; };
 		D78FC61515DC02010003C823 /* new.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = new.png; sourceTree = "<group>"; };
 		D78FC61815DC02520003C823 /* CustomCellNewImageDamageDetailView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellNewImageDamageDetailView.xib; sourceTree = "<group>"; };
@@ -484,8 +484,8 @@
 		D777230F15D91DF00071FD06 /* MBProgressHUD */ = {
 			isa = PBXGroup;
 			children = (
-				D777231015D91E000071FD06 /* MBProgressHUD.h */,
-				D777231115D91E000071FD06 /* MBProgressHUD.m */,
+				D75E4FC816007D1000507C3A /* MBProgressHUD.h */,
+				D75E4FC916007D1000507C3A /* MBProgressHUD.m */,
 			);
 			name = MBProgressHUD;
 			sourceTree = "<group>";
@@ -801,7 +801,6 @@
 				D77722F615D917210071FD06 /* HTTPService.m in Sources */,
 				D777230A15D91B890071FD06 /* DCLoginViewController.m in Sources */,
 				D777230E15D91D7D0071FD06 /* DCURLConnection.m in Sources */,
-				D777231215D91E000071FD06 /* MBProgressHUD.m in Sources */,
 				D7F2918E15D95802000D1B0E /* DCSurveyViewController.m in Sources */,
 				D7F291A915D96D01000D1B0E /* DCDamageDetailViewController.m in Sources */,
 				D7FD97BF15DA60F5000D0AE2 /* DCPickListViewController.m in Sources */,
@@ -819,6 +818,7 @@
 				D7B231A315F0C8C4001A1560 /* JSONKit.m in Sources */,
 				D7B231AB15F51395001A1560 /* DCImageViewerViewController.m in Sources */,
 				D7B231B615F62F31001A1560 /* DCAssetModel.m in Sources */,
+				D75E4FCA16007D1000507C3A /* MBProgressHUD.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

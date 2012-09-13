@@ -99,11 +99,9 @@
     [self makeURLCall];
 }
 
--(void) viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
+-(void) viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
     [self.httpService cancelHTTPService];
-    self.httpService = nil;
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
 }
 
 
@@ -259,6 +257,28 @@
                     }
                 }
                 [self.pickListTableView reloadData];
+            } else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                    NSString *errorCode = [errorDict valueForKey:@"code"];
+                    if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                        if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                            [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                            
+                             //timestamp is adjusted. call the same url again
+                            
+                            if ([identifier isEqualToString:ASSETS]) {
+                                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];                            }
+                            
+                            if ([identifier isEqualToString:HELPDESK_DAMAGEPOSITION]) {
+                                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGEPOSITION requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                            }
+                            
+                            if ([identifier isEqualToString:HELPDESK_DAMAGETYPE]) {
+                                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGETYPE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                            }
+                        }
+                    }
+                }
             } else {
                 [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
             }
@@ -330,12 +350,13 @@
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
     [MBProgressHUD hideHUDForView:self.view animated:YES];
-    if (self.httpStatusCode == 200) {
-        NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 #if kDebug
-        NSLog(@"%@", responseString);
+    NSLog(@"%@", responseString);
 #endif
-        
+    
+
+    if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
     } else {
         [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];

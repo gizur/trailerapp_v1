@@ -215,8 +215,20 @@
             DCDamageDetailModel *damageDetailModel = [self.currentDamageArray objectAtIndex:index];
             //make a dictionary of post data
             NSMutableDictionary *bodyDict = [[[NSMutableDictionary alloc] init] autorelease];
-            [bodyDict setValue:@"damaged" forKey:@"ticket_title"];
+#warning Fetch this from the pick list
+
+            [bodyDict setValue:@"Yes" forKey:@"reportdamage"];
+#warning Fetch this from the pick list
+
             [bodyDict setValue:@"Open" forKey:@"ticketstatus"];
+            
+            NSString *ticketTitle = @"";
+            if ([[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]) {
+                ticketTitle = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"DAMAGE_TICKET_TITLE", @""), [[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]];
+            }
+            [bodyDict setValue:ticketTitle forKey:@"ticket_title"];
+
+            
             if (damageDetailModel.surveyModel.surveyTrailerId) {
                 [bodyDict setValue:damageDetailModel.surveyModel.surveyTrailerId forKey:@"trailerid"];
             }
@@ -224,7 +236,8 @@
             if (damageDetailModel.surveyModel.surveyPlace) {
                 [bodyDict setValue:damageDetailModel.surveyModel.surveyPlace forKey:@"damagereportlocation"];
             }
-            
+#warning Fetch this from the pick list
+
             if (damageDetailModel.surveyModel.surveyTrailerSealed) {
                 [bodyDict setValue:[damageDetailModel.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
             }
@@ -435,29 +448,17 @@
                             if ((NSNull *)[damageDict valueForKey:@"trailerid"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
                                     damageDetailModel.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
-#if kDebug
-                                    NSLog(@"SurveyModel in ParseResponse 1: %p", damageDetailModel.surveyModel);
-#endif
 
                                 }
                                 damageDetailModel.surveyModel.surveyTrailerId = [damageDict valueForKey:@"trailerid"];
-#if kDebug
-                                NSLog(@"surveyPlates 1: %p", damageDetailModel.surveyModel.surveyPlates);
-#endif
                             }
                             
                             if ((NSNull *)[damageDict valueForKey:@"damagereportlocation"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
                                     damageDetailModel.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
-#if kDebug
-                                    NSLog(@"SurveyModel in ParseResponse 2: %p", damageDetailModel.surveyModel);
-#endif
 
                                 }
                                 damageDetailModel.surveyModel.surveyPlace = [damageDict valueForKey:@"damagereportlocation"];
-#if kDebug
-                                NSLog(@"surveyPlates 2: %p", damageDetailModel.surveyModel.surveyPlates);
-#endif
 
                             }
                             
@@ -465,33 +466,18 @@
                             if ((NSNull *)[damageDict valueForKey:@"sealed"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
                                     damageDetailModel.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
-#if kDebug
-                                    NSLog(@"SurveyModel in ParseResponse 3: %p", damageDetailModel.surveyModel);
-#endif
 
                                 }
                                 NSString *sealed = [damageDict valueForKey:@"sealed"];
                                 damageDetailModel.surveyModel.surveyTrailerSealed = [NSNumber numberWithBool:[[sealed lowercaseString] isEqualToString:@"yes"]? YES: NO];
-#if kDebug
-                                NSLog(@"surveyPlates 3: %p", damageDetailModel.surveyModel.surveyPlates);
-#endif
 
                             }
                             
                             if ((NSNull *)[damageDict valueForKey:@"plates"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
                                     damageDetailModel.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
-#if kDebug
-                                    NSLog(@"SurveyModel in ParseResponse 4: %p", damageDetailModel.surveyModel);
-#endif
                                 }
                                 damageDetailModel.surveyModel.surveyPlates = [NSNumber numberWithInt:[[damageDict valueForKey:@"plates"] intValue]];
-                                //damageDetailModel.surveyModel.surveyPlates = [[NSNumber alloc] initWithInt:[[damageDict valueForKey:@"plates"] intValue]];
-
-#if kDebug
-                                NSLog(@"surveyPlates 4: %p", damageDetailModel.surveyModel.surveyPlates);
-#endif
-
                             }
                             
                             if ((NSNull *)[damageDict valueForKey:@"straps"] != [NSNull null]) {
@@ -516,8 +502,71 @@
                             [self.damageListModelArray addObject:damageDetailModel];
                         }
                     }
+                } else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                    NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                    if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                        NSString *errorCode = [errorDict valueForKey:@"code"];
+                        if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                            if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];;
+                                //timestamp is adjusted. call the same url again
+                                [self getDamageList];
+                            }
+                        }
+                    }
                 } else {
                     [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                }
+            }
+        }
+        
+        if ([identifier isEqualToString:HELPDESK]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+                NSString *status = [jsonDict valueForKey:SUCCESS];
+                if ([status boolValue]) {
+#if kDebug
+                    NSLog(@"s: %d, c: %d", self.submittingDamageIndex, [self.currentDamageArray count]);
+#endif
+                    if (self.submittingDamageIndex < [self.currentDamageArray count] - 1) {
+                        [self.currentDamageArray removeObjectAtIndex:self.submittingDamageIndex];
+                        //self.submittingDamageIndex will always be zero since the next damageClaim to submit 
+                        //is always at zero
+                        [self submitDamageReportAtIndex:self.submittingDamageIndex];
+                    } else if (self.submittingDamageIndex == [self.currentDamageArray count] - 1) {
+                        [self.currentDamageArray removeObjectAtIndex:self.submittingDamageIndex];
+                        if ([self.currentDamageArray count] == 0) { //if all the damages were sent successfully, make the array nil
+                            self.currentDamageArray = nil;
+                        }
+                        [self enableActions];
+                        
+                        //update the damage list
+                        [self getDamageList];
+                    }
+                    //check if the call failed because of timestamp
+                    //if yes, adjust the timestamp and hit the url again
+                } else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                    NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                    if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                        NSString *errorCode = [errorDict valueForKey:@"code"];
+                        if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                            if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                //timestamp is adjusted. call the same url again
+#if kDebug
+                                NSLog(@"s: %d, c: %d", self.submittingDamageIndex, [self.currentDamageArray count]);
+#endif
+
+                                if (self.submittingDamageIndex < [self.currentDamageArray count]) {
+                                    //self.submittingDamageIndex will always be zero since the next damageClaim to submit 
+                                    //is always at zero
+                                    [self submitDamageReportAtIndex:self.submittingDamageIndex];
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    [self toggleActionButtons];
                 }
             }
         }
@@ -546,33 +595,8 @@
     NSLog(@"%@", responseString);
 #endif
 
-    if (self.httpStatusCode == 200) {
-        
-        if ([identifier isEqualToString:HELPDESK_DAMAGED]) {
-            
-            [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:HELPDESK_DAMAGED];
-        }
-        
-        if ([identifier isEqualToString:HELPDESK]) {
-            if (self.submittingDamageIndex < [self.currentDamageArray count] - 1) {
-                [self.currentDamageArray removeObjectAtIndex:self.submittingDamageIndex];
-                //self.submittingDamageIndex will always be zero since the next damageClaim to submit 
-                //is always at zero
-                [self submitDamageReportAtIndex:self.submittingDamageIndex];
-            } else if (self.submittingDamageIndex == [self.currentDamageArray count] - 1) {
-                if (self.submittingDamageIndex < [self.currentDamageArray count]) {
-                    [self.currentDamageArray removeObjectAtIndex:self.submittingDamageIndex];
-                }
-                if ([self.currentDamageArray count] == 0) { //if all the damages were sent successfully, make the array nil
-                    self.currentDamageArray = nil;
-                }
-                [self enableActions];
-                
-                //update the damage list
-                [self getDamageList];
-            }
-        }
-        
+    if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
+        [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:HELPDESK_DAMAGED];
     }
 }
 

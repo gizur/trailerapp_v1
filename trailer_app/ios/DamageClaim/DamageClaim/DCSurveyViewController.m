@@ -23,6 +23,10 @@
 
 #import "DCDamageListViewController.h"
 
+#import "MBProgressHUD.h"
+
+#import "JSONKit.h"
+
 
 #define SURVEY_SECTION_ONE_ROWS 4
 #define SURVEY_SECTION_TWO_ROWS 2
@@ -35,6 +39,9 @@
 @property (nonatomic, getter = isTrailerInventoryVisible) BOOL trailerInventoryVisible;
 @property (nonatomic) CGRect originalTableFrame;
 @property (nonatomic, retain) DCSurveyModel *surveyModel;
+@property (retain, nonatomic) IBOutlet UIBarButtonItem *submitToolBarButton;
+@property (retain, nonatomic) HTTPService *httpService;
+@property (nonatomic) NSInteger httpStatusCode;
 
 -(void) customizeNavigationBar;
 -(IBAction) submitSurveyReport;
@@ -44,7 +51,9 @@
 -(BOOL) isEmpty:(NSString *)string;
 -(void) openDamageList;
 -(void) logout;
--(void) toggleReportDamageButton;
+-(void) toggleActionButtons;
+-(void) loadPickLists;
+-(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier;
 @end
 
 @implementation DCSurveyViewController
@@ -54,6 +63,9 @@
 @synthesize trailerInventoryVisible = _trailerInventoryVisible;
 @synthesize originalTableFrame = _originalTableFrame;
 @synthesize surveyModel = _surveyModel;
+@synthesize submitToolBarButton = _submitToolBarButton;
+@synthesize httpService = _httpService;
+@synthesize httpStatusCode = _httpStatusCode;
 
 #pragma mark - View LifeCycle
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -71,9 +83,6 @@
 	// Do any additional setup after loading the view.
     [self customizeNavigationBar];
     
-    DCLoginViewController *loginViewController = [[[DCLoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
-    [self presentModalViewController:loginViewController animated:NO];
-    
     //store the original tableview height. will be used in restoring it
     //to its old height
     self.originalTableFrame = self.surveyTableView.frame;
@@ -85,7 +94,8 @@
         self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
     }
     
-    [self toggleReportDamageButton];
+    [self loadPickLists];
+    [self toggleActionButtons];
     
 }
 
@@ -94,6 +104,7 @@
     [self setSurveyTableView:nil];
     [self setCustomCellSegmentedView:nil];
     [self setCustomCellTextFieldView:nil];
+    [self setSubmitToolBarButton:nil];
     [super viewDidUnload];
     
     // Release any retained subviews of the main view.
@@ -101,9 +112,14 @@
 
 -(void) viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    [self.surveyTableView reloadData];
     
 }
+-(void) viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [self.httpService cancelHTTPService];
+}
+
+
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
@@ -115,11 +131,14 @@
     [_customCellSegmentedView release];
     [_customCellTextFieldView release];
     [_surveyModel release];
+    [_submitToolBarButton release];
+    [_httpService release];
     [super dealloc];
 }
 
 #pragma mark - Others
 -(void) customizeNavigationBar {
+    [self.navigationController setNavigationBarHidden:NO];
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
 #if kDebug
     NSLog(@"%@", [self.navigationItem description]);
@@ -133,7 +152,7 @@
 }
 
 -(void) logout {
-    
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:AUTHENTICATE_LOGOUT requestMethod:kRequestMethodPOST model:AUTHENTICATE delegate:self viewController:self];
 }
 
 //open the damage report's list
@@ -146,6 +165,41 @@
 
 //send the survey to the server
 -(void) submitSurveyReport {
+    //make a dictionary of post data
+    NSMutableDictionary *bodyDict = [[[NSMutableDictionary alloc] init] autorelease];
+#warning Fetch this from the pick list
+    [bodyDict setValue:@"No" forKey:@"reportdamage"];
+#warning Fetch this from the pick list
+    [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
+    NSString *ticketTitle = @"";
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]) {
+        ticketTitle = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"SURVEY_TICKET_TITLE", @""), [[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]];
+    }
+    [bodyDict setValue:ticketTitle forKey:@"ticket_title"];
+    
+    
+    if (self.surveyModel.surveyTrailerId) {
+        [bodyDict setValue:self.surveyModel.surveyTrailerId forKey:@"trailerid"];
+    }
+    
+    if (self.surveyModel.surveyPlace) {
+        [bodyDict setValue:self.surveyModel.surveyPlace forKey:@"damagereportlocation"];
+    }
+    
+#warning Fetch this from the pick list
+    if (self.surveyModel.surveyTrailerSealed) {
+        [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
+    }
+    
+    if (self.surveyModel.surveyPlates) {
+        [bodyDict setValue:[NSString stringWithFormat:@"%d", [self.surveyModel.surveyPlates intValue]] forKey:@"plates"];
+    }
+    
+    if (self.surveyModel.surveyStraps) {
+        [bodyDict setValue:[NSString stringWithFormat:@"%d", [self.surveyModel.surveyStraps intValue]] forKey:@"straps"];
+    }
+    
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:bodyDict identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
 }
 
 - (IBAction)resetSurvey:(id)sender {
@@ -198,14 +252,7 @@
     }
     [self setTrailerInventoryVisible:NO];
     
-    if (!self.surveyModel.surveyTrailerId) {
-        [self.navigationItem.rightBarButtonItem setEnabled:NO];
-    }
-    
-    
-    
-    
-    
+    [self toggleActionButtons];
 }
 
 //open the Trailer inventory section
@@ -273,14 +320,186 @@
     return NO;
 }
 
-
--(void) toggleReportDamageButton {
-    if (self.surveyModel.surveyTrailerId) {
-        [self.navigationItem.rightBarButtonItem setEnabled:YES];
-    } else {
+-(void) toggleActionButtons {
+    if (!self.surveyModel.surveyTrailerId) {
         [self.navigationItem.rightBarButtonItem setEnabled:NO];
+        [self.submitToolBarButton setEnabled:NO];
+    } else {
+        [self.navigationItem.rightBarButtonItem setEnabled:YES];
+        [self.submitToolBarButton setEnabled:YES];
     }
 }
+
+-(void) loadPickLists {
+//    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_TICKETSTATUS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+//    
+//    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_SEALED requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+//    
+//    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+//    
+}
+
+-(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
+    if (responseString) {
+        NSDictionary *jsonDict = [responseString objectFromJSONString];
+        if ([identifier isEqualToString:HELPDESK_TICKETSTATUS]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS]) {
+                if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                    if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                        NSArray *resultArray = [jsonDict valueForKey:@"result"];
+                        NSMutableDictionary *ticketStatusDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                        for (NSDictionary *result in resultArray) {
+                            if ((NSNull *)[result valueForKey:@"label"] != [NSNull null]) {
+                                NSString *label = [result valueForKey:@"label"];
+                                if ((NSNull *)[result valueForKey:@"value"] != [NSNull null]) {
+                                    NSString *value = [result valueForKey:@"value"];
+                                    [ticketStatusDictionary setValue:value forKey:label];
+                                }
+                            }
+                        }
+                        [[[DCSharedObject sharedPreferences] preferences] setValue:ticketStatusDictionary forKey:HELPDESK_TICKETSTATUS];
+                    }
+                }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                    NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                    if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                        NSString *errorCode = [errorDict valueForKey:@"code"];
+                        if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                            if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                //timestamp is adjusted. call the same url again
+                                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_TICKETSTATUS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        if ([identifier isEqualToString:HELPDESK_SEALED]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS]) {
+                if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                    if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                        NSArray *resultArray = [jsonDict valueForKey:@"result"];
+                        NSMutableDictionary *sealedDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                        for (NSDictionary *result in resultArray) {
+                            if ((NSNull *)[result valueForKey:@"label"] != [NSNull null]) {
+                                NSString *label = [result valueForKey:@"label"];
+                                if ((NSNull *)[result valueForKey:@"value"] != [NSNull null]) {
+                                    NSString *value = [result valueForKey:@"value"];
+                                    [sealedDictionary setValue:value forKey:label];
+                                }
+                            }
+                        }
+                        [[[DCSharedObject sharedPreferences] preferences] setValue:sealedDictionary forKey:HELPDESK_SEALED];
+                        [self.surveyTableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationNone];
+                    }
+                }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                    NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                    if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                        NSString *errorCode = [errorDict valueForKey:@"code"];
+                        if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                            if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                //timestamp is adjusted. call the same url again
+                                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_SEALED requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        if ([identifier isEqualToString:HELPDESK_REPORTDAMAGE]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS]) {
+                if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                    if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                        NSArray *resultArray = [jsonDict valueForKey:@"result"];
+                        NSMutableDictionary *reportDamageDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                        for (NSDictionary *result in resultArray) {
+                            if ((NSNull *)[result valueForKey:@"label"] != [NSNull null]) {
+                                NSString *label = [result valueForKey:@"label"];
+                                if ((NSNull *)[result valueForKey:@"value"] != [NSNull null]) {
+                                    NSString *value = [result valueForKey:@"value"];
+                                    [reportDamageDictionary setValue:value forKey:label];
+                                }
+                            }
+                        }
+                        [[[DCSharedObject sharedPreferences] preferences] setValue:reportDamageDictionary forKey:HELPDESK_REPORTDAMAGE];
+                    }
+                }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                    NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                    if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                        NSString *errorCode = [errorDict valueForKey:@"code"];
+                        if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                            if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                //timestamp is adjusted. call the same url again
+                                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        if ([identifier isEqualToString:HELPDESK]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS]) {
+                if (![(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                    if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                        NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                        if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                            NSString *errorCode = [errorDict valueForKey:@"code"];
+                            if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                                if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                    [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                    //timestamp is adjusted. call the same url again
+                                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS]) {
+                if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_NAME];
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:PASSWORD];
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_API_KEY];
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_SECRET_KEY];
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:CONTACT_NAME];
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:ACCOUNT_NAME];
+                    
+                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:USER_NAME]) {
+                        [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:USER_NAME];
+                    }
+                    
+                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:PASSWORD]) {
+                        [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:PASSWORD];
+                    }
+                    
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_LOGGED_IN];
+                    [self.navigationController popViewControllerAnimated:YES];
+
+                } else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                    NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                    if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                        NSString *errorCode = [errorDict valueForKey:@"code"];
+                        if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                            if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                //timestamp is adjusted. call the same url again
+                                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 #pragma mark - DCPickListViewControllerDelegate
 -(void) pickListDidPickItem:(id)item ofType:(NSInteger)type {
     switch (type) {
@@ -312,7 +531,8 @@
             break;
     }
     
-    [self toggleReportDamageButton];
+    [self toggleActionButtons];
+    [self.surveyTableView reloadData];
 }
 
 -(void) pickListDidPickItems:(NSArray *)items ofType:(NSInteger)type {
@@ -395,6 +615,43 @@
     return YES;
 }
 
+
+#pragma mark - HTTPServiceDelegate methods
+-(void) responseCode:(int)code {
+    self.httpStatusCode = code;
+}
+
+-(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+#if kDebug
+    NSLog(@"%@: %@", identifier, responseString);
+#endif
+
+    if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
+        [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
+    } else {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
+
+}
+
+-(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+    } else {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
+    
+
+}
+
+-(void) storeResponse:(NSData *)data forIdentifier:(NSString *)identifier {
+    
+}
+
+
 #pragma mark - UITableViewDataSource methods
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
     return 2;
@@ -440,7 +697,6 @@
         
         if ((indexPath.section == 0 && (indexPath.row == 1 || indexPath.row == 2)) || indexPath.section == 1) {
             cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SimpleCell"] autorelease];
-            
         }
     }
     
@@ -495,8 +751,20 @@
                     titleLabel.text = NSLocalizedString(@"SEALED", @"");
                     
                     UISegmentedControl *segmentedControl = (UISegmentedControl *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
-                    [segmentedControl setTitle:NSLocalizedString(@"YES", @"") forSegmentAtIndex:0];
-                    [segmentedControl setTitle:NSLocalizedString(@"NO", @"") forSegmentAtIndex:1];
+                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_SEALED]) {
+                        NSString *yesString = [[[DCSharedObject sharedPreferences] preferences] valueForKey:@"Yes"];
+                        NSString *noString = [[[DCSharedObject sharedPreferences] preferences] valueForKey:@"No"];
+                        if (yesString && noString) {
+                            [segmentedControl setTitle:yesString forSegmentAtIndex:0];
+                            [segmentedControl setTitle:noString forSegmentAtIndex:1];
+                        } else {
+                            [segmentedControl setTitle:NSLocalizedString(@"YES", @"") forSegmentAtIndex:0];
+                            [segmentedControl setTitle:NSLocalizedString(@"NO", @"") forSegmentAtIndex:1];
+                        }
+                    } else {
+                        [segmentedControl setTitle:NSLocalizedString(@"YES", @"") forSegmentAtIndex:0];
+                        [segmentedControl setTitle:NSLocalizedString(@"NO", @"") forSegmentAtIndex:1];
+                    }
                     [segmentedControl addTarget:self action:@selector(toggleInventorySection:) forControlEvents:UIControlEventValueChanged];
                     if (self.surveyModel.surveyTrailerSealed) {
 #if kDebug

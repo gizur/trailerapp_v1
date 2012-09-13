@@ -16,30 +16,51 @@
 
 +(NSDictionary *)commonHeaders {
 	
-    NSString *username;
-    NSString *password;
-    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:USER_NAME] && [[[DCSharedObject sharedPreferences] preferences] valueForKey:PASSWORD]) {
+    NSString *username = nil;
+    NSString *password = nil;
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME] && [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD]) {
+        username = [[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME];
+        password = [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD];
+    } else if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:USER_NAME] && [[[DCSharedObject sharedPreferences] preferences] valueForKey:PASSWORD]) {
         
         username = [[[DCSharedObject sharedPreferences] preferences] valueForKey:USER_NAME];
         password = [[[DCSharedObject sharedPreferences] preferences] valueForKey:PASSWORD];
     }
-    
     if (username && password) {
-        NSString *timestamp = [DCSharedObject strFromISO8601:[NSDate date]];
         
+        NSDate *timestamp = [NSDate date];
+        
+        if ([[NSUserDefaults standardUserDefaults] valueForKey:TIME_DIFFERENCE]) {
+            NSInteger timeDifference = [(NSNumber *)[[NSUserDefaults standardUserDefaults] valueForKey:TIME_DIFFERENCE] intValue];
+#if kDebug
+            NSLog(@"oldDate in requestHeaders: %@", [DCSharedObject strFromISO8601:timestamp]);
+#endif
+            timestamp = [timestamp dateByAddingTimeInterval:timeDifference];
+#if kDebug
+            NSLog(@"newDate in requestHeaders: %@", [DCSharedObject strFromISO8601:timestamp]);
+#endif
+
+        }
+        
+        NSString *timestampString = [DCSharedObject strFromISO8601:timestamp];
         //use the same timestamp to generate the signature
-        [[NSUserDefaults standardUserDefaults] setValue:[timestamp description] forKey:X_TIMESTAMP];
+        [[NSUserDefaults standardUserDefaults] setValue:timestampString forKey:X_TIMESTAMP];
+        [[NSUserDefaults standardUserDefaults] synchronize];
         NSString *apiKey = [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_KEY];
         
-        NSDictionary *headerDictionary = [NSDictionary dictionaryWithObjectsAndKeys: 
-                                          @"text/json", @"Accept", 
-                                          username, X_USERNAME, 
-                                          password, X_PASSWORD, 
-                                          timestamp, X_TIMESTAMP, 
-                                          apiKey, X_GIZUR_API_KEY, 
-                                          @"sv,en-us,en;q=0.5", @"Accept-Language", 
-                                          nil];
-        return headerDictionary;
+        if (apiKey && timestampString) {
+            NSDictionary *headerDictionary = [NSDictionary dictionaryWithObjectsAndKeys: 
+                                              @"text/json", @"Accept", 
+                                              username, X_USERNAME, 
+                                              password, X_PASSWORD, 
+                                              timestampString, X_TIMESTAMP, 
+                                              apiKey, X_GIZUR_API_KEY, 
+                                              @"sv,en-us,en;q=0.5", @"Accept-Language", 
+                                              nil];
+            return headerDictionary;
+        }
+        
+        
     }
     
     return nil;

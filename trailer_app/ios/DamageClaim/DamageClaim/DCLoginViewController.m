@@ -20,6 +20,8 @@
 
 #import "JSONKit.h"
 
+#import "DCSurveyViewController.h"
+
 @interface DCLoginViewController ()
 @property (retain, nonatomic) IBOutlet UIView *parentView;
 @property (retain, nonatomic) IBOutlet UITableView *loginTableView;
@@ -68,20 +70,26 @@
     }
     
     [self.loginTableView reloadData];
-    
-    if ([[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME]) {
-        UITextField *usernameTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]] viewWithTag:LOGIN_USERNAME_TEXTFIELD_TAG];
-        usernameTextField.text = [[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME];
-    }
-    
-    if ([[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD]) {
-        UITextField *passwordTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]] viewWithTag:LOGIN_PASSWORD_TEXTFIELD_TAG];
-        passwordTextField.text = [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD];
-    }
-    
-    
 }
 
+-(void) viewDidAppear:(BOOL)animated {
+    [self.navigationController setNavigationBarHidden:YES];
+    UITextField *usernameTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]] viewWithTag:LOGIN_USERNAME_TEXTFIELD_TAG];
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME]) {
+        
+        usernameTextField.text = [[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME];
+    } else {
+        usernameTextField.text = @"";
+    }
+    
+    UITextField *passwordTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]] viewWithTag:LOGIN_PASSWORD_TEXTFIELD_TAG];
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD]) {
+        passwordTextField.text = [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD];
+    } else {
+        passwordTextField.text = @"";
+    }
+
+}
 -(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     [self.httpService cancelHTTPService];
@@ -154,6 +162,9 @@
     
     UITextField *passwordTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]] viewWithTag:LOGIN_PASSWORD_TEXTFIELD_TAG];
     
+#if kDebug
+    NSLog(@"username: %@ password: %@", usernameTextField.text, passwordTextField.text);
+#endif
     //store the username temporariy to share amongst the objects
     [[[DCSharedObject sharedPreferences] preferences] setValue:usernameTextField.text forKey:USER_NAME];
     //store the username temporariy to share amongst the screen
@@ -167,6 +178,10 @@
             
         } else {
             [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:AUTHENTICATE_LOGIN requestMethod:kRequestMethodPOST model:AUTHENTICATE delegate:self viewController:self];
+            
+//            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:@"DocumentAttachments/15x501" requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
+//            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:@"DocumentAttachments/15x502" requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
+//            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:@"DocumentAttachments/15x503" requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
         }
     } else {
         [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NO_API_KEY_ERROR", @"")];
@@ -196,12 +211,46 @@
                     [[NSUserDefaults standardUserDefaults] setValue:[[[DCSharedObject sharedPreferences] preferences] valueForKey:USER_NAME] forKey:USER_NAME];
                     [[NSUserDefaults standardUserDefaults] setValue:[[[DCSharedObject sharedPreferences] preferences] valueForKey:PASSWORD] forKey:PASSWORD];
                 }
-                [self dismissModalViewControllerAnimated:YES];
-            } else {
+                
+                //store the contact name and account name
+                if ((NSNull *)[jsonDict valueForKey:@"contactname"] != [NSNull null]) {
+                    NSString *contactName = [jsonDict valueForKey:@"contactname"];
+                    [[NSUserDefaults standardUserDefaults] setValue:contactName forKey:CONTACT_NAME];
+                }
+                
+                if ((NSNull *)[jsonDict valueForKey:@"accountname"] != [NSNull null]) {
+                    NSString *accountName = [jsonDict valueForKey:@"accountname"];
+                    [[NSUserDefaults standardUserDefaults] setValue:accountName forKey:ACCOUNT_NAME];
+                    
+                }
+                
+                [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES] forKey:USER_LOGGED_IN];
+                
+                DCSurveyViewController *surveyViewController = [[[DCSurveyViewController alloc] initWithNibName:@"SurveyView" bundle:nil] autorelease];
+                [self.navigationController pushViewController:surveyViewController animated:YES];
+                
+                
+            } else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                    NSString *errorCode = [errorDict valueForKey:@"code"];
+                    if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                        if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                            [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                            //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                            [[NSUserDefaults standardUserDefaults] synchronize];
+                            //timestamp is adjusted. call the same url again
+                            [self login:nil];
+                        }
+                    }
+                }
+            }
+            else {
                 [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INVALID_LOGIN", @"")];
             }
         }
     }
+    
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 #pragma mark - HTTPServiceDelegate
@@ -216,7 +265,7 @@
     NSLog(@"%@", responseString);
 #endif
 
-    if (self.httpStatusCode == 200) {        
+    if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {        
         [self parseResponse:responseString forIdentifier:identifier];
     } else {
         [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];

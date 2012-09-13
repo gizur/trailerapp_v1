@@ -15,6 +15,9 @@
 
 #import "Const.h"
 
+#import "DCLoginViewController.h"
+
+
 #import "DCSharedObject.h"
 
 
@@ -35,17 +38,21 @@
     
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     // Override point for customization after application launch.
-    
-    DCSurveyViewController *surveyViewController = [[[DCSurveyViewController alloc] initWithNibName:@"SurveyView" bundle:nil] autorelease];
-    self.navigationController = [[[UINavigationController alloc] initWithRootViewController:surveyViewController] autorelease];
-    
-#if kTestingAPI
-    [[NSUserDefaults standardUserDefaults] setValue:@"cloud3@gizur.com" forKey:USER_NAME];
-    [[NSUserDefaults standardUserDefaults] setValue:@"rksh2jjf" forKey:PASSWORD];
-    [[NSUserDefaults standardUserDefaults] setValue:@"9b45e67513cb3377b0b18958c4de55be" forKey:GIZURCLOUD_SECRET_KEY];
-    [[NSUserDefaults standardUserDefaults] setValue:@"GZCLDFC4B35B" forKey:GIZURCLOUD_API_KEY];
-    
-#endif
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:USER_LOGGED_IN]) {
+        if ([(NSNumber *)[[NSUserDefaults standardUserDefaults] valueForKey:USER_LOGGED_IN] boolValue]) {
+            
+            DCSurveyViewController *surveyViewController = [[[DCSurveyViewController alloc] initWithNibName:@"SurveyView" bundle:nil] autorelease];
+            self.navigationController = [[[UINavigationController alloc] initWithRootViewController:surveyViewController] autorelease];
+            
+        } else {
+            DCLoginViewController *loginViewController = [[[DCLoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
+            self.navigationController = [[[UINavigationController alloc] initWithRootViewController:loginViewController] autorelease];
+        }
+    } else {
+        DCLoginViewController *loginViewController = [[[DCLoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
+        self.navigationController = [[[UINavigationController alloc] initWithRootViewController:loginViewController] autorelease];
+
+    }
     
     self.window.rootViewController = self.navigationController;
     [self.window makeKeyAndVisible];
@@ -84,6 +91,7 @@
             }
         }
     }
+    [[NSUserDefaults standardUserDefaults] synchronize];
     return YES;
 }
 

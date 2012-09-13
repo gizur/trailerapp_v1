@@ -61,3 +61,6 @@
 "NO_API_KEY_ERROR" = "Error logging in! Please open the link you've received via text/mail to register properly.";
 "EMPTY_USERNAME_PASSWORD" = "Either the username or password is empty.";
 "INVALID_LOGIN" = "Could not verify your identity. Please note that you've to open this app from the link given to you via text/mail for the first time. If you've already done so, please contact your company.";
+"SURVEY_TICKET_TITLE" = "Survey ticket by";
+"DAMAGE_TICKET_TITLE" = "Damage report by";
+"IMAGE_LOADING_ERROR" = "Could not load some images";

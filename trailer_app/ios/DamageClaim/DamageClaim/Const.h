@@ -47,7 +47,15 @@ GET_HIVE_URL_CALL_TYPE
 #define DAMAGE_POSITION_LABEL_DICTIONARY @"DAMAGE_POSITION_LABEL_DICTIONARY"
 #define DAMAGE_POSITION_VALUE_DICTIONARY @"DAMAGE_POSITION_VALUE_DICTIONARY"
 
+#define TIME_DIFFERENCE @"TIME_DIFFERENCE"
 
+
+#define CONTACT_NAME @"CONTACT_NAME"
+#define ACCOUNT_NAME @"ACCOUNT_NAME"
+
+
+
+/////////////////////////////////////////////////////////////////////////////////
 enum ADD_PHOTO_ACTION {
     ADD_PHOTO_CAMERA = 0,
     ADD_PHOTO_ALBUM = 1,
@@ -78,7 +86,8 @@ enum CUSTOM_CELL_TEXTFIELD_TAGS {
 
 enum CUSTOM_CELL_NEW_IMAGE_DAMAGE_TAGS {
     CUSTOM_CELL_TEXT_FIELD_NEW_IMAGE_DAMAGE_TAG = -1,
-    CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG = -2
+    CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG = -2,
+    CUSTOM_CELL_LOADING_IMAGE_NEW_IMAGE_TAG = -3,
     };
 
 enum TEXT_FIELD_TAGS {
@@ -111,6 +120,7 @@ enum DCPickListItemTypes {
 
 #pragma mark - Other Constants
 #define THUMBNAIL_IMAGE_SIZE 80
+#define LOADING_IMAGE_SIZE 40
 #define GET @"GET"
 #define POST @"POST"
 
@@ -128,6 +138,10 @@ enum DCPickListItemTypes {
 #define ASSETS_LIST @"ASSETS_LIST"
 #define DAMAGE_TYPE_LIST @"DAMAGE_TYPE_LIST"
 #define DAMAGE_POSITION_LIST @"DAMAGE_POSITION_LIST"
+
+#define TIME_NOT_IN_SYNC @"TIME_NOT_IN_SYNC"
+
+#define USER_LOGGED_IN @"USER_LOGGED_IN"
 
 #pragma mark - List of all the models
 //List of all the models
@@ -148,12 +162,15 @@ enum DCPickListItemTypes {
 #pragma mark - URL identifiers
 //URLS identifiers
 #define AUTHENTICATE_LOGIN @"Authenticate/login"
+#define AUTHENTICATE_LOGOUT @"Authenticate/logout"
 #define HELPDESK @"HelpDesk"
 #define HELPDESK_ID @"HelpDesk/%@"
 #define HELPDESK_DAMAGETYPE @"HelpDesk/damagetype"
 #define HELPDESK_DAMAGEPOSITION @"HelpDesk/damageposition"
 #define HELPDESK_DAMAGED @"HelpDesk/damaged"
 #define ASSETS @"Assets"
+#define HELPDESK_TICKETSTATUS @"HelpDesk/ticketstatus"
+#define HELPDESK_REPORTDAMAGE @"HelpDesk/reportdamage"
 #define HELPDESK_SEALED @"HelpDesk/sealed"
 #define HELPDESK_TICKETTITLE @"HelpDesk/ticket_title"
 #define DOCUMENTATTACHMENTS_ID @"DocumentAttachments/%@"

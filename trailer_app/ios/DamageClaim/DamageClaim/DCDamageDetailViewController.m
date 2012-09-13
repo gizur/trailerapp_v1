@@ -61,6 +61,7 @@
 -(void) getDamageDetail;
 -(void) getImages;
 -(void) updateUI;
+-(void) showError;
 @end
 
 @implementation DCDamageDetailViewController
@@ -134,6 +135,11 @@
 
 -(void) viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+}
+
+-(void) viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [self.httpService cancelHTTPService];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -230,6 +236,19 @@
                             [self getImages];
                         }
                     }
+                } else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                    NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                    if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                        NSString *errorCode = [errorDict valueForKey:@"code"];
+                        if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                            if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //timestamp is adjusted. call the same url again
+                                [self getDamageDetail];
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -295,25 +314,40 @@
 #if kDebug
             NSLog(@"%@", [error description]);
 #endif
-#warning Show this in the main thread
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+
+            [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
+            //image was not loaded remove a row from the model array of the table
+            //removing any array from documentIdArray will do since this array only gives a hint 
+            //of how many images are there
+            if (self.documentIdArray) {
+                if ([self.documentIdArray count] > 0) {
+                    [self.documentIdArray removeObjectAtIndex:0];
+                }
+            }
             return;
         }
         if (response) {
+            NSString *responseString = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
             if ([(NSHTTPURLResponse *)response statusCode] != 200) {
-#warning Show this in the main thread
-                [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+#if kDebug
+                NSLog(@"here: %@", responseString);
+#endif
+
+                [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
+                //image was not loaded remove a row from the model array of the table
+                //removing any array from documentIdArray will do since this array only gives a hint 
+                //of how many images are there
+                if (self.documentIdArray) {
+                    if ([self.documentIdArray count] > 0) {
+                        [self.documentIdArray removeObjectAtIndex:0];
+                    }
+                }
                 return;
             } else {
-                NSString *responseString = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
-//#if kDebug
-//                NSLog(@"here: %@", responseString);
-//#endif
                 [self parseResponse:responseString forIdentifier:DOCUMENTATTACHMENTS_ID];
-                
-                [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
             }
         }
+        [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
     }
 }
 
@@ -333,6 +367,10 @@
             
         }
     }
+}
+
+-(void) showError {
+    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
 }
 
 -(void) updateUI {
@@ -530,7 +568,7 @@
     NSLog(@"%@", responseString);
 #endif
 
-    if (self.httpStatusCode == 200) {
+    if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         
         [self parseResponse:responseString forIdentifier:identifier];
     } else {
@@ -762,6 +800,9 @@
                             UIImage *image = [UIImage imageWithData:imageData];
                             
                             UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG];
+                            UIImageView *loadingImageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_LOADING_IMAGE_NEW_IMAGE_TAG];
+                            imageView.hidden = NO;
+                            loadingImageView.hidden = YES;
                             [imageView setImage:image];
                         }
                     }
@@ -775,11 +816,16 @@
             }
         } else {
             UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG];
-            if (self.thumbnailImagesArray) {
+            UIImageView *loadingImageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_LOADING_IMAGE_NEW_IMAGE_TAG];
+            if (self.imagesArray) {
                 
                 if (indexPath.row < [self.imagesArray count]) {
+                    imageView.hidden = NO;
+                    loadingImageView.hidden = YES;
                     [imageView setImage:[self.imagesArray objectAtIndex:indexPath.row]];
                 } else {
+                    imageView.hidden = YES;
+                    loadingImageView.hidden = NO;
                     NSArray *imageArray = [NSArray arrayWithObjects:
                                            [UIImage imageNamed:@"1.tiff"],
                                            [UIImage imageNamed:@"2.tiff"], 
@@ -793,11 +839,14 @@
                                            [UIImage imageNamed:@"10.tiff"], 
                                            nil];
                     
-                    imageView.animationImages = imageArray;
-                    imageView.animationDuration = 0.5;
-                    [imageView startAnimating];
+                    loadingImageView.animationImages = imageArray;
+                    loadingImageView.animationDuration = 0.5;
+                    [loadingImageView startAnimating];
                 }
             } else {
+                imageView.hidden = YES;
+                loadingImageView.hidden = NO;
+                imageView.frame = CGRectMake(imageView.frame.origin.x, imageView.frame.origin.y, LOADING_IMAGE_SIZE, LOADING_IMAGE_SIZE);
                 NSArray *imageArray = [NSArray arrayWithObjects:
                                        [UIImage imageNamed:@"1.tiff"],
                                        [UIImage imageNamed:@"2.tiff"], 
@@ -811,9 +860,9 @@
                                        [UIImage imageNamed:@"10.tiff"], 
                                        nil];
                 
-                imageView.animationImages = imageArray;
-                imageView.animationDuration = 0.5;
-                [imageView startAnimating];
+                loadingImageView.animationImages = imageArray;
+                loadingImageView.animationDuration = 0.5;
+                [loadingImageView startAnimating];
             }
         }
     }
@@ -867,8 +916,12 @@
                         if (indexPath.row  < [self.damageDetailModel.damageImagePaths count] + 1) {
                             
                             NSString *filePath = [self.damageDetailModel.damageImagePaths objectAtIndex:indexPath.row - 1];
-                            DCImageViewerViewController *viewer = [[[DCImageViewerViewController alloc] initWithNibName:@"ImageViewerView" bundle:nil filePath:filePath] autorelease];
-                            [self.navigationController pushViewController:viewer animated:YES];
+                            NSData *imageData = [[NSFileManager defaultManager] contentsAtPath:filePath];
+                            if (imageData) {
+                                UIImage *image = [UIImage imageWithData:imageData];
+                                DCImageViewerViewController *viewer = [[[DCImageViewerViewController alloc] initWithNibName:@"ImageViewerView" bundle:nil image:image] autorelease];
+                                [self.navigationController pushViewController:viewer animated:YES];
+                            }
                         }
                     }
                 }
@@ -879,9 +932,28 @@
         } else {
             if (self.imagesArray) {
                 if (indexPath.row < [self.imagesArray count]) {
-                    DCImageViewerViewController *viewer = [[[DCImageViewerViewController alloc] initWithNibName:@"ImageViewerView" bundle:nil image:[self.thumbnailImagesArray objectAtIndex:indexPath.row]] autorelease];
+                    DCImageViewerViewController *viewer = [[[DCImageViewerViewController alloc] initWithNibName:@"ImageViewerView" bundle:nil image:[self.imagesArray objectAtIndex:indexPath.row]] autorelease];
                     [self.navigationController pushViewController:viewer animated:YES];
-                }
+                } 
+            } else {
+                UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+                UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG];
+                NSArray *imageArray = [NSArray arrayWithObjects:
+                                       [UIImage imageNamed:@"1.tiff"],
+                                       [UIImage imageNamed:@"2.tiff"], 
+                                       [UIImage imageNamed:@"3.tiff"], 
+                                       [UIImage imageNamed:@"4.tiff"], 
+                                       [UIImage imageNamed:@"5.tiff"], 
+                                       [UIImage imageNamed:@"6.tiff"], 
+                                       [UIImage imageNamed:@"7.tiff"], 
+                                       [UIImage imageNamed:@"8.tiff"], 
+                                       [UIImage imageNamed:@"9.tiff"], 
+                                       [UIImage imageNamed:@"10.tiff"], 
+                                       nil];
+                
+                imageView.animationImages = imageArray;
+                imageView.animationDuration = 0.5;
+                [imageView startAnimating];
             }
         }
     }

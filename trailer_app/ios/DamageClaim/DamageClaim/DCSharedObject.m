@@ -224,17 +224,27 @@ static DCSharedObject *sharedPreferences = nil;
     //extract the verb i.e. GET POST etc
     NSString *verb = requestType;
     NSString *apiVersion = @"0.1";
-    NSString *timestamp = [[NSUserDefaults standardUserDefaults] valueForKey:X_TIMESTAMP];
-    if (!timestamp) {
-        timestamp = [DCSharedObject strFromISO8601:[NSDate date]];
+    NSString *timestampString = [[NSUserDefaults standardUserDefaults] valueForKey:X_TIMESTAMP];
+    if (!timestampString) {
+        NSDate *timestamp = [NSDate date];
+        if ([[NSUserDefaults standardUserDefaults] valueForKey:TIME_DIFFERENCE]) {
+            NSInteger timeDifference = [(NSNumber *)[[NSUserDefaults standardUserDefaults] valueForKey:TIME_DIFFERENCE] intValue];
+#if kDebug
+            NSLog(@"time_diff in signature: %d", timeDifference);
+#endif
+            timestamp =  [timestamp dateByAddingTimeInterval:timeDifference];
+        }
+        
+        timestampString = [DCSharedObject strFromISO8601:timestamp];
     }
     NSString *publicKey = [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_KEY];
-    if (verb && apiVersion && timestamp && publicKey) {
-        NSString *inputString = [NSString stringWithFormat:@"KeyID%@Model%@Timestamp%@Verb%@Version%@", publicKey, model, timestamp, verb, apiVersion];
+    NSString *privateKey = [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_SECRET_KEY];
+    if (verb && apiVersion && timestampString && publicKey && privateKey) {
+        NSString *inputString = [NSString stringWithFormat:@"KeyID%@Model%@Timestamp%@Verb%@Version%@", publicKey, model, timestampString, verb, apiVersion];
 #if kDebug
         NSLog(@"%@", inputString);
 #endif
-        NSString *signature = [DCSharedObject hmacSHA256WithKey:@"9b45e67513cb3377b0b18958c4de55be" andInputString:inputString];
+        NSString *signature = [DCSharedObject hmacSHA256WithKey:privateKey andInputString:inputString];
         if (signature) {
             return signature;
         } else {

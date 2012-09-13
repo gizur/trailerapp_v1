@@ -11,16 +11,16 @@
 #import "Const.h"
 
 @interface DCImageViewerViewController ()
-@property (retain, nonatomic) IBOutlet UIWebView *webView;
-@property (retain, nonatomic) NSString *filePath;
 @property (retain, nonatomic) UIImage *image;
+@property (retain, nonatomic) IBOutlet UIScrollView *scrollView;
+@property (retain, nonatomic) IBOutlet UIImageView *imageView;
 
 @end
 
 @implementation DCImageViewerViewController
-@synthesize webView = _webView;
-@synthesize filePath = _filePath;
 @synthesize image = _image;
+@synthesize scrollView = _scrollView;
+@synthesize imageView = _imageView;
 
 #pragma mark - View LifeCycle methods
 
@@ -34,15 +34,6 @@
     return self;
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil filePath:(NSString *)filePathOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-        _filePath = filePathOrNil;[_filePath retain];
-    }
-    return self;
-}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil image:(UIImage *)image
 {
@@ -59,19 +50,18 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    if (self.filePath) {
-#if kDebug
-        NSLog(@"%@", [NSURL fileURLWithPath:self.filePath]);
-#endif
-        [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL fileURLWithPath:self.filePath]]];
-    } else if (self.image) {
-        
+    if (self.image) {
+        [self.imageView setImage:self.image];
+        self.scrollView.maximumZoomScale = 5;
+//        [self.imageView setBounds:CGRectMake(0, 0, self.image.size.width, self.image.size.height)];
+//        self.scrollView.contentSize = self.image.size;
     }
 }
 
 - (void)viewDidUnload
 {
-    [self setWebView:nil];
+    [self setScrollView:nil];
+    [self setImageView:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
 }
@@ -82,26 +72,17 @@
 }
 
 - (void)dealloc {
-    [_webView release];
-    [_filePath release];
     [_image release];
+    [_scrollView release];
+    [_imageView release];
     [super dealloc];
 }
 
-#pragma mark - UIWebViewDelegate methods
--(BOOL) webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-    return YES;
-}
 
--(void) webViewDidStartLoad:(UIWebView *)webView {
-    
-}
+#pragma mark - UIScrollViewDelegate methods
 
--(void) webViewDidFinishLoad:(UIWebView *)webView {
-    
-}
 
--(void) webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    
+-(UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+    return self.imageView;
 }
 @end
