@@ -243,7 +243,6 @@
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                 [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
                                 //timestamp is adjusted. call the same url again
                                 [self getDamageDetail];
                             }
@@ -460,13 +459,13 @@
         NSLog(@"%@", [image description]);
 #endif
         if (image) {
-            NSData *imageData = UIImagePNGRepresentation(image);
+            NSData *imageData = UIImageJPEGRepresentation(image, 1.0f);
             
             UIImage *thumbnailImage = [image thumbnailImage:THUMBNAIL_IMAGE_SIZE transparentBorder:0 cornerRadius:0 interpolationQuality:kCGInterpolationLow];
 #if kDebug
             NSLog(@"Width %f, Height %f", thumbnailImage.size.width, thumbnailImage.size.height);
 #endif
-            NSData *thumbnailImageData = UIImagePNGRepresentation(thumbnailImage);
+            NSData *thumbnailImageData = UIImageJPEGRepresentation(thumbnailImage, 1.0f);
             //store the image in file and insert a
             //new row in UITableView
             //Also resize the image to lower resolution and save 

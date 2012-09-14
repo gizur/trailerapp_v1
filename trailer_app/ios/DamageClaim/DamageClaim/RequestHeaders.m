@@ -33,6 +33,7 @@
         if ([[NSUserDefaults standardUserDefaults] valueForKey:TIME_DIFFERENCE]) {
             NSInteger timeDifference = [(NSNumber *)[[NSUserDefaults standardUserDefaults] valueForKey:TIME_DIFFERENCE] intValue];
 #if kDebug
+            NSLog(@"Timestamp: %d", timeDifference);
             NSLog(@"oldDate in requestHeaders: %@", [DCSharedObject strFromISO8601:timestamp]);
 #endif
             timestamp = [timestamp dateByAddingTimeInterval:timeDifference];

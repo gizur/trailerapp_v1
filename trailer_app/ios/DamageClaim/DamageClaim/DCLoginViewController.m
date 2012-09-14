@@ -237,7 +237,6 @@
                     if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                         if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                             [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                            //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                            [[NSUserDefaults standardUserDefaults] synchronize];
                             //timestamp is adjusted. call the same url again
                             [self login:nil];
                         }
