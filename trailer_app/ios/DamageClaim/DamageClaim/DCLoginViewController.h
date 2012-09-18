@@ -7,8 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HTTPService.h"
 
-@interface DCLoginViewController : UIViewController<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate>
+@interface DCLoginViewController : UIViewController<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, HTTPServiceDelegate>
 
 
 @end

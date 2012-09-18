@@ -11,7 +11,9 @@
 
 #import "DCSurveyViewController.h"
 
-#import "DCDamageViewController.h"
+#import "DCDamageDetailViewController.h"
+
+#import "Const.h"
 
 
 @implementation DCAppDelegate
@@ -28,6 +30,30 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    
+//    NSMutableSet *set1, *set2;
+//    set1 = [NSMutableSet setWithObjects:@"1", @"2", @"3", nil];
+//    set2 = [NSMutableSet setWithObjects:@"2", @"3", @"4", nil];
+//    for (NSString *s in set1) {
+//        [set2 addObject:s];
+//    }
+//    
+//    
+//#if kDebug
+//    NSLog(@"%@", set2);
+//#endif
+  
+//    NSMutableArray *array = [NSMutableArray arrayWithObjects:[NSMutableArray arrayWithObjects:@"1", @"2", @"3", nil], [NSMutableArray arrayWithObjects:@"4", @"5", @"6",nil], nil];
+//    
+//    NSMutableArray *array2 = [array objectAtIndex:1];
+//    [array2 replaceObjectAtIndex:1 withObject:@"10"];
+//    
+//#if kDebug
+//    NSLog(@"%@", [array description]);
+//#endif
+    
+    
+    
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     // Override point for customization after application launch.
     //self.viewController = [[[DCViewController alloc] initWithNibName:@"DCViewController" bundle:nil] autorelease];
@@ -38,11 +64,30 @@
     
 //    DCDamageViewController *d = [[[DCDamageViewController alloc] initWithNibName:@"DamageView" bundle:nil] autorelease];
 //    self.navigationController = [[[UINavigationController alloc] initWithRootViewController:d] autorelease];
+#if kTestingAPI
+    [[NSUserDefaults standardUserDefaults] setValue:@"cloud3@gizur.com" forKey:USER_NAME];
+    [[NSUserDefaults standardUserDefaults] setValue:@"rksh2jjf" forKey:PASSWORD];
+    [[NSUserDefaults standardUserDefaults] setValue:@"9b45e67513cb3377b0b18958c4de55be" forKey:GIZURCLOUD_SECRET_KEY];
+    [[NSUserDefaults standardUserDefaults] setValue:@"GZCLDFC4B35B" forKey:GIZURCLOUD_API_KEY];
+    
+#endif
     
     self.window.rootViewController = self.navigationController;
     [self.window makeKeyAndVisible];
     return YES;
 }
+
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+    // Display text
+    UIAlertView *alertView;
+    NSString *text = [[url host] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    alertView = [[UIAlertView alloc] initWithTitle:@"Text" message:text delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alertView show];
+    [alertView release];
+    
+    return YES;
+}
+
 
 - (void)applicationWillResignActive:(UIApplication *)application
 {

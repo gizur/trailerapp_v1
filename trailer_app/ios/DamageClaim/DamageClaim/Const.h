@@ -13,39 +13,7 @@
 
 #define kBuildDate 20120805 //(yyyymmdd)
 
-#if kLocalServer
-
-#define SIGNUP_URL @"http://192.168.0.99:3001/register"
-#define CREATE_HIVE_URL @"http://192.168.0.99:3001/hive/create"
-#define RECOMMENDATIONS_URL  @"http://192.168.0.99:3001/recommendations"
-#define GET_CATEGORIES_URL @"http://192.168.0.99:3001/category/get"
-#define SUBMIT_REVIEW_URL @"http://192.168.0.99:3001/review/create"
-#define UPDATE_SETTINGS @"http://192.168.0.99:3001/user/update"
-#define INVITE_CONTACT @"http://192.168.0.99:3001/invite"
-#define GET_MY_PLUNKS_URL @"http://192.168.0.99:3001/plunk/get"
-#define ADD_RECOMMENDATION_URL @"http://192.168.0.99:3001/recommendation/create"
-#define UPDATE_PLUNK_URL @"http://192.168.0.99:3001/plunk/update"
-#define SEARCH_WEB_URL @"http://192.168.0.99:3001/search_web"
-#define GET_HIVE_URL @"http://192.168.0.99:3001/hive/get"
-#define SERVER_DOMAIN @"192.168.0.99"
-
-#else
-
-#define SIGNUP_URL @"http://188.65.63.142:3002/register"
-#define CREATE_HIVE_URL @"http://188.65.63.142:3002/hive/create"
-#define RECOMMENDATIONS_URL  @"http://188.65.63.142:3002/recommendations"
-#define GET_CATEGORIES_URL @"http://188.65.63.142:3002/category/get"
-#define SUBMIT_REVIEW_URL @"http://188.65.63.142:3002/review/create"
-#define UPDATE_SETTINGS @"http://188.65.63.142:3002/user/update"
-#define INVITE_CONTACT @"http://188.65.63.142:3002/invite"
-#define GET_MY_PLUNKS_URL @"http://188.65.63.142:3002/plunk/get"
-#define ADD_RECOMMENDATION_URL @"http://188.65.63.142:3002/recommendation/create"
-#define UPDATE_PLUNK_URL @"http://188.65.63.142:3002/plunk/update"
-#define SEARCH_WEB_URL @"http://188.65.63.142:3002/search_web"
-#define GET_HIVE_URL @"http://188.65.63.142:3002/hive/get"
-#define SERVER_DOMAIN @"188.65.63.142"
-
-#endif
+#define kTestingAPI TRUE
 
 typedef enum {
 SIGNUP_URL_CALL_TYPE,
@@ -64,13 +32,9 @@ GET_HIVE_URL_CALL_TYPE
 } DC_URL_CALL_TYPE;
 
 
-
-#define DAMAGE_TYPE_KEY @"DAMAGE_TYPE_KEY"
-#define DAMAGE_POSITION_KEY @"DAMAGE_POSITION_KEY"
-#define SURVEY_TRAILER_ID @"SURVEY_TRAILER_ID"
-#define SURVEY_PLACE @"SURVEY_PLACE"
-#define SURVEY_PLATES @"SURVEY_PLATES"
-#define SURVEY_STRAPS @"SURVEY_STRAPS"
+//Keys to share data across the app
+#define DAMAGE_DETAIL_MODEL @"DAMAGE_DETAIL_MODEL"
+#define NUMBER_OF_IMAGES @"NUMBER_OF_IMAGES"
 
 #define DAMAGE_IMAGE_NAME @"IMAGE"
 #define DAMAGE_THUMBNAIL_IMAGE_NAME @"THUMBNAILIMAGE"
@@ -125,4 +89,43 @@ enum CUSTOM_CELL_PICK_LIST_VIEW_TAGS {
 enum CUSTOM_CELL_ADD_NEW_ITEM_TAGS {
     CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG = -1
     };
+
+enum DCPickListItemTypes {
+    DCPickListItemSurveyTrailerId,
+    DCPickListItemSurveyPlace,
+    DCPickListItemSurveyPlates,
+    DCPickListItemSurveyStraps,
+    DCPickListItemTypeDamageType,
+    DCPickListItemTypeDamagePosition
+    
+    };
+
+#define GET @"GET"
+#define POST @"POST"
+
+#define USER_NAME @"USER_NAME"
+#define PASSWORD @"PASSWORD"
+
+#define GIZURCLOUD_SECRET_KEY @"GIZURCLOUD_SECRET_KEY"
+#define GIZURCLOUD_API_KEY @"GIZURCLOUD_API_KEY"
+
+//List of all the models
+#define ASSETS @"Assets"
+#define HELPDESK @"HelpDesk"
+#define AUTHENTICATE @"Authenticate"
+#define DOCUMENTS_ATTACHMENT @"DocumentsAttachment"
+
+
+//header strings
+#define HOST @"Host"
+#define X_SIGNATURE @"x_signature"
+#define X_USERNAME @"x_username"
+#define X_PASSWORD @"x_password"
+#define X_TIMESTAMP @"x_timestamp"
+#define X_GIZUR_API_KEY @"x_gizurcloud_api_key"
+
+
+//URLS identifiers
+#define AUTHENTICATE_LOGIN @"Authenticate/login"
+
 

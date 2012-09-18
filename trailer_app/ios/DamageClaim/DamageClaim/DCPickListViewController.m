@@ -21,6 +21,8 @@
 @property (retain, nonatomic) NSArray *modelArray;
 @property (retain, nonatomic) NSString *storageKey;
 @property (retain, nonatomic) NSMutableArray *selectedObjects;
+@property (nonatomic, getter = isSingleValue) BOOL singleValue;
+@property (nonatomic) NSInteger type;
 
 -(void) customizeNavigationBar;
 -(void) storeSelectedValues;
@@ -33,7 +35,9 @@
 @synthesize modelArray = _modelArray;
 @synthesize storageKey = _storageKey;
 @synthesize selectedObjects = _selectedObjects;
-
+@synthesize singleValue = _singleValue;
+@synthesize type = _type;
+@synthesize delegate = _delegate;
 #pragma mark - ViewLifeCycle methods
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -44,15 +48,29 @@
     return self;
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray storageKey:(NSString *)key{
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArrayOrNil storageKey:(NSString *)key isSingleValue:(BOOL)singleValue{
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        _modelArray = modelArray; [_modelArray retain];
+        _modelArray = modelArrayOrNil; [_modelArray retain];
         _storageKey = key; [_storageKey retain];
+        _singleValue = singleValue;
     }
     return self;
 }
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArrayOrNil type:(NSInteger) type isSingleValue:(BOOL) singleValue {
+    // Custom initialization
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        _modelArray = modelArrayOrNil; [_modelArray retain];
+        _type = type;
+        _singleValue = singleValue;
+    }
+    return self;
+}
+
 
 - (void)viewDidLoad
 {
@@ -75,6 +93,7 @@
 }
 
 - (void)dealloc {
+    _delegate = nil;
     [_customCellPickListView release];
     [_pickListTableView release];
     [_modelArray release];
@@ -86,23 +105,36 @@
 
 #pragma mark - Others
 -(void) customizeNavigationBar {
-    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-    if (self.navigationItem) {
-        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DONE", @"") style:UIBarButtonItemStylePlain target:self action:@selector(storeSelectedValues)] autorelease];
-    }
+//    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+//    if (self.navigationItem) {
+//        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DONE", @"") style:UIBarButtonItemStylePlain target:self action:@selector(storeSelectedValues)] autorelease];
+//    }
     
 }
 
 -(void) storeSelectedValues {
     if (self.selectedObjects && self.storageKey) {
-        if ([self.selectedObjects count] > 0) {
+        if ([self isSingleValue]) {
+            if ([self.selectedObjects count] > 0) {
+#if kDebug
+                NSLog(@"%@", [self.selectedObjects description]);
+#endif
+                [[[DCSharedObject sharedPreferences] preferences] setValue:[self.selectedObjects objectAtIndex:0] forKey:self.storageKey];
+            }
+        } else {
 #if kDebug
             NSLog(@"%@", [self.selectedObjects description]);
 #endif
-            
             [[[DCSharedObject sharedPreferences] preferences] setValue:self.selectedObjects forKey:self.storageKey];
+            
         }
     }
+    if (self.delegate) {
+        if ([self.delegate respondsToSelector:@selector(pickListDidPickItems:ofType:)]) {
+            [self.delegate pickListDidPickItems:self.selectedObjects ofType:self.type];
+        }
+    }
+    
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -163,39 +195,73 @@
 #pragma mark - UITableViewDelegate methods
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     UIImageView *imageView = (UIImageView *)[[tableView cellForRowAtIndexPath:indexPath] viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
-    if ([imageView isHidden]) {
-        //select this row and unselect all other rows
-        imageView.hidden = NO;
-        
-        for (NSInteger i = 0 ; i < [self.modelArray count]; i++) {
-            if (i != indexPath.row) {
-                UITableViewCell *cell = [self.pickListTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:0]];
-                UIImageView *otherImageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
-                if (![otherImageView isHidden]) {
-                    otherImageView.hidden = YES;
+    if ([self isSingleValue]) {
+        if ([imageView isHidden]) {
+            //select this row and unselect all other rows
+            imageView.hidden = NO;
+            
+            for (NSInteger i = 0 ; i < [self.modelArray count]; i++) {
+                if (i != indexPath.row) {
+                    UITableViewCell *cell = [self.pickListTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:0]];
+                    UIImageView *otherImageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
+                    if (![otherImageView isHidden]) {
+                        otherImageView.hidden = YES;
+                    }
+                }
+                
+            }
+            if (!self.selectedObjects) {
+                self.selectedObjects = [[[NSMutableArray alloc] init] autorelease];
+            }
+            if (self.modelArray) {
+                if (indexPath.row < [self.modelArray count]) {
+                    [self.selectedObjects removeAllObjects];
+                    [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
+                }
+            }
+            if (self.delegate) {
+                if ([self.delegate respondsToSelector:@selector(pickListDidPickItem:ofType:)]) {
+                    [self.delegate pickListDidPickItem:[self.modelArray objectAtIndex:indexPath.row] ofType:self.type];
                 }
             }
             
         }
-        if (!self.selectedObjects) {
-            self.selectedObjects = [[[NSMutableArray alloc] init] autorelease];
-        }
-        if (self.modelArray) {
-            if (indexPath.row < [self.modelArray count]) {
-                [self.selectedObjects removeAllObjects];
-                [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
+        [self storeSelectedValues];
+    } else {
+        if ([imageView isHidden]) {
+            //select this row and unselect all other rows
+            imageView.hidden = NO;
+            
+            for (NSInteger i = 0 ; i < [self.modelArray count]; i++) {
+                if (i != indexPath.row) {
+                    UITableViewCell *cell = [self.pickListTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:0]];
+                    UIImageView *otherImageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
+                    if (![otherImageView isHidden]) {
+                        otherImageView.hidden = YES;
+                    }
+                }
+                
+            }
+            if (!self.selectedObjects) {
+                self.selectedObjects = [[[NSMutableArray alloc] init] autorelease];
+            }
+            if (self.modelArray) {
+                if (indexPath.row < [self.modelArray count]) {
+                    [self.selectedObjects removeAllObjects];
+                    [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
+                }
+            }
+            
+        } else {
+            imageView.hidden = YES;
+            if (self.modelArray) {
+                if (indexPath.row < [self.modelArray count]) {
+                    [self.selectedObjects removeObject:[self.modelArray objectAtIndex:indexPath.row]];
+                }
             }
         }
-        
     }
-//    else {
-//        imageView.hidden = YES;
-//        if (self.modelArray) {
-//            if (indexPath.row < [self.modelArray count]) {
-//                [self.selectedObjects removeObject:[self.modelArray objectAtIndex:indexPath.row]];
-//            }
-//        }
-//    }
+    
 }
 
 @end

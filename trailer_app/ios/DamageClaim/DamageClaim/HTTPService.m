@@ -12,7 +12,7 @@
 @implementation HTTPService
 
 @synthesize receivedData,connection ;
-@synthesize delegate,serviceURLString,headersDictionary,bodyString,isPOST,serviceRequestMethod, callType, bodyData;
+@synthesize delegate,serviceURLString,headersDictionary,bodyString,isPOST,serviceRequestMethod, bodyData, request, identifier;
  
 - (id)init
 {
@@ -22,107 +22,60 @@
 - (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
                delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod {
     if (self=[super init]) {
-        serviceURLString =urlString ;[serviceURLString retain] ;
+        serviceURLString = urlString ;[serviceURLString retain] ;
         headersDictionary=[headers mutableCopy] ;//[headersDictionary retain] ;
         bodyString = body ;[bodyString retain];
         delegate=serviceDelegate ;
-        serviceRequestMethod =requestMethod ;
+        serviceRequestMethod = requestMethod;
     }
     return self ;
 }
 
-- (id)initWithURLString : (NSString *)urlString callType:(DC_URL_CALL_TYPE)serviceCallType headers : (NSDictionary *)headers body : (NSString *)body 
-               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod {
+- (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
+               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod identifier:(NSString *)iden{
     if (self=[super init]) {
-        callType = serviceCallType;
-        serviceURLString =urlString ;[serviceURLString retain] ;
-        headersDictionary=[headers mutableCopy] ;//[headersDictionary retain] ;
-        bodyString = body ;[bodyString retain];
-        delegate=serviceDelegate ;
-        serviceRequestMethod =requestMethod ;
+        serviceURLString = urlString ;[serviceURLString retain] ;
+        headersDictionary = [headers mutableCopy] ;//[headersDictionary retain] ;
+        bodyString = body; [bodyString retain];
+        delegate=serviceDelegate;
+        serviceRequestMethod = requestMethod;
+        identifier = iden; [identifier retain];
     }
     return self ;
 }
-
-- (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers bodyData : (NSData *)data 
-               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod {
-    if (self=[super init]) {
-        serviceURLString =urlString ;[serviceURLString retain] ;
-        headersDictionary=[headers mutableCopy] ;//[headersDictionary retain] ;
-        bodyData = data ;[bodyData retain];
-        delegate=serviceDelegate ;
-        serviceRequestMethod =requestMethod ;
-    }
-    return self ;
-}
-
-- (id)initWithURLString : (NSString *)urlString callType:(DC_URL_CALL_TYPE)serviceCallType headers : (NSDictionary *)headers bodyData: (NSData *)data 
-               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod {
-    if (self=[super init]) {
-        callType = serviceCallType;
-        serviceURLString =urlString ;[serviceURLString retain] ;
-        headersDictionary=[headers mutableCopy] ;//[headersDictionary retain] ;
-        bodyData = data ;[bodyData retain];
-        delegate=serviceDelegate ;
-        serviceRequestMethod =requestMethod ;
-    }
-    return self ;
-}
-
 
 
 - (void)startService { //setup the post request header and body and start connection
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:self.serviceURLString] cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:15];
+    NSURL *url = [NSURL URLWithString:self.serviceURLString];
+    self.request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:TIMEOUT_INTERVAL];
     
-    if (serviceRequestMethod == kRequestMethodPOST) { //set up request type 
-       [request setHTTPMethod:@"POST"] ; 
+    if (self.serviceRequestMethod == kRequestMethodPOST) { //set up request type 
+       [self.request setHTTPMethod:@"POST"];
     }
     
     if (self.headersDictionary!=nil) { //setup headers
         NSArray *headerKeys = [self.headersDictionary allKeys];
         
         for (NSString *headerKey in headerKeys) {
-            [request setValue:[self.headersDictionary objectForKey:headerKey] forHTTPHeaderField:headerKey];
+            [self.request setValue:[self.headersDictionary objectForKey:headerKey] forHTTPHeaderField:headerKey];
         }
     }
+    
+    
 
     //bodyData isn't null which means it was set by user
     //use it instead of bodyString
     if (self.bodyData) {
-        [request setHTTPBody:self.bodyData];
+        [self.request setHTTPBody:self.bodyData];
     } else if (self.bodyString){
-        [request setHTTPBody:[NSData dataWithBytes:[self.bodyString UTF8String] length:[self.bodyString length]]];
+        [self.request setHTTPBody:[NSData dataWithBytes:[self.bodyString UTF8String] length:[self.bodyString length]]];
     }
     
-//    //check for network reachability before connecting
-//    Reachability *internetConnectionStatus = [Reachability reachabilityForInternetConnection];
-//    Reachability *wifiConnectionStatus = [Reachability reachabilityForLocalWiFi];
-//    Reachability *domainStatus = [Reachability reachabilityWithHostName:SERVER_DOMAIN];
-//    
-//    NetworkStatus currentInternetStatus = [internetConnectionStatus currentReachabilityStatus];
-//    NetworkStatus currentWifiStatus = [wifiConnectionStatus currentReachabilityStatus];
-//    NetworkStatus currentDomainStatus = [domainStatus currentReachabilityStatus];
-//    
-//    
-//    NSError *error;
-//    if (currentInternetStatus == NotReachable || currentWifiStatus == NotReachable) {
-//        error = [NSError errorWithDomain:ERROR_DOMAIN code:kNetworkConnectionError userInfo:nil];
-//        [self.delegate serviceDidFailWithError:error];
-//        return;
-//    }
-//    
-//    if (currentDomainStatus == NotReachable) {
-//        error = [NSError errorWithDomain:ERROR_DOMAIN code:kServerConnectionError userInfo:nil];
-//        [self.delegate serviceDidFailWithError:error];
-//        return;
-//    }
     
-    
-    
-    self.connection = [[[DCURLConnection alloc] initWithRequest:request delegate:self startImmediately:YES forCallType:self.callType] autorelease];
+    self.connection = [[[NSURLConnection alloc] initWithRequest:self.request delegate:self startImmediately:YES] autorelease];
 
     if (!self.connection) {
-        [self.delegate serviceDidFailWithError:nil];
+        [self.delegate serviceDidFailWithError:nil forURLString:self.serviceURLString];
     }
 }
 
@@ -132,11 +85,11 @@
 
 #if kDebug
 
-- (BOOL)connection:(DCURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
+- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
     return YES;
 }
 
-- (void)connection:(DCURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
     [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
     
     [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
@@ -144,7 +97,7 @@
 
 #endif
 
-- (void)connection:(DCURLConnection *)connection didReceiveData:(NSData *)data {
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     if (self.receivedData==nil) {
         self.receivedData = [[[NSMutableData alloc] init] autorelease];
     }
@@ -153,32 +106,32 @@
     
 }
 
-- (void)connectionDidFinishLoading:(DCURLConnection *)connection {
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     
-    [self.delegate didReceiveResponse:self.receivedData];
+    [self.delegate didReceiveResponse:self.receivedData forIdentifier:self.identifier];
     if ([(UIViewController *)self.delegate respondsToSelector:@selector(storeResponse:forCallType:)]) {
-        [self.delegate storeResponse:self.receivedData forCallType:connection.callType];
+        [self.delegate storeResponse:self.receivedData forIdentifier:self.identifier];
     }
 }
 
-- (void)connection:(DCURLConnection *)connection didFailWithError:(NSError *)error {
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
 #if kDebug
     NSLog(@"ERROR: %@", [error description]);
 #endif
-    [self.delegate serviceDidFailWithError:error];
+    [self.delegate serviceDidFailWithError:error forIdentifier:self.identifier];
 }
 
 - (void)cancelHTTPService {
     [self.connection cancel];
 }
 
-- (void) connection:(DCURLConnection *)connection didReceiveResponse:(NSURLResponse *)response{
+- (void) connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response{
     NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
     int code = [httpResponse statusCode];
     [self.delegate responseCode:code];
     
 }
-#pragma mark -
+#pragma mark - 
 
 
 - (void)dealloc {
@@ -189,6 +142,7 @@
     [headersDictionary release];
     [bodyString release];
     [bodyData release];
+    [request release];
     [super dealloc]; 
 }
 

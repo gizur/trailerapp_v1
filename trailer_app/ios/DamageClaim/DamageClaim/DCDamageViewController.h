@@ -2,12 +2,14 @@
 //  DCDamageViewController.h
 //  DamageClaim
 //
-//  Created by Dev on 13/08/12.
+//  Created by Dev on 18/08/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
 
-@interface DCDamageViewController : UIViewController<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@interface DCDamageViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
 
+
+-(id) initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil reportedDamageDetails:(NSMutableArray *) reportedDamageDetailArrayOrNil;
 @end

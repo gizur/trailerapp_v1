@@ -8,8 +8,20 @@
 
 #import <UIKit/UIKit.h>
 
-@interface DCPickListViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
+@protocol DCPickListViewControllerDelegate <NSObject>
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArray storageKey:(NSString *)key;
+@required
+-(void) pickListDidPickItem:(id) item ofType:(NSInteger) type;
+-(void) pickListDidPickItems:(NSArray *)items ofType:(NSInteger)type;
+
+@end
+
+@interface DCPickListViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
+@property (assign, nonatomic) id<DCPickListViewControllerDelegate> delegate;
+
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArrayOrNil storageKey:(NSString *)key isSingleValue:(BOOL) singleValue;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil modelArray:(NSArray *)modelArrayOrNil type:(NSInteger)type isSingleValue:(BOOL) singleValue;
 
 @end

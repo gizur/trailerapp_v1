@@ -7,21 +7,21 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DCURLConnection.h"
-#import "MBProgressHUD.h"
 #import "Const.h"
 
 @protocol HTTPServiceDelegate
 - (void)responseCode:(int)code;
--(void) storeResponse:(NSData *)data forCallType:(DC_URL_CALL_TYPE)callType;
+-(void) storeResponse:(NSData *)data forIdentifier:(NSString *) identifier;
 
 @required
-- (void)didReceiveResponse :(NSData *)data ;
+- (void)didReceiveResponse :(NSData *)data forIdentifier:(NSString *) identifier;
 @required
-- (void)serviceDidFailWithError : (NSError *)error ;
+- (void)serviceDidFailWithError : (NSError *)error forIdentifier:(NSString *) identifier;
 
 
 @end
+
+#define TIMEOUT_INTERVAL 45
 
 typedef enum {
     kRequestMethodGET,
@@ -35,34 +35,30 @@ typedef enum {
     kServerConnectionError
 }ConnectionError;
 
-#define ERROR_DOMAIN @"error.networkstatus.plunk"
-
 @interface HTTPService : NSObject
 
-@property(nonatomic, retain) NSMutableData *receivedData;
-@property(nonatomic, retain) DCURLConnection *connection;
-@property(nonatomic, assign) id<HTTPServiceDelegate>delegate;
-@property(nonatomic, retain) NSString *serviceURLString;
-@property(nonatomic, retain) NSMutableDictionary *headersDictionary;
-@property(nonatomic, retain) NSString *bodyString;
+@property (nonatomic, retain) NSMutableData *receivedData;
+@property (nonatomic, retain) NSURLConnection *connection;
+@property (nonatomic, assign) id<HTTPServiceDelegate>delegate;
+@property (nonatomic, retain) NSString *serviceURLString;
+@property (nonatomic, retain) NSMutableDictionary *headersDictionary;
+@property (nonatomic, retain) NSString *bodyString;
+@property (nonatomic, retain) NSMutableURLRequest *request;
+@property (nonatomic, retain) NSString *identifier;
+
 //the bodyString when converted to NSData is stored here.
 //The dev can also set the data directly
 @property (nonatomic, retain) NSData *bodyData;
+
 @property(nonatomic) BOOL isPOST;
 @property(nonatomic) RequestMethod serviceRequestMethod;
-@property(nonatomic) DC_URL_CALL_TYPE callType;
 
 - (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
                delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod;
 
-- (id)initWithURLString : (NSString *)urlString callType:(DC_URL_CALL_TYPE)serviceCallType headers : (NSDictionary *)headers body : (NSString *)body 
-               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod;
+- (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
+               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod identifier:(NSString *)iden;
 
-- (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers bodyData : (NSData *)data 
-               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod;
-
-- (id)initWithURLString : (NSString *)urlString callType:(DC_URL_CALL_TYPE)serviceCallType headers : (NSDictionary *)headers bodyData : (NSData *)data 
-               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod;
 
 - (void)startService;
 - (void)cancelHTTPService ;

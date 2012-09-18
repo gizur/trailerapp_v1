@@ -1,20 +1,22 @@
 //
-//  DCDamageModel.m
+//  DCDamageDetailModel.m
 //  DamageClaim
 //
 //  Created by Dev on 19/08/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "DCDamageModel.h"
+#import "DCDamageDetailModel.h"
 
-@implementation DCDamageModel
+@implementation DCDamageDetailModel
 @synthesize damageType = _damageType;
 @synthesize damagePosition = _damagePosition;
-@synthesize damageImages = _damageImages;
+@synthesize damageImagePaths = _damageImagePaths;
+@synthesize damageThumbnailImagePaths = _damageThumbnailImagePaths;
 
 -(void) dealloc {
-    [_damageImages release];
+    [_damageImagePaths release];
+    [_damageThumbnailImagePaths release];
     [_damagePosition release];
     [_damageType release];
     [super dealloc];

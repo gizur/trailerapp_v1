@@ -2,29 +2,32 @@
 //  DCDamageListViewController.m
 //  DamageClaim
 //
-//  Created by Dev on 18/08/12.
+//  Created by Dev on 29/08/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
-//  This class shows the list of 
-//  all the damages filed for a particular truck
+//
 
 #import "DCDamageListViewController.h"
 
-#import "DCDamageModel.h"
+#import "DCDamageDetailModel.h"
 
 #import "Const.h"
 
 #import "DCDamageViewController.h"
 
+
 @interface DCDamageListViewController ()
 @property (retain, nonatomic) IBOutlet UITableView *damageTableView;
-@property (nonatomic, retain) NSMutableArray *modelArray;
+@property (nonatomic, retain) NSMutableArray *damageListModelArray;
+
+-(void) customizeNavigationBar;
+-(void) logout;
+-(void) submitDamageReport;
 
 @end
 
 @implementation DCDamageListViewController
 @synthesize damageTableView = _damageTableView;
-@synthesize modelArray = _modelArray;
-
+@synthesize damageListModelArray = _damageListModelArray;
 
 #pragma mark - View LifeCycle methods
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -40,49 +43,50 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    
     //fill array with dummy values
-    self.modelArray = [[[NSMutableArray alloc] init] autorelease];
+    self.damageListModelArray = [[[NSMutableArray alloc] init] autorelease];
+    
+    [self customizeNavigationBar];
     
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
-    damageModel.damageType = @"Type: Door";
-    damageModel.damagePosition = @"Position: Right Side";
-    [self.modelArray addObject:damageModel];
+        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
+        damageModel.damageType = @"9 Damages Reported";
+        damageModel.damagePosition = @"2 Days ago";
+        [self.damageListModelArray addObject:damageModel];
     }
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
-    damageModel.damageType = @"Type: Lighting";
-    damageModel.damagePosition = @"Position: Rear Side";
-    [self.modelArray addObject:damageModel];
+        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
+        damageModel.damageType = @"2 Damages Reported";
+        damageModel.damagePosition = @"11 Days ago";
+        [self.damageListModelArray addObject:damageModel];
     }
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
-    damageModel.damageType = @"Type: Chasis";
-    damageModel.damagePosition = @"Position: Right Side";
-    [self.modelArray addObject:damageModel];
+        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
+        damageModel.damageType = @"7 Damages Reported";
+        damageModel.damagePosition = @"15 Days ago";
+        [self.damageListModelArray addObject:damageModel];
     }
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
-    damageModel.damageType = @"Type: Bumper";
-    damageModel.damagePosition = @"Position: Front Side";
-    [self.modelArray addObject:damageModel];
+        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
+        damageModel.damageType = @"3 Damages Reported";
+        damageModel.damagePosition = @"2 Months ago";
+        [self.damageListModelArray addObject:damageModel];
     }
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
-    damageModel.damageType = @"Type: Lighting";
-    damageModel.damagePosition = @"Position: Front Side";
-    [self.modelArray addObject:damageModel];
+        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
+        damageModel.damageType = @"1 Damage Reported";
+        damageModel.damagePosition = @"6 Months ago";
+        [self.damageListModelArray addObject:damageModel];
     }
     {
-    DCDamageModel *damageModel = [[[DCDamageModel alloc] init] autorelease];
-    damageModel.damageType = @"Type: Indicator";
-    damageModel.damagePosition = @"Position: Left Side";
-    [self.modelArray addObject:damageModel];
+        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
+        damageModel.damageType = @"5 Damages Reported";
+        damageModel.damagePosition = @"2 Years ago";
+        [self.damageListModelArray addObject:damageModel];
     }
     
 #if kDebug
-    for (DCDamageModel *damage in self.modelArray) {
+    for (DCDamageDetailModel *damage in self.damageListModelArray) {
         NSLog(@"%@", damage.damageType);
     }
     
@@ -93,39 +97,61 @@
 
 - (void)viewDidUnload
 {
-    [self setDamageTableView:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
 }
-
-
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)dealloc {
+-(void) dealloc {
     [_damageTableView release];
-    [_modelArray release];
+    [_damageListModelArray release];
     [super dealloc];
+
+}
+
+#pragma mark - Others
+-(void) customizeNavigationBar {
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+}
+
+-(void) logout {
+    
+}
+
+
+//sends the damage report to the server
+-(void) submitDamageReport {
+    
 }
 
 #pragma mark - UITableViewDataSource methods
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    return 2;
 }
 
 - (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (self.modelArray) {
-        return [self.modelArray count];
+    switch (section) {
+        case 0:
+            return 1;
+            break;
+        case 1:
+            if (self.damageListModelArray) {
+                return [self.damageListModelArray count];
+            }
+        default:
+            break;
     }
+    
     return 0;
 }
 
 -(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    if (section == 0) {
+    if (section == 1) {
         return NSLocalizedString(@"REPORTED_DAMAGES", @"");
     }
     return @"";
@@ -134,7 +160,7 @@
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     UITableViewCell *cell;
-    if (indexPath.row == 0) {
+    if (indexPath.section == 0) {
         cell = [tableView dequeueReusableCellWithIdentifier:@"SimpleCell"];
     } else {
         cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
@@ -142,7 +168,7 @@
     
     
     if (!cell) {
-        if (indexPath.row == 0) {
+        if (indexPath.section == 0) {
             NSArray *customCellAddNewItemView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellAddNewItemView" owner:nil options:nil];
             if (customCellAddNewItemView) {
                 if ([customCellAddNewItemView count] > 0) {
@@ -151,19 +177,19 @@
             }
         } else {
             cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Cell"] autorelease];
-
+            
         }
     }
     
     cell.selectionStyle = UITableViewCellSelectionStyleGray;
     
-    if (indexPath.row == 0) {
+    if (indexPath.section == 0) {
         UILabel *titleLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_LABEL_ADD_NEW_ITEM_TAG];
         titleLabel.text = NSLocalizedString(@"REPORT_NEW_DAMAGE", @"");
-    } else if (indexPath.row < [self.modelArray count]) {
+    } else if (indexPath.row < [self.damageListModelArray count]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         
-        DCDamageModel *damageModel = [self.modelArray objectAtIndex:indexPath.row];
+        DCDamageDetailModel *damageModel = [self.damageListModelArray objectAtIndex:indexPath.row];
         
         cell.textLabel.text = @"";
         if (damageModel.damageType) {
@@ -178,12 +204,22 @@
     return cell;
 }
 
+#pragma mark -
+//TODO: Uncomment the else part
 #pragma mark - UITableViewDelegate methods
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.row == 0) {
+    if (indexPath.section == 0) {
         DCDamageViewController *damageViewController = [[[DCDamageViewController alloc] initWithNibName:@"DamageView" bundle:nil] autorelease];
         [self.navigationController pushViewController:damageViewController animated:YES];
+    } else {
+//        if (indexPath.row < [self.damageListModelArray count]) {
+//            DCDamageViewController *damageViewController = [[[DCDamageViewController alloc] initWithNibName:@"DamageView" bundle:nil reportedDamageDetails:[self.damageListModelArray objectAtIndex:indexPath.row]] autorelease];
+//            [self.navigationController pushViewController:damageViewController animated:YES];
+//        }
+        
     }
 }
+
+
 
 @end

@@ -42,3 +42,9 @@
 "ADD_NEW_IMAGE" = "Add a new image";
 "REPORT_NEW_DAMAGE" = "Report a new damage";
 "REPORTED_DAMAGES" = "Reported Damages";
+"LOGOUT" = "Logout";
+
+
+
+"DAMAGE_DETAILS" = "Damage Details";
+"ADD_NEW_DAMAGE_DETAIL" = "Add New Damage Detail";

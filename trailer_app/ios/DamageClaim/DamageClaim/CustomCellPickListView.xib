@@ -42,7 +42,7 @@
 						<array class="NSMutableArray" key="NSSubviews">
 							<object class="IBUILabel" id="186407300">
 								<reference key="NSNextResponder" ref="291246706"/>
-								<int key="NSvFlags">292</int>
+								<int key="NSvFlags">262</int>
 								<string key="NSFrame">{{20, 0}, {237, 43}}</string>
 								<reference key="NSSuperview" ref="291246706"/>
 								<reference key="NSWindow"/>
@@ -82,18 +82,17 @@
 							</object>
 							<object class="IBUIImageView" id="790260297">
 								<reference key="NSNextResponder" ref="291246706"/>
-								<int key="NSvFlags">-2147483356</int>
-								<string key="NSFrame">{{275.5, 12}, {15, 20}}</string>
+								<int key="NSvFlags">-2147483351</int>
+								<string key="NSFrame">{{280, 12}, {20, 20}}</string>
 								<reference key="NSSuperview" ref="291246706"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:9</string>
 								<int key="IBUITag">-2</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<object class="NSCustomResource" key="IBUIImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">flag.png</string>
+									<string key="NSResourceName">check.png</string>
 								</object>
 							</object>
 						</array>
@@ -189,8 +188,8 @@
 		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
 		<object class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
-			<string key="NS.key.0">flag.png</string>
-			<string key="NS.object.0">{18, 26}</string>
+			<string key="NS.key.0">check.png</string>
+			<string key="NS.object.0">{18, 19}</string>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">1179</string>
 	</data>

@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DCPickListViewController.h"
 
-@interface DCSurveyViewController : UIViewController<UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate>
+@interface DCSurveyViewController : UIViewController<UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, DCPickListViewControllerDelegate>
 
 @end
