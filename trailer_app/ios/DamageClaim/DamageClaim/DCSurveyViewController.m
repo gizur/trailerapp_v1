@@ -168,9 +168,44 @@
     //make a dictionary of post data
     NSMutableDictionary *bodyDict = [[[NSMutableDictionary alloc] init] autorelease];
 #warning Fetch this from the pick list
-    [bodyDict setValue:@"No" forKey:@"reportdamage"];
+    
+    NSDictionary *reportDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_REPORTDAMAGE];
+    if (reportDamageDict) {
+        NSString *reportDamageNoValue = [reportDamageDict valueForKey:@"No"];
+#if kDebug
+        NSLog(@"%@", reportDamageNoValue);
+#endif
+        if (reportDamageDict) {
+            [bodyDict setValue:reportDamageNoValue forKey:@"reportdamage"];
+        } else {
+            [bodyDict setValue:@"No" forKey:@"reportdamage"];
+        }
+    } else {
+        [bodyDict setValue:@"No" forKey:@"reportdamage"];
+    }
+    
+    
+    
+    
 #warning Fetch this from the pick list
-    [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
+    
+    
+    NSDictionary *ticketStatusDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_TICKETSTATUS];
+    if (ticketStatusDict) {
+        NSString *ticketStatusClosedValue = [ticketStatusDict valueForKey:@"Closed"];
+#if kDebug
+        NSLog(@"%@, %@", ticketStatusDict, ticketStatusClosedValue);
+#endif
+        if (ticketStatusClosedValue) {
+            [bodyDict setValue:ticketStatusClosedValue forKey:@"ticketstatus"];
+        } else {
+            [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
+        }
+    } else {
+        [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
+    }
+
+    
     NSString *ticketTitle = @"";
     if ([[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]) {
         ticketTitle = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"SURVEY_TICKET_TITLE", @""), [[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]];
@@ -188,7 +223,21 @@
     
 #warning Fetch this from the pick list
     if (self.surveyModel.surveyTrailerSealed) {
-        [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
+        NSDictionary *sealedDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_SEALED];
+        if (sealedDict) {
+            NSString *sealedYesValue = [reportDamageDict valueForKey:@"Yes"];
+            NSString *sealedNoValue = [reportDamageDict valueForKey:@"No"];
+#if kDebug
+            NSLog(@"%@ %@", sealedYesValue, sealedNoValue);
+#endif
+            if (sealedDict) {
+                [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?sealedYesValue:sealedNoValue forKey:@"sealed"];
+            } else {
+                [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
+            }
+        } else {
+            [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
+        }
     }
     
     if (self.surveyModel.surveyPlates) {
@@ -322,28 +371,28 @@
 
 -(void) toggleActionButtons {
     if (!self.surveyModel.surveyTrailerId) {
-        [self.navigationItem.rightBarButtonItem setEnabled:NO];
+        //[self.navigationItem.rightBarButtonItem setEnabled:NO];
         [self.submitToolBarButton setEnabled:NO];
     } else {
-        [self.navigationItem.rightBarButtonItem setEnabled:YES];
+        //[self.navigationItem.rightBarButtonItem setEnabled:YES];
         [self.submitToolBarButton setEnabled:YES];
     }
 }
 
 -(void) loadPickLists {
-//    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_TICKETSTATUS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
-//    
-//    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_SEALED requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
-//    
-//    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
-//    
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_TICKETSTATUS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+    
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_SEALED requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+    
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+    
 }
 
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     if (responseString) {
         NSDictionary *jsonDict = [responseString objectFromJSONString];
         if ([identifier isEqualToString:HELPDESK_TICKETSTATUS]) {
-            if ((NSNull *)[jsonDict valueForKey:SUCCESS]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
                 if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSArray *resultArray = [jsonDict valueForKey:@"result"];
@@ -365,18 +414,24 @@
                         NSString *errorCode = [errorDict valueForKey:@"code"];
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                //timestamp is adjusted. call the same url again
+                                [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_TICKETSTATUS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                             }
+                        } else {
+                            [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
                         }
                     }
+                } else {
+                    [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
                 }
             }
         }
         
         
         if ([identifier isEqualToString:HELPDESK_SEALED]) {
-            if ((NSNull *)[jsonDict valueForKey:SUCCESS]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
                 if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSArray *resultArray = [jsonDict valueForKey:@"result"];
@@ -399,18 +454,24 @@
                         NSString *errorCode = [errorDict valueForKey:@"code"];
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                //timestamp is adjusted. call the same url again
+                                [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //timestamp is adjusted. call the same url again
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_SEALED requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                             }
+                        } else {
+                            [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
                         }
                     }
+                } else {
+                    [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
                 }
             }
         }
         
         
         if ([identifier isEqualToString:HELPDESK_REPORTDAMAGE]) {
-            if ((NSNull *)[jsonDict valueForKey:SUCCESS]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
                 if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSArray *resultArray = [jsonDict valueForKey:@"result"];
@@ -432,18 +493,25 @@
                         NSString *errorCode = [errorDict valueForKey:@"code"];
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                //timestamp is adjusted. call the same url again
+                                [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                
+                                //timestamp is adjusted. call the same url again
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                             }
+                        } else {
+                            [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
                         }
                     }
+                } else {
+                    [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
                 }
             }
         }
         
         
         if ([identifier isEqualToString:HELPDESK]) {
-            if ((NSNull *)[jsonDict valueForKey:SUCCESS]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
                 if (![(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
                     if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
                         NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
@@ -451,9 +519,14 @@
                             NSString *errorCode = [errorDict valueForKey:@"code"];
                             if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                                 if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                                    [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                    //timestamp is adjusted. call the same url again
+                                    [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                    //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                    
+                                    //timestamp is adjusted. call the same url again
                                     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                                 }
+                            } else {
+                                [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
                             }
                         }
                     }
@@ -462,7 +535,7 @@
         }
         
         if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-            if ((NSNull *)[jsonDict valueForKey:SUCCESS]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
                 if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
                     [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_NAME];
                     [[NSUserDefaults standardUserDefaults] removeObjectForKey:PASSWORD];
@@ -480,7 +553,17 @@
                     }
                     
                     [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_LOGGED_IN];
-                    [self.navigationController popViewControllerAnimated:YES];
+#if kDebug
+                    NSLog(@"%@", self.navigationController);
+#endif
+                    id parentViewController = [self.navigationController parentViewController];
+                    if ([parentViewController isKindOfClass:[DCLoginViewController class]]) {
+                        [self.navigationController popViewControllerAnimated:YES];
+                    } else {
+                        DCLoginViewController *loginViewController = [[[DCLoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
+                        [self.navigationController pushViewController:loginViewController animated:YES];
+                    }
+                    
 
                 } else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
                     NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
@@ -488,11 +571,18 @@
                         NSString *errorCode = [errorDict valueForKey:@"code"];
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                //timestamp is adjusted. call the same url again
+                                [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //timestamp is adjusted. call the same url again
+                                
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                             }
+                        } else {
+                            [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
                         }
                     }
+                } else {
+                    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                 }
             }
         }
@@ -622,7 +712,7 @@
 }
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    [DCSharedObject hideProgressDialogInView:self.view];
     NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 #if kDebug
     NSLog(@"%@: %@", identifier, responseString);
@@ -637,7 +727,7 @@
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    [DCSharedObject hideProgressDialogInView:self.view];
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else {

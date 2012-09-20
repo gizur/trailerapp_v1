@@ -263,8 +263,8 @@
                     NSString *errorCode = [errorDict valueForKey:@"code"];
                     if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                         if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                            [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                            
-                             //timestamp is adjusted. call the same url again
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                            //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                             //timestamp is adjusted. call the same url again
                             
                             if ([identifier isEqualToString:ASSETS]) {
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];                            }
@@ -277,6 +277,8 @@
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGETYPE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                             }
                         }
+                    } else {
+                        [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
                     }
                 }
             } else {
@@ -364,7 +366,7 @@
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    [DCSharedObject hideProgressDialogInView:self.view];
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else {

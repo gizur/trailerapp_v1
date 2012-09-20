@@ -226,8 +226,14 @@
                 
                 [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES] forKey:USER_LOGGED_IN];
                 
-                DCSurveyViewController *surveyViewController = [[[DCSurveyViewController alloc] initWithNibName:@"SurveyView" bundle:nil] autorelease];
-                [self.navigationController pushViewController:surveyViewController animated:YES];
+                id parentViewController = [self.navigationController parentViewController];
+                if ([parentViewController isKindOfClass:[DCSurveyViewController class]]) {
+                    [self.navigationController popViewControllerAnimated:YES];
+                } else {
+                    DCSurveyViewController *surveyViewController = [[[DCSurveyViewController alloc] initWithNibName:@"SurveyView" bundle:nil] autorelease];
+                    [self.navigationController pushViewController:surveyViewController animated:YES];
+                }
+                
                 
                 
             } else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
@@ -236,10 +242,13 @@
                     NSString *errorCode = [errorDict valueForKey:@"code"];
                     if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                         if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                            [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                            //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
                             //timestamp is adjusted. call the same url again
                             [self login:nil];
                         }
+                    } else {
+                        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INVALID_LOGIN", @"")];
                     }
                 }
             }

@@ -28,10 +28,15 @@
     }
     if (username && password) {
         
+        //generate a random number and save it as unique salt
+        NSInteger randomNumber = arc4random();
+        NSString *randomNumberString = [NSString stringWithFormat:@"%d", randomNumber];
+        [[[DCSharedObject sharedPreferences] preferences] setValue:randomNumberString forKey:UNIQUE_SALT];
+        
         NSDate *timestamp = [NSDate date];
         
-        if ([[NSUserDefaults standardUserDefaults] valueForKey:TIME_DIFFERENCE]) {
-            NSInteger timeDifference = [(NSNumber *)[[NSUserDefaults standardUserDefaults] valueForKey:TIME_DIFFERENCE] intValue];
+        if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:TIME_DIFFERENCE]) {
+            NSInteger timeDifference = [(NSNumber *)[[[DCSharedObject sharedPreferences] preferences] valueForKey:TIME_DIFFERENCE] intValue];
 #if kDebug
             NSLog(@"Timestamp: %d", timeDifference);
             NSLog(@"oldDate in requestHeaders: %@", [DCSharedObject strFromISO8601:timestamp]);
@@ -56,6 +61,7 @@
                                               password, X_PASSWORD, 
                                               timestampString, X_TIMESTAMP, 
                                               apiKey, X_GIZUR_API_KEY, 
+                                              randomNumberString, X_UNIQUE_SALT,
                                               @"sv,en-us,en;q=0.5", @"Accept-Language", 
                                               nil];
             return headerDictionary;

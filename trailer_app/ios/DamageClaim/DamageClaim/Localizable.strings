@@ -63,4 +63,7 @@
 "INVALID_LOGIN" = "Could not verify your identity. Please note that you've to open this app from the link given to you via text/mail for the first time. If you've already done so, please contact your company.";
 "SURVEY_TICKET_TITLE" = "Survey ticket by";
 "DAMAGE_TICKET_TITLE" = "Damage report by";
-"IMAGE_LOADING_ERROR" = "Could not load some images";
+"IMAGE_LOADING_ERROR" = "Could not load an image. Please try again.";
+"TRAILER_ID_NULL_ERROR" = "Please choose a trailer-id first.";
+"SURVEY" = "Survey";
+"DAMAGES" = "Damages";

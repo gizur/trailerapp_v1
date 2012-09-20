@@ -21,9 +21,6 @@
 
 
 -(void) dealloc {
-#if kDebug
-    NSLog(@"Deallocating surveyPlates: %p", _surveyPlates);
-#endif
     [_surveyPlace release];
     [_surveyPlates release];
     [_surveyStraps release];

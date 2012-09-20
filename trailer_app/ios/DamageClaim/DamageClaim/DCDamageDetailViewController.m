@@ -242,12 +242,17 @@
                         NSString *errorCode = [errorDict valueForKey:@"code"];
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
                                 //timestamp is adjusted. call the same url again
                                 [self getDamageDetail];
                             }
+                        } else {
+                            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                         }
                     }
+                } else {
+                    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                 }
             }
         }
@@ -277,6 +282,15 @@
                         }
                     }
                     
+                } else {
+                    //remove an item from the indicator array
+                    if (self.documentIdArray) {
+                        if ([self.documentIdArray count] > 0) {
+                            [self.documentIdArray removeObjectAtIndex:0];
+                        }
+                    }
+                    [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
+                    
                 }
             }
         }
@@ -301,6 +315,10 @@
     for (NSString *headerKey in [RequestHeaders commonHeaders]) {
         [request setValue:[[RequestHeaders commonHeaders] objectForKey:headerKey] forHTTPHeaderField:headerKey];
     }
+    
+#if kDebug
+    NSLog(@"headers: %@", [RequestHeaders commonHeaders]);
+#endif
     
     
     NSString *signature = [DCSharedObject generateSignatureFromModel:DOCUMENTATTACHMENTS requestType:@"GET"];
@@ -327,10 +345,11 @@
         }
         if (response) {
             NSString *responseString = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
-            if ([(NSHTTPURLResponse *)response statusCode] != 200) {
 #if kDebug
-                NSLog(@"here: %@", responseString);
+            NSLog(@"here: %@", responseString);
 #endif
+            
+            if ([(NSHTTPURLResponse *)response statusCode] != 200) {
 
                 [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
                 //image was not loaded remove a row from the model array of the table
@@ -341,13 +360,14 @@
                         [self.documentIdArray removeObjectAtIndex:0];
                     }
                 }
+                [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
                 return;
             } else {
                 [self parseResponse:responseString forIdentifier:DOCUMENTATTACHMENTS_ID];
             }
         }
-        [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
     }
+    [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
 }
 
 -(void) getImages {
@@ -369,7 +389,7 @@
 }
 
 -(void) showError {
-    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
 }
 
 -(void) updateUI {
@@ -459,7 +479,7 @@
         NSLog(@"%@", [image description]);
 #endif
         if (image) {
-            NSData *imageData = UIImageJPEGRepresentation(image, 1.0f);
+            NSData *imageData = UIImageJPEGRepresentation(image, 0.5f);
             
             UIImage *thumbnailImage = [image thumbnailImage:THUMBNAIL_IMAGE_SIZE transparentBorder:0 cornerRadius:0 interpolationQuality:kCGInterpolationLow];
 #if kDebug
@@ -561,7 +581,7 @@
 }
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    [DCSharedObject hideProgressDialogInView:self.view];
     NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 #if kDebug
     NSLog(@"%@", responseString);
@@ -577,7 +597,7 @@
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    [DCSharedObject hideProgressDialogInView:self.view];
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else {
@@ -933,8 +953,30 @@
                 if (indexPath.row < [self.imagesArray count]) {
                     DCImageViewerViewController *viewer = [[[DCImageViewerViewController alloc] initWithNibName:@"ImageViewerView" bundle:nil image:[self.imagesArray objectAtIndex:indexPath.row]] autorelease];
                     [self.navigationController pushViewController:viewer animated:YES];
+                } else {
+                    [self.damageTableView deselectRowAtIndexPath:indexPath animated:NO];
+                    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+                    UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG];
+                    NSArray *imageArray = [NSArray arrayWithObjects:
+                                           [UIImage imageNamed:@"1.tiff"],
+                                           [UIImage imageNamed:@"2.tiff"], 
+                                           [UIImage imageNamed:@"3.tiff"], 
+                                           [UIImage imageNamed:@"4.tiff"], 
+                                           [UIImage imageNamed:@"5.tiff"], 
+                                           [UIImage imageNamed:@"6.tiff"], 
+                                           [UIImage imageNamed:@"7.tiff"], 
+                                           [UIImage imageNamed:@"8.tiff"], 
+                                           [UIImage imageNamed:@"9.tiff"], 
+                                           [UIImage imageNamed:@"10.tiff"], 
+                                           nil];
+                    
+                    imageView.animationImages = imageArray;
+                    imageView.animationDuration = 0.5;
+                    [imageView startAnimating];
+                    
                 } 
             } else {
+                [self.damageTableView deselectRowAtIndexPath:indexPath animated:NO];
                 UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
                 UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG];
                 NSArray *imageArray = [NSArray arrayWithObjects:

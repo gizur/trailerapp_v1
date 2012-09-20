@@ -31,8 +31,8 @@ typedef enum {
 
 typedef enum {
     kNetworkConnectionError = -1009,
-    kServerTimeOutError = -1001,
     kHostUnreachableError = -1004,
+    kServerTimeOutError = -1001,
     kServerConnectionError
 }ConnectionError;
 

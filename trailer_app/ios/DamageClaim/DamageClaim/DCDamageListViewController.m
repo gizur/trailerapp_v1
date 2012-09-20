@@ -203,9 +203,13 @@
 }
 
 -(void) submitDamageReport {
-    [self disableActions];
-    self.submittingDamageIndex = 0;
-    [self submitDamageReportAtIndex:self.submittingDamageIndex];
+    if (!self.surveyModel.surveyTrailerId) {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
+    } else {
+        [self disableActions];
+        self.submittingDamageIndex = 0;
+        [self submitDamageReportAtIndex:self.submittingDamageIndex];
+    }
 }
 
 //sends the damage report to the server
@@ -217,10 +221,36 @@
             NSMutableDictionary *bodyDict = [[[NSMutableDictionary alloc] init] autorelease];
 #warning Fetch this from the pick list
 
-            [bodyDict setValue:@"Yes" forKey:@"reportdamage"];
+            NSDictionary *reportDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_REPORTDAMAGE];
+            if (reportDamageDict) {
+                NSString *reportDamageNoValue = [reportDamageDict valueForKey:@"Yes"];
+#if kDebug
+                NSLog(@"%@", reportDamageNoValue);
+#endif
+                if (reportDamageDict) {
+                    [bodyDict setValue:reportDamageNoValue forKey:@"reportdamage"];
+                } else {
+                    [bodyDict setValue:@"Yes" forKey:@"reportdamage"];
+                }
+            } else {
+                [bodyDict setValue:@"Yes" forKey:@"reportdamage"];
+            }
 #warning Fetch this from the pick list
 
-            [bodyDict setValue:@"Open" forKey:@"ticketstatus"];
+            NSDictionary *ticketStatusDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_TICKETSTATUS];
+            if (ticketStatusDict) {
+                NSString *ticketStatusOpenValue = [ticketStatusDict valueForKey:@"Open"];
+#if kDebug
+                NSLog(@"%@, %@", ticketStatusDict, ticketStatusOpenValue);
+#endif
+                if (ticketStatusOpenValue) {
+                    [bodyDict setValue:ticketStatusOpenValue forKey:@"ticketstatus"];
+                } else {
+                    [bodyDict setValue:@"Open" forKey:@"ticketstatus"];
+                }
+            } else {
+                [bodyDict setValue:@"Open" forKey:@"ticketstatus"];
+            }
             
             NSString *ticketTitle = @"";
             if ([[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]) {
@@ -239,7 +269,21 @@
 #warning Fetch this from the pick list
 
             if (damageDetailModel.surveyModel.surveyTrailerSealed) {
-                [bodyDict setValue:[damageDetailModel.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
+                NSDictionary *sealedDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_SEALED];
+                if (sealedDict) {
+                    NSString *sealedYesValue = [reportDamageDict valueForKey:@"Yes"];
+                    NSString *sealedNoValue = [reportDamageDict valueForKey:@"No"];
+#if kDebug
+                    NSLog(@"%@ %@", sealedYesValue, sealedNoValue);
+#endif
+                    if (sealedDict) {
+                        [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?sealedYesValue:sealedNoValue forKey:@"sealed"];
+                    } else {
+                        [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
+                    }
+                } else {
+                    [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
+                }
             }
             
             if (damageDetailModel.surveyModel.surveyPlates) {
@@ -426,6 +470,9 @@
 }
 
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
+#if kDebug
+    NSLog(@"Parse started for identifier: %@", identifier);
+#endif
     if (responseString) {
         NSDictionary *jsonDict = [responseString objectFromJSONString];
         if ([identifier isEqualToString:HELPDESK_DAMAGED]) {
@@ -441,10 +488,20 @@
                         NSArray *resultsArray = [jsonDict valueForKey:@"result"];
                         for (NSDictionary *damageDict in resultsArray) {
                             DCDamageDetailModel *damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
-                            if ((NSNull *)[damageDict valueForKey:@"id"]) {
+#if kDebug
+                            NSLog(@"parsing id: %@", damageDict);
+#endif
+
+                            if ((NSNull *)[damageDict valueForKey:@"id"] != [NSNull null]) {
+#if kDebug
+                                NSLog(@"%@", [damageDict valueForKey:@"id"]);
+#endif
                                 damageDetailModel.damageId = [damageDict valueForKey:@"id"];
                             }
-                            
+#if kDebug
+                            NSLog(@"id parsed");
+#endif
+
                             if ((NSNull *)[damageDict valueForKey:@"trailerid"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
                                     damageDetailModel.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
@@ -452,6 +509,10 @@
                                 }
                                 damageDetailModel.surveyModel.surveyTrailerId = [damageDict valueForKey:@"trailerid"];
                             }
+#if kDebug
+                            NSLog(@"trailer id parsed");
+#endif
+
                             
                             if ((NSNull *)[damageDict valueForKey:@"damagereportlocation"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
@@ -461,6 +522,10 @@
                                 damageDetailModel.surveyModel.surveyPlace = [damageDict valueForKey:@"damagereportlocation"];
 
                             }
+#if kDebug
+                            NSLog(@"damage report location parsed");
+#endif
+
                             
                             //sealed is received as a string and converted to NSNumber
                             if ((NSNull *)[damageDict valueForKey:@"sealed"] != [NSNull null]) {
@@ -472,6 +537,10 @@
                                 damageDetailModel.surveyModel.surveyTrailerSealed = [NSNumber numberWithBool:[[sealed lowercaseString] isEqualToString:@"yes"]? YES: NO];
 
                             }
+#if kDebug
+                            NSLog(@"sealed parsed");
+#endif
+
                             
                             if ((NSNull *)[damageDict valueForKey:@"plates"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
@@ -480,6 +549,11 @@
                                 damageDetailModel.surveyModel.surveyPlates = [NSNumber numberWithInt:[[damageDict valueForKey:@"plates"] intValue]];
                             }
                             
+#if kDebug
+                            NSLog(@"plates parsed");
+#endif
+
+                            
                             if ((NSNull *)[damageDict valueForKey:@"straps"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
                                     damageDetailModel.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
@@ -487,13 +561,28 @@
                                 damageDetailModel.surveyModel.surveyStraps = [NSNumber numberWithInt:[[damageDict valueForKey:@"straps"] intValue]];
                             }
                             
-                            if ((NSNull *)[damageDict valueForKey:@"damagetype"]) {
+#if kDebug
+                            NSLog(@"straps parsed");
+#endif
+
+                            
+                            if ((NSNull *)[damageDict valueForKey:@"damagetype"] != [NSNull null]) {
                                 damageDetailModel.damageType = [damageDict valueForKey:@"damagetype"];
                             }
                             
-                            if ((NSNull *)[damageDict valueForKey:@"damageposition"]) {
+#if kDebug
+                            NSLog(@"damage type parsed");
+#endif
+
+                            
+                            if ((NSNull *)[damageDict valueForKey:@"damageposition"] != [NSNull null]) {
                                 damageDetailModel.damagePosition = [damageDict valueForKey:@"damageposition"];
                             }
+                            
+#if kDebug
+                            NSLog(@"damage position parsed");
+#endif
+
                             
                             if (!self.damageListModelArray) {
                                 self.damageListModelArray = [[[NSMutableArray alloc] init] autorelease];
@@ -508,11 +597,13 @@
                         NSString *errorCode = [errorDict valueForKey:@"code"];
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];;
+                                [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
                                 //timestamp is adjusted. call the same url again
                                 [self getDamageList];
                             }
+                        } else {
+                            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERRO", @"")];
                         }
                     }
                 } else {
@@ -551,8 +642,9 @@
                         NSString *errorCode = [errorDict valueForKey:@"code"];
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                                [[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                                //timestamp is adjusted. call the same url again
+                                [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //timestamp is adjusted. call the same url again
 #if kDebug
                                 NSLog(@"s: %d, c: %d", self.submittingDamageIndex, [self.currentDamageArray count]);
 #endif
@@ -563,6 +655,8 @@
                                     [self submitDamageReportAtIndex:self.submittingDamageIndex];
                                 }
                             }
+                        } else {
+                            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERRO", @"")];
                         }
                     }
                 } else {
@@ -571,6 +665,10 @@
             }
         }
     }
+#if kDebug
+    NSLog(@"Parse Ended");
+#endif
+
     [self.damageTableView reloadData];
 }
 
@@ -589,20 +687,20 @@
 }
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    [DCSharedObject hideProgressDialogInView:self.view];
     NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 #if kDebug
     NSLog(@"%@", responseString);
 #endif
 
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
-        [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:HELPDESK_DAMAGED];
+        [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
     }
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
     if ([identifier isEqualToString:HELPDESK]) {
-        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        [DCSharedObject hideProgressDialogInView:self.view];
         if (self.submittingDamageIndex < [self.currentDamageArray count]) {
             self.submittingDamageIndex++;
             [self submitDamageReportAtIndex:self.submittingDamageIndex];
@@ -759,6 +857,9 @@
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
+#if kDebug
+    NSLog(@"Cell Started");
+#endif
     UITableViewCell *cell;
     if (self.currentDamageArray) {
         if ([self.currentDamageArray count] > 0) {
@@ -863,6 +964,10 @@
             cell.detailTextLabel.text = damageModel.damagePosition;
         }
     }
+#if kDebug
+    NSLog(@"Cell Returned");
+#endif
+
     return cell;
 }
 
@@ -872,7 +977,13 @@
     if (self.currentDamageArray) {
         if ([self.currentDamageArray count] > 0) {
             if (indexPath.section == 0) {
-                damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil isEditable:YES] autorelease];
+                if (!self.surveyModel.surveyTrailerId) { // the user can submit the damage report only after setting the trailer id.
+                    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
+                    return;
+                } else {
+                    damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil isEditable:YES] autorelease];
+                }
+                
             } else if (indexPath.section == 1) {
                 if (indexPath.row < [self.currentDamageArray count]) {
                     damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:[self.currentDamageArray objectAtIndex:indexPath.row] isEditable:YES] autorelease];
@@ -886,7 +997,12 @@
             }
         } else {
             if (indexPath.section == 0) {
-                damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil isEditable:YES] autorelease];
+                if (!self.surveyModel.surveyTrailerId) { // the user can submit the damage report only after setting the trailer id.
+                    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
+                    return;
+                } else {
+                    damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil isEditable:YES] autorelease];
+                }
                 
             } else {
                 if (self.damageListModelArray) {
@@ -899,7 +1015,15 @@
         }
     }else {
         if (indexPath.section == 0) {
-            damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil isEditable:YES] autorelease];
+            if (!self.surveyModel.surveyTrailerId) { // the user can submit the damage report only after setting the trailer id.
+#if kDebug
+                NSLog(@"%@", self.surveyModel.surveyTrailerId);
+#endif
+                [DCSharedObject showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
+                return;
+            } else {
+                damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil isEditable:YES] autorelease];
+            }
             
         } else {
             if (self.damageListModelArray) {

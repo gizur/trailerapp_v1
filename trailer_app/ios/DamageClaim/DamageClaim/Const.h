@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define kDebug TRUE
+#define kDebug FALSE
 
 #define kLocalServer FALSE
 
@@ -53,7 +53,7 @@ GET_HIVE_URL_CALL_TYPE
 #define CONTACT_NAME @"CONTACT_NAME"
 #define ACCOUNT_NAME @"ACCOUNT_NAME"
 
-
+#define UNIQUE_SALT @"UNIQUE_SALT"
 
 /////////////////////////////////////////////////////////////////////////////////
 enum ADD_PHOTO_ACTION {
@@ -158,6 +158,7 @@ enum DCPickListItemTypes {
 #define X_PASSWORD @"x_password"
 #define X_TIMESTAMP @"x_timestamp"
 #define X_GIZUR_API_KEY @"x_gizurcloud_api_key"
+#define X_UNIQUE_SALT @"x_unique_salt"
 
 #pragma mark - URL identifiers
 //URLS identifiers

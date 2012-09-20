@@ -72,6 +72,18 @@ static DCSharedObject *sharedPreferences = nil;
 
 #pragma mark - Others
 
++(void) showProgressDialogInView:(UIView *)view message:(NSString *)labelText {
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];;
+    hud.animationType = MBProgressHUDAnimationZoom;
+    hud.labelText = labelText;
+    
+}
+
++(void) hideProgressDialogInView:(UIView *)view {
+    [MBProgressHUD hideHUDForView:view animated:YES];
+}
+
+
 +(void)showAlertWithMessage:(NSString *)alertMessage
 {
 	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(alertMessage, @"") delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", @"") otherButtonTitles:nil] autorelease];
@@ -128,9 +140,11 @@ static DCSharedObject *sharedPreferences = nil;
     if (signature) {
         [[httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
         if (viewControllerOrNil) {
-            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:viewControllerOrNil.view animated:YES];
-            hud.animationType = MBProgressHUDAnimationFade;
-            hud.labelText = NSLocalizedString(@"LOADING_MESSAGE", @"");
+//            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:viewControllerOrNil.view animated:YES];
+//            hud.animationType = MBProgressHUDAnimationFade;
+//            hud.labelText = NSLocalizedString(@"LOADING_MESSAGE", @"");
+            [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
+            [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
         }
         
         [httpService startService];
@@ -188,9 +202,11 @@ static DCSharedObject *sharedPreferences = nil;
     if (signature) {
         [[httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
         if (viewControllerOrNil) {
-            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:viewControllerOrNil.view animated:YES];
-            hud.animationType = MBProgressHUDAnimationFade;
-            hud.labelText = NSLocalizedString(@"LOADING_MESSAGE", @"");
+//            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:viewControllerOrNil.view animated:YES];
+//            hud.animationType = MBProgressHUDAnimationFade;
+//            hud.labelText = NSLocalizedString(@"LOADING_MESSAGE", @"");
+            [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
+            [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
         }
         
         [httpService startService];
@@ -206,6 +222,9 @@ static DCSharedObject *sharedPreferences = nil;
 
 
 +(NSString *) keyValuePairFromDictionary:(NSDictionary *)dict {
+#if kDebug
+    NSLog(@"dict: %@", dict);
+#endif
     NSMutableString *retVal = [[[NSMutableString alloc] init] autorelease];
     if (dict) {
         for (NSString *key in dict) {
@@ -227,8 +246,8 @@ static DCSharedObject *sharedPreferences = nil;
     NSString *timestampString = [[NSUserDefaults standardUserDefaults] valueForKey:X_TIMESTAMP];
     if (!timestampString) {
         NSDate *timestamp = [NSDate date];
-        if ([[NSUserDefaults standardUserDefaults] valueForKey:TIME_DIFFERENCE]) {
-            NSInteger timeDifference = [(NSNumber *)[[NSUserDefaults standardUserDefaults] valueForKey:TIME_DIFFERENCE] intValue];
+        if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:TIME_DIFFERENCE]) {
+            NSInteger timeDifference = [(NSNumber *)[[[DCSharedObject sharedPreferences] preferences] valueForKey:TIME_DIFFERENCE] intValue];
 #if kDebug
             NSLog(@"time_diff in signature: %d", timeDifference);
 #endif
@@ -236,11 +255,19 @@ static DCSharedObject *sharedPreferences = nil;
         }
         
         timestampString = [DCSharedObject strFromISO8601:timestamp];
+        
+        //remove TIME_DIFFERENCE since using the same delta gives problems
+        //in case the system on the client side changes. Hence, every URL is hit with
+        //time_difference 0 in the beginning. TIME_DIFFERENCE is always used only once.
+        [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:TIME_DIFFERENCE];
     }
+    
+    //retrieve randomNumberString
+    NSString *randomNumberString = [[[DCSharedObject sharedPreferences] preferences] valueForKey:UNIQUE_SALT];
     NSString *publicKey = [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_KEY];
     NSString *privateKey = [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_SECRET_KEY];
     if (verb && apiVersion && timestampString && publicKey && privateKey) {
-        NSString *inputString = [NSString stringWithFormat:@"KeyID%@Model%@Timestamp%@Verb%@Version%@", publicKey, model, timestampString, verb, apiVersion];
+        NSString *inputString = [NSString stringWithFormat:@"KeyID%@Model%@Timestamp%@UniqueSalt%@Verb%@Version%@", publicKey, model, timestampString, randomNumberString, verb, apiVersion];
 #if kDebug
         NSLog(@"%@", inputString);
 #endif

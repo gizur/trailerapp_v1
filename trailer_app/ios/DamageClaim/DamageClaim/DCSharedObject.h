@@ -10,6 +10,7 @@
 
 #import "HTTPService.h"
 
+@class MBProgressHUD;
 
 @interface DCSharedObject : NSObject
 @property(nonatomic, retain) NSMutableDictionary *preferences;
@@ -25,6 +26,9 @@
 
 +(NSString *) keyValuePairFromDictionary:(NSDictionary *)dict;
 
+//when MBProgressHUD is passed as an argument
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil ProgressHUD:(MBProgressHUD *)progressHUD;
+
 //in case the body is name=value pairs
 +(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil;
 
@@ -37,4 +41,7 @@
 +(NSString *) decodeSwedishHTMLFromString:(NSString *)swedishString;
 
 +(NSString *) strFromISO8601:(NSDate *) date;
+
++(void)showProgressDialogInView:(UIView *)view message:(NSString *)labelText;
++(void)hideProgressDialogInView:(UIView *)view;
 @end
