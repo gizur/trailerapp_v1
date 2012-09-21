@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="@android:style/Theme">
+    <item name="android:windowBackground">@color/app_theme</item>
+    <item name="android:colorBackground">@color/app_theme</item>
+        
+        
+    </style>
+</resources>
+
+
+<!-- <resources> -->
+
+<!--     <style name="AppTheme" parent="android:Theme"> -->
+<!--     <item name="android:windowBackground">@color/app_theme</item> -->
+<!--     <item name="android:colorBackground">@color/app_theme</item> -->
+<!--     </style> -->
+
+<!-- </resources> -->

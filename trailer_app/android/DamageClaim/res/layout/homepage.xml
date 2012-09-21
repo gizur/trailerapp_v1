@@ -1,0 +1,249 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#F3F3F3" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <!-- SURVEY -->
+
+        <TextView
+            android:id="@+id/homepage_textview_survey"            
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:paddingLeft="10dp"
+            android:text="@string/homepage_textview_survey"
+            android:textColor="#6E6E6E"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <!-- TRAILER TYPE -->
+
+        <TextView
+            android:id="@+id/homepage_textview_trailertype"
+            android:drawableRight="@drawable/arrow_left_gif"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/homepage_textview_survey"
+            android:layout_marginTop="20dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingTop="10dp"
+            android:paddingRight="10dp"
+            android:text="@string/homepage_textview_trailertype"
+            android:textColor="#6E6E6E"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/homepage_textview_trailertype"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:background="@android:color/darker_gray" />
+
+        <!-- ID -->
+
+        <TextView
+            android:drawableRight="@drawable/arrow_left_gif"
+            android:id="@+id/homepage_textview_id"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/homepage_textview_trailertype"
+            android:layout_marginTop="20dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingTop="10dp"
+            android:paddingRight="10dp"
+            android:text="@string/homepage_textview_ID"
+            android:textColor="#6E6E6E"
+            android:textSize="20sp"
+            android:textStyle="bold" >
+        </TextView>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/homepage_textview_id"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:background="@android:color/darker_gray" />
+
+        <!-- PLACE -->
+
+        <TextView
+            android:drawableRight="@drawable/arrow_left_gif"
+            android:id="@+id/homepage_textview_place"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/homepage_textview_id"
+            android:layout_marginTop="20dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingTop="10dp"
+            android:paddingRight="10dp"
+            android:text="@string/homepage_textview_place"
+            android:textColor="#6E6E6E"
+            android:textSize="20sp"
+            android:textStyle="bold" >
+        </TextView>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/homepage_textview_place"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:background="@android:color/darker_gray" />
+
+        <!-- SEALED -->
+
+        <TextView
+            android:drawableRight="@drawable/arrow_left_gif"
+            android:id="@+id/homepage_textview_sealed"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/homepage_textview_place"
+            android:layout_marginTop="20dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingTop="10dp"
+            android:paddingRight="10dp"
+            android:text="@string/homepage_textview_sealed"
+            android:textColor="#6E6E6E"
+            android:textSize="20sp"
+            android:textStyle="bold" >
+        </TextView>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/homepage_textview_sealed"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:background="@android:color/darker_gray" />
+
+        <RelativeLayout
+            android:id="@+id/trailer_inventory"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/homepage_textview_sealed"
+            android:visibility="gone" >
+
+            <!-- TRAILER INVENTORY -->
+
+            <TextView
+                android:id="@+id/homepage_textview_trailorinventery"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:paddingLeft="10dp"
+                android:text="@string/homepage_textview_trailerinventory"
+                android:textColor="#6E6E6E"
+                android:textSize="30sp"
+                android:textStyle="bold" >
+            </TextView>
+
+            <TextView
+                android:drawableRight="@drawable/arrow_left_gif"
+                android:id="@+id/homepage_textview_plates"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/homepage_textview_trailorinventery"
+                android:layout_marginTop="20dp"
+                android:paddingBottom="10dp"
+                android:paddingLeft="20dp"
+                android:paddingTop="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/homepage_textview_plates"
+                android:textColor="#6E6E6E"
+                android:textSize="20sp"
+                android:textStyle="bold" >
+            </TextView>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/homepage_textview_plates"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="15dp"
+                android:background="@android:color/darker_gray" />
+
+            <TextView
+                android:drawableRight="@drawable/arrow_left_gif"
+                android:id="@+id/homepage_textview_straps"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/homepage_textview_plates"
+                android:layout_marginTop="20dp"
+                android:paddingBottom="20dp"
+                android:paddingLeft="20dp"
+                android:paddingTop="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/homepage_textview_straps"
+                android:textColor="#6E6E6E"
+                android:textSize="20sp"
+                android:textStyle="bold" >
+            </TextView>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/homepage_textview_straps"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="15dp"
+                android:background="@android:color/darker_gray" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/trailer_inventory"
+            android:layout_marginTop="25dp"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/homepage_button_submit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_style"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:text="@string/homepage_button_submit"
+                android:textStyle="bold"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/homepage_button_damages"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_style"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:text="@string/damages"
+                android:textStyle="bold"
+                android:textSize="20sp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</ScrollView>

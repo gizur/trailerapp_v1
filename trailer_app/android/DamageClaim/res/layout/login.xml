@@ -1,0 +1,56 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/all_screens" >
+
+    <EditText
+        android:id="@+id/login_edittext_username"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/login_edittext_password"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:hint="@string/login_username_hint"
+        android:inputType="textEmailAddress"
+        android:text="cloud3@gizur.com"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@id/login_edittext_password"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:hint="@string/login_password_hint"
+        android:inputType="textPassword"
+        android:text="rksh2jjf"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/login_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/login_edittext_username"
+        android:paddingLeft="20dp"
+        android:text="@string/login_textview"
+        android:textColor="@drawable/all_textviews"
+        android:textSize="25sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/login_button_login"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/login_edittext_password"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/button_style"
+        android:text="@string/login_button_login"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>
