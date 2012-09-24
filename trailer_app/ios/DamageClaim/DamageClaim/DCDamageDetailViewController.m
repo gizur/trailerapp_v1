@@ -316,13 +316,18 @@
         [request setValue:[[RequestHeaders commonHeaders] objectForKey:headerKey] forHTTPHeaderField:headerKey];
     }
     
-#if kDebug
-    NSLog(@"headers: %@", [RequestHeaders commonHeaders]);
-#endif
     
     
     NSString *signature = [DCSharedObject generateSignatureFromModel:DOCUMENTATTACHMENTS requestType:@"GET"];
+#if kDebug
+    NSLog(@"Signature: %@", signature);
+#endif
     [request setValue:signature forHTTPHeaderField:X_SIGNATURE];
+    
+#if kDebug
+    NSLog(@"headers: %@", [request allHTTPHeaderFields]);
+#endif
+
     if (signature) {
         NSURLResponse *response = nil;
         NSError *error = nil;

@@ -167,7 +167,6 @@
 -(void) submitSurveyReport {
     //make a dictionary of post data
     NSMutableDictionary *bodyDict = [[[NSMutableDictionary alloc] init] autorelease];
-#warning Fetch this from the pick list
     
     NSDictionary *reportDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_REPORTDAMAGE];
     if (reportDamageDict) {
@@ -183,12 +182,6 @@
     } else {
         [bodyDict setValue:@"No" forKey:@"reportdamage"];
     }
-    
-    
-    
-    
-#warning Fetch this from the pick list
-    
     
     NSDictionary *ticketStatusDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_TICKETSTATUS];
     if (ticketStatusDict) {
@@ -221,7 +214,6 @@
         [bodyDict setValue:self.surveyModel.surveyPlace forKey:@"damagereportlocation"];
     }
     
-#warning Fetch this from the pick list
     if (self.surveyModel.surveyTrailerSealed) {
         NSDictionary *sealedDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_SEALED];
         if (sealedDict) {

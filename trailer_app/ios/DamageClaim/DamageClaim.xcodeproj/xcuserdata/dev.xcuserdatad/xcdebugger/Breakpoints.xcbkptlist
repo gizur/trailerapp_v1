@@ -8,11 +8,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "DamageClaim/DCDamageDetailViewController.m"
-         timestampString = "369832515.7713"
+         timestampString = "369912522.041783"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "358"
-         endingLineNumber = "358"
+         startingLineNumber = "363"
+         endingLineNumber = "363"
          landmarkName = "-getImageFromId:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -21,11 +21,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "DamageClaim/DCDamageDetailViewController.m"
-         timestampString = "369832515.7713"
+         timestampString = "369912522.041783"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "395"
-         endingLineNumber = "395"
+         startingLineNumber = "400"
+         endingLineNumber = "400"
          landmarkName = "-updateUI"
          landmarkType = "5">
       </FileBreakpoint>
@@ -34,11 +34,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "DamageClaim/DCDamageDetailViewController.m"
-         timestampString = "369832515.7713"
+         timestampString = "369912522.041783"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "346"
-         endingLineNumber = "346"
+         startingLineNumber = "351"
+         endingLineNumber = "351"
          landmarkName = "-getImageFromId:"
          landmarkType = "5">
       </FileBreakpoint>
