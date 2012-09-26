@@ -13,6 +13,7 @@ public class ProgressDialogHelper {
 		new Thread(){
 		public void run(){
 			Looper.prepare();
+			dismissProgressDialog();
 			pd = ProgressDialog.show(context, title, message);
 			Looper.loop();
 		}

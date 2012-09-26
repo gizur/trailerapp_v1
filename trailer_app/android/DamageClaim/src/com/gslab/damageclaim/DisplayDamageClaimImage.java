@@ -8,6 +8,7 @@ import android.widget.ImageView;
 
 import com.gslab.R.id;
 import com.gslab.R.layout;
+import com.gslab.utils.Utility;
 
 public class DisplayDamageClaimImage extends Activity {
 	
@@ -19,10 +20,16 @@ public class DisplayDamageClaimImage extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(layout.displaydamageimage);
 		
-		uri = (Uri) getIntent().getExtras().getParcelable("uri");
-		
 		imageview = (ImageView) findViewById(id.damage_claim_imageview_image);
+		
+		if(getIntent().getBooleanExtra("report_damage", true)){
+		uri = (Uri) getIntent().getExtras().getParcelable("uri");
 		imageview.setImageURI(uri);
+		}
+		else
+		{
+			imageview.setImageBitmap(Utility.BITMAP);			
+		}
 		
 	}
 

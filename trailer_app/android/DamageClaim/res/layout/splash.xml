@@ -1,0 +1,11 @@
+
+
+<ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/damage_claim_imageview_image"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#1A1A1A"
+    android:src="@drawable/splash"
+    android:contentDescription="@string/damaged_full_image" />

@@ -1,26 +1,35 @@
 package com.gslab.core;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.gslab.damageclaim.Login;
 import com.gslab.helpers.UserInfo;
 import com.gslab.helpers.error;
 import com.gslab.interfaces.Constants;
 import com.gslab.interfaces.NetworkListener;
 import com.gslab.networking.HTTPRequest;
 import com.gslab.networking.HTTPRequest.RequestMethod;
+import com.gslab.uihelpers.ToastUI;
 import com.gslab.utils.NetworkCallRequirements;
 import com.gslab.utils.URLList;
 import com.gslab.utils.Utility;
@@ -38,11 +47,9 @@ public class CoreComponent {
 	private static int DIFFERENCE = 0;
 	
 	public static boolean SENDING_IMAGES = false;
-	public static String trailerid;
-
+	public static String trailerid = null;
 	
-	public static MultipartEntity mpEntity;
-	
+	public static MultipartEntity mpEntity;	
 	
 	public static String getResponseString() {
 		return responseString;
@@ -91,13 +98,9 @@ public class CoreComponent {
 	public static void setUserinfo(UserInfo userinfo) {
 		CoreComponent.userinfo = userinfo;
 	}
-
-	public static HTTPRequest getRequest(int url) {
-
-		Log.i("URL", URLList.getURL(url));
-
-		request = new HTTPRequest(URLList.getURL(url));
-
+	
+	public static void performInitialSettings()
+	{
 		request.addHeader(NetworkCallRequirements.getUsernameString(),
 				CoreComponent.getUsername());
 
@@ -113,18 +116,35 @@ public class CoreComponent {
 		request.addHeader(NetworkCallRequirements.getAcceptLanguageString(),
 				NetworkCallRequirements.getAcceptLanguageValue());
 
+	}
+
+	public static HTTPRequest getRequest(int url) {
+
+		Log.i("URL", URLList.getURL(url));
+
+		request = new HTTPRequest(URLList.getURL(url));
+
+		performInitialSettings();
+		
 		return request;
 	}
 
 	public synchronized static void processRequest(final String requestType,
 			final String model, final NetworkListener listener,
 			final HTTPRequest request) {
+		
+		if (!NetworkCallRequirements.isNetworkAvailable((Activity) listener)) {
+			Log.i("got it", "the network info");			
+			ToastUI.showToast( ((Activity) listener).getApplicationContext() , "Network unavailable");	
+			listener.onError("Please check your network connection and retry");
+			return;
+		}
 
 		runnable = new Runnable() {
 
-			@Override
+			
 			public void run() {
-
+				
 				String timestamp = NetworkCallRequirements.getTimeStampValue();
 
 				request.addHeader(NetworkCallRequirements.getTimestampString(),
@@ -143,7 +163,7 @@ public class CoreComponent {
 					if (requestType.equalsIgnoreCase("get"))
 						request.execute(RequestMethod.GET);
 
-					Log.i("Response string:", request.getResponseString());
+					Log.i("Response string:", request.getResponseString() + "---");
 					Log.i("Response code:", request.getResponseCode() + "");
 
 					switch (request.getResponseCode()) {
@@ -220,48 +240,78 @@ public class CoreComponent {
 		return false;		
 	}
 
+	
+	@SuppressWarnings("deprecation")
 	public static void processRequestForImages(String requestType, String model,
 			NetworkListener listener, HTTPRequest request,
-			ArrayList<Uri> imagePaths) {
+			ArrayList<Uri> imagePaths, Activity activity) {
 
-		File [] file = new File[imagePaths.size()];
+	
 		
+		
+		  try {
+			    
+		        for(int i = 0;i < imagePaths.size();i++){
+		        
+		        String[] projection = { MediaStore.Images.Media.DATA };
+		        Cursor cursor = activity.managedQuery(imagePaths.get(i), projection, null, null, null);
+		        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+		        cursor.moveToFirst();
+		        String path =  cursor.getString(column_index);		  		          
+		          
+		        Bitmap bitmap = BitmapFactory.decodeFile(path);  
+		  
+		        // you can change the format of you image compressed for what do you want;  
+		        //now it is set up to 640 x 480;  
+		  
+		        Bitmap bmpCompressed = Bitmap.createScaledBitmap(bitmap, 640, 480, true);  
+		        ByteArrayOutputStream bos = new ByteArrayOutputStream();  
+		  
+		        // CompressFormat set up to JPG, you can change to PNG or whatever you want;  
+		  
+		        bmpCompressed.compress(CompressFormat.JPEG, 100, bos);  
+		        byte[] data = bos.toByteArray(); 
+		        
+		        // sending a Image;  
+		        // note here, that you can send more than one image, just add another param, same rule to the String;  
+		        Log.i("Core Component", i + " added image");
+		        mpEntity.addPart("image"+i, new ByteArrayBody(data, "DamageImage"+i+".jpg"));		        
+		        Log.i("added to mpEntity", path);		        
+		        
+		        }
+		        CoreComponent.processRequest(requestType, model, listener, request);
+				
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+	
+	}
+
+	public static MultipartEntity getMpEntity() {
 		mpEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-		
-		for(int i = 0;i < imagePaths.size();i++)
-		{
-			if(imagePaths.get(i).getPath() != null)
-			file[i] = new File(imagePaths.get(i).getPath());
-			
-			Log.i("upload file data", "UPLOAD: file length = " + file[i].length());
-		    Log.i("does it exist", "UPLOAD: file exist = " + file[i].exists());
-		
-		    try {
-	        mpEntity.addPart("image", new FileBody(file[i]));	      
-	    } catch (Exception e1) {
-	        Log.i(e1.getClass().getSimpleName(), "UPLOAD: UnsupportedEncodingException");
-	        e1.printStackTrace();
-	    }
-		}
-	      HttpResponse response;
-//	    try {
-//	        Log.d(TAG, "UPLOAD: about to execute");
-//	        response = httpclient.execute(httppost);
-//	        Log.d(TAG, "UPLOAD: executed");
-//	        HttpEntity resEntity = response.getEntity();
-//	        Log.d(TAG, "UPLOAD: respose code: " + response.getStatusLine().toString());
-//	        if (resEntity != null) {
-//	            Log.d(TAG, "UPLOAD: " + EntityUtils.toString(resEntity));
-//	        }
-//	        if (resEntity != null) {
-//	            resEntity.consumeContent();
-//	        }
-//	    } catch (ClientProtocolException e) {
-//	        e.printStackTrace();
-//	    } catch (IOException e) {
-//	        e.printStackTrace();
-//	    }
+		return mpEntity;
+	}
 
+	public static void setMpEntity(MultipartEntity mpEntity) {
+		CoreComponent.mpEntity = mpEntity;
+	}
+
+	public static void logout(Activity activity) {
+		
+		HTTPRequest request = getRequest(Constants.LOGOUT);
+		CoreComponent.processRequest(Constants.POST,
+				Constants.AUTHENTICATE, (NetworkListener)activity, request);	
+	
+		Utility.waitForThread();
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
+		SharedPreferences.Editor editor = preferences.edit();
+		editor.putBoolean("credentials", false);
+		editor.commit();
+		Intent intent = new Intent(activity.getApplicationContext(), Login.class);		
+		intent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+		activity.startActivity(intent);
+		activity.finish();
 		
 	}
+	
 }

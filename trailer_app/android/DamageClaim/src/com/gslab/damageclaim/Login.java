@@ -3,9 +3,11 @@ package com.gslab.damageclaim;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,26 +33,52 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 	private Button loginButton;
 	private EditText username, password;
 	private static Context context;
+	private SharedPreferences preferences;
+	private SharedPreferences.Editor editor;
+	private String uname, pwd;
 
-	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
 
-		context = getApplicationContext();
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		editor = preferences.edit();
 
-		loginButton = (Button) findViewById(id.login_button_login);
-		loginButton.setOnClickListener(this);
+		Log.i(getClass().getSimpleName(), "App Started");
 
-		username = (EditText) findViewById(id.login_edittext_username);
-		username.setSelected(true);
+		if (preferences.getBoolean("credentials", false)) {
+			uname = preferences.getString("username", "username");
+			pwd = preferences.getString("password", "password");
+//			Log.i("login", "here");
+//			new Thread(){
+//				public void run(){
+//			login();
+//				}
+//			}.start();
+			CoreComponent.setUsername(uname);
+			CoreComponent.setPassword(pwd);
+			Intent intent = new Intent(getApplicationContext(), HomePage.class);
+			startActivity(intent);
+			finish();
+		}
 
-		password = (EditText) findViewById(id.login_edittext_password);
+		else {
+
+			Log.i("login", "no username and password found");
+			context = getApplicationContext();
+
+			loginButton = (Button) findViewById(id.login_button_login);
+			loginButton.setOnClickListener(this);
+
+			username = (EditText) findViewById(id.login_edittext_username);
+			username.setSelected(true);
+
+			password = (EditText) findViewById(id.login_edittext_password);
+		}
 	}
 
 	private static Handler handler = new Handler() {
 
-		@Override
 		public void handleMessage(Message msg) {
 
 			super.handleMessage(msg);
@@ -63,14 +91,16 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 			case Constants.TOAST:
 				ToastUI.showToast(context, CoreComponent.getErr().getMessage());
 				break;
-				
-			case 2 : 
-				ToastUI.showToast(context, "There seems to be an error.\nPlease report this to the developers");
+
+			case 2:
+				ToastUI.showToast(context,
+						"There seems to be an error.\nPlease report this to the developers");
 				break;
 
 			default:
 				Log.i("Login.java", "in default case - handler");
-				ToastUI.showToast(context, "There seems to be an error.\nPlease report this to the developers");
+				ToastUI.showToast(context,
+						"There seems to be an error. Restart your connection.\n If problem exists, please report this to the developers");
 			}
 		}
 
@@ -78,37 +108,44 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 
 	private void login() {
 
-		String uname = username.getText().toString();
-		String pwd = password.getText().toString();
-
+		ProgressDialogHelper.showProgressDialog(this, "",
+				getString(string.login_pd));
+		
 		CoreComponent.setUsername(uname);
 		CoreComponent.setPassword(pwd);
 
-		CoreComponent.processRequest(Constants.POST,
-				Constants.AUTHENTICATE, this, createRequest());	
-	
+		CoreComponent.processRequest(Constants.POST, Constants.AUTHENTICATE,
+				this, createRequest());
+
 		Utility.waitForThread();
 	}
 
 	private boolean performChecks() {
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ProgressDialogHelper.dismissProgressDialog();
 			ToastUI.showToast(getApplicationContext(), "Network unavailable");
 			return false;
 		}
+
+		if (!Utility.isEmailValid(username.getText().toString())) {
+			ToastUI.showToast(context, "Enter a valid email id");
+			return false;
+		}
+
 		return true;
 	}
 
-	@Override
 	public void onClick(View v) {
 
 		if (v == loginButton) {
 
-			ProgressDialogHelper.showProgressDialog(this, "",
-					getString(string.login_pd));
-
 			if (performChecks()) {
+			
+
+				uname = username.getText().toString();
+				pwd = password.getText().toString();
+
+				Log.i(getClass().getSimpleName(), "coming here");
 				login();
 			}
 
@@ -116,20 +153,24 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 
 	}
 
-	@Override
 	public void onSuccessFinish(String response) {
 
 		CoreComponent
 				.setUserinfo(new Gson().fromJson(response, UserInfo.class));
 
+		editor.putBoolean("credentials", true);
+		editor.putString("username", uname);
+		editor.putString("password", pwd);
+		editor.commit();
+
 		Intent intent = new Intent(getApplicationContext(), HomePage.class);
 		startActivity(intent);
 
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
+		finish();
 
 	}
 
-	@Override
 	public void onError(String status) {
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 		if (CoreComponent.getErr() != null)
@@ -139,9 +180,8 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 
 	}
 
-	@Override
 	public HTTPRequest createRequest() {
-		
+
 		return CoreComponent.getRequest(Constants.LOGIN);
 	}
 

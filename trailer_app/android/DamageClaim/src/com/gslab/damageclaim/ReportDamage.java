@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.apache.http.entity.mime.content.StringBody;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +14,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -43,6 +45,7 @@ import com.gslab.interfaces.NetworkListener;
 import com.gslab.networking.HTTPRequest;
 import com.gslab.uihelpers.ProgressDialogHelper;
 import com.gslab.uihelpers.ToastUI;
+import com.gslab.utils.NetworkCallRequirements;
 import com.gslab.utils.Utility;
 
 @SuppressWarnings("serial")
@@ -59,28 +62,31 @@ public class ReportDamage extends Activity implements OnClickListener,
 	private TextView reporting_damage_textview;
 
 	private int selectedID, reporting_entry;
-	
+
+	private JSONObject object;
+	private JSONArray array;
+
 	private Thread thread;
-	
+
 	private String response;
-	
+
 	private Context context;
-	
+
 	private boolean which_request;
 
 	private ScrollView scrollview;
-	
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(layout.report_damage);
-		
+
 		scrollview = (ScrollView) findViewById(id.reportdamage_scrollview);
-		
+
 		which_request = true;
-		
+
 		context = getApplicationContext();
 
-		report_new_damage = (Button) findViewById(id.report_damage_button_report_new_damage);		
+		report_new_damage = (Button) findViewById(id.report_damage_button_report_new_damage);
 		report_new_damage.setOnClickListener(this);
 
 		reporting_damage_listview = (ListView) findViewById(id.report_damage_listview_reporting_damage);
@@ -101,60 +107,72 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 		checkVisibility();
 
-		ProgressDialogHelper.showProgressDialog(this, "", "Loading");
-		thread = new Thread(this);
-		thread.start();		
-		
+		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+			Log.i("got it", "the network info");
+			ToastUI.showToast(getApplicationContext(), "Network unavailable");
+
+		} else {
+			ProgressDialogHelper.showProgressDialog(this, "", "Loading");
+			thread = new Thread(this);
+			thread.start();
+		}
+
 	}
 
-		
-	private void createPreviouslyReportedDamagesList()
-	{
-		ProgressDialogHelper.showProgressDialog(this, "", "Loading");
-		if(this.response != null)
-		{
-			JSONObject object;
-			JSONArray array;
+	private void createPreviouslyReportedDamagesList() {
+
+		if (this.response != null) {
+
 			try {
 				object = new JSONObject(response);
-			
-			array = object.getJSONArray("result");
-			
-			for(int i = 0;i < array.length();i++)
-			{
-				object = array.getJSONObject(i);
-				previously_reported_damage_list.add(createDamageInfoWithoutImages(object.getString("damagetype"), object.getString("damageposition")));
-				Log.i(object.getString("damagetype"), object.getString("damageposition"));
-			}
+
+				array = object.getJSONArray("result");
+
+				for (int i = 0; i < array.length(); i++) {
+					object = array.getJSONObject(i);
+					previously_reported_damage_list
+							.add(createDamageInfoWithoutImages(
+									object.getString("damagetype"),
+									object.getString("damageposition"),
+									object.getString("drivercauseddamage")));
+					Log.i(object.getString("damagetype"),
+							object.getString("damageposition"));
+				}
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			setPreviouslyReportedDamagesListAdapter();
-			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		}
-		else
-			ToastUI.showToast(getApplicationContext(), "could not retrieve previously reported damages");
+
+		} else
+			ToastUI.showToast(getApplicationContext(),
+					"could not retrieve previously reported damages");
+
 	}
-	
-	private Handler handler = new Handler(){
-		@Override
-		public void handleMessage(Message msg)
-		{
-			switch(msg.what)
-			{
-			case Constants.DISMISS_DIALOG : ProgressDialogHelper.dismissProgressDialog();
-			break;
-			case 1 : createPreviouslyReportedDamagesList();
-			break;
-			
-			case Constants.TOAST:
-				ToastUI.showToast(context, CoreComponent.getErr().getMessage());
+
+	private Handler handler = new Handler() {
+
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case Constants.DISMISS_DIALOG:
+				ProgressDialogHelper.dismissProgressDialog();
 				break;
-			
+
+			case 2:
+				setPreviouslyReportedDamagesListAdapter();
+				break;
+
+			case Constants.TOAST:
+				if (CoreComponent.getErr() != null)
+					ToastUI.showToast(context, CoreComponent.getErr()
+							.getMessage());
+				else
+					ToastUI.showToast(context,
+							"Some error has occurred. Please report this to the developers");
+				break;
+
 			}
 		}
 	};
-	
+
 	private void checkVisibility() {
 		if (reporting_damage_list.size() == 0) {
 			reporting_damage_listview.setVisibility(ListView.GONE);
@@ -185,7 +203,6 @@ public class ReportDamage extends Activity implements OnClickListener,
 		setListViewHeight();
 	}
 
-	@Override
 	public void onBackPressed() {
 
 		if (reporting_damage_list.size() != 0) {
@@ -211,13 +228,37 @@ public class ReportDamage extends Activity implements OnClickListener,
 			AlertDialog alert = builder.create();
 			alert.show();
 		} else
-			super.onBackPressed();
+			finish();
 	}
 
 	private void addToReportingDamageList(DamageInfo info) {
-		reporting_damage_list.add(info);
-		setReportingDamageListAdapter();
+		if (!checkDuplication(info)) {
+			reporting_damage_list.add(info);
+			setReportingDamageListAdapter();
+		}
+		Log.i(getClass().getSimpleName(), "checking visibility");
 		checkVisibility();
+	}
+
+	private boolean checkDuplication(DamageInfo info) {
+
+		for (int i = 0; i < reporting_damage_list.size(); i++) {
+			if (info.getDriver_caused_damage().equalsIgnoreCase(
+					reporting_damage_list.get(i).getDriver_caused_damage())
+					&& info.getLocationOfDamage().equalsIgnoreCase(
+							reporting_damage_list.get(i).getLocationOfDamage())
+					&& info.getWhatIsDamaged().equalsIgnoreCase(
+							reporting_damage_list.get(i).getWhatIsDamaged())) {
+				ArrayList<Uri> temp = reporting_damage_list.get(i)
+						.getImagePaths();
+				for (int j = 0; j < info.getImagePaths().size(); j++) {
+					temp.add(info.getImagePaths().get(j));
+				}
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private void removeFromReportingDamageList(int id) {
@@ -227,12 +268,12 @@ public class ReportDamage extends Activity implements OnClickListener,
 	}
 
 	private DamageInfo createDamageInfoWithoutImages(String what_is_damaged,
-			String location_of_damage) /*--------------To be edited---------*/
+			String location_of_damage, String drivercauseddamage) /*--------------To be edited---------*/
 	{
-		return (new DamageInfo(what_is_damaged, location_of_damage));
+		return (new DamageInfo(what_is_damaged, location_of_damage,
+				drivercauseddamage));
 	}
 
-	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 
 		super.onContextItemSelected(item);
@@ -252,7 +293,6 @@ public class ReportDamage extends Activity implements OnClickListener,
 		return true;
 	}
 
-	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 
@@ -268,10 +308,14 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 	}
 
-	@Override
 	public void onClick(View v) {
 
 		if (v == report_new_damage) {
+			if (CoreComponent.trailerid == null) {
+				ToastUI.showToast(getApplicationContext(),
+						"Please select id before reporting a damage");
+				return;
+			}
 			reporting_entry = -1;
 			Intent intent = new Intent(this, ReportNewDamage.class);
 			startActivityForResult(intent, Constants.INTENT_DATA);
@@ -279,42 +323,83 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 		if (v == submit) {
 
-			ProgressDialogHelper.showProgressDialog(this, "", "Submitting");
+			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+				Log.i("got it", "the network info");
+				ToastUI.showToast(getApplicationContext(),
+						"Network unavailable");
+				return;
+			}
+			ProgressDialogHelper.showProgressDialog(this, "", "Submitting...");
 			which_request = false;
 			HTTPRequest request = createRequest();
-			
-			int failures = 0;
-			
-			for(int i = 0;i < reporting_damage_list.size();i++){
 
-				
-				request.addParam("ticket_title", CoreComponent.getUserinfo().getContactname());
-				request.addParam("ticketstatus", "open");
-				request.addParam("trailerid", CoreComponent.trailerid);
-				request.addParam("reportdamage", "yes");
-								
-			request.addParam("damagetype", reporting_damage_list.get(0 + failures).getWhatIsDamaged());
-			request.addParam("damageposition", reporting_damage_list.get(0 + failures).getLocationOfDamage());
-			request.addParam("trailerid", CoreComponent.trailerid);
-			
-			CoreComponent.processRequestForImages(Constants.POST, Constants.HELPDESK, this, request, reporting_damage_list.get(0 + failures).getImagePaths());
-			
-			Utility.waitForThread();
-				if(this.response == null)
-				{
-					failures++;
-					continue;
+			int failures = 0;
+
+			CoreComponent.SENDING_IMAGES = true;
+			for (int i = 0; i < reporting_damage_list.size(); i++) {
+
+				try {
+
+					CoreComponent.mpEntity = CoreComponent.getMpEntity();
+					Log.i("trailer id", CoreComponent.trailerid);
+					CoreComponent.mpEntity.addPart("trailerid", new StringBody(
+							CoreComponent.trailerid));
+
+					CoreComponent.mpEntity.addPart("ticketstatus",
+							new StringBody("Open"));
+					CoreComponent.mpEntity.addPart("reportdamage",
+							new StringBody("Yes"));
+
+					CoreComponent.mpEntity.addPart("ticket_title",
+							new StringBody(CoreComponent.getUserinfo()
+									.getContactname()));
+
+					CoreComponent.mpEntity.addPart("reportdamage",
+							new StringBody("yes"));
+
+					CoreComponent.mpEntity.addPart(
+							"damagetype",
+							new StringBody(reporting_damage_list.get(
+									0 + failures).getWhatIsDamaged()));
+
+					CoreComponent.mpEntity.addPart(
+							"damageposition",
+							new StringBody(reporting_damage_list.get(
+									0 + failures).getLocationOfDamage()));
+
+					CoreComponent.mpEntity.addPart(
+							"drivercauseddamage",
+							new StringBody(reporting_damage_list.get(
+									0 + failures).getDriver_caused_damage()));
+
+					CoreComponent.processRequestForImages(Constants.POST,
+							Constants.HELPDESK, this, request,
+							reporting_damage_list.get(0 + failures)
+									.getImagePaths(), this);
+
+					Utility.waitForThread();
+
+					if (this.response == null) {
+						failures++;
+						continue;
+					}
+					reporting_damage_list.remove(0);
+
+					setReportingDamageListAdapter();
+				} catch (Exception e) {
+					e.printStackTrace();
+					Log.i(getClass().getSimpleName(), e.getClass()
+							.getSimpleName());
 				}
-				reporting_damage_list.remove(0);
-				setReportingDamageListAdapter();
 			}
-			if(failures == 0){
+			if (failures == 0) {
 				reporting_damage_list.clear();
-				ToastUI.showToast(getApplicationContext(), "Damages successfully submitted");
-			}
-			else
-				ToastUI.showToast(getApplicationContext(), "Some damages could not be reported");
-			
+				ToastUI.showToast(getApplicationContext(),
+						"Damages successfully submitted");
+			} else
+				ToastUI.showToast(getApplicationContext(),
+						"Some damages could not be reported");
+
 			checkVisibility();
 			CoreComponent.SENDING_IMAGES = false;
 			which_request = true;
@@ -322,23 +407,23 @@ public class ReportDamage extends Activity implements OnClickListener,
 		}
 	}
 
-	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 		super.onActivityResult(requestCode, resultCode, data);
 
-		if (data != null) {
-			DamageInfo info = (DamageInfo) data.getExtras().getParcelable(
-					"updated_value");
-			if (info != null) {
-				if (reporting_entry >= 0)
-					removeFromReportingDamageList((reporting_entry));
-				addToReportingDamageList(info);
+		if (resultCode == RESULT_OK) {
+			if (data != null) {
+				DamageInfo info = (DamageInfo) data.getExtras().getParcelable(
+						"updated_value");
+				if (info != null) {
+					if (reporting_entry >= 0)
+						removeFromReportingDamageList((reporting_entry));
+					addToReportingDamageList(info);
+				}
 			}
 		}
 	}
 
-	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 
 		if (arg0 == reporting_damage_listview) {
@@ -356,64 +441,97 @@ public class ReportDamage extends Activity implements OnClickListener,
 					PreviouslyReportedDamagesInfo.class);
 			intent.putExtra("previous_data",
 					previously_reported_damage_list.get((int) arg3));
+			try {
+				intent.putExtra("json_info", array.getJSONObject((int) arg3)
+						.toString());
+				Log.i("sending intent data : ", array.getJSONObject((int) arg3)
+						.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			startActivity(intent);
 		}
 
 	}
 
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		menu.add(Menu.NONE, 1, Menu.NONE, "Logout");
+		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, "Logout");
 
 		return super.onCreateOptionsMenu(menu);
 	}
 
-	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		super.onOptionsItemSelected(item);
+
+		switch (item.getItemId()) {
+
+		case Constants.LOGOUT:
+
+			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+				Log.i("got it", "the network info");
+				ToastUI.showToast(getApplicationContext(),
+						"Network unavailable");
+
+			} else {
+				ProgressDialogHelper.showProgressDialog(this, "",
+						"Logging out...");
+				CoreComponent.logout(this);
+			}
+			break;
+		}
+
+		return true;
+	}
+
 	public void run() {
 		getReportedDamagesList();
+
 	}
-	
-	private void getReportedDamagesList()
-	{
+
+	private void getReportedDamagesList() {
 		previously_reported_damage_list.clear();
-		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this, createRequest());
-		Utility.waitForThread();	
+		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
+				createRequest());
+		Utility.waitForThread();
 		scrollview.scrollTo(0, scrollview.getTop());
+		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 		handler.sendEmptyMessage(1);
 	}
 
-	@Override
 	public void onSuccessFinish(String response) {
 		this.response = response;
-		if(which_request)
-			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);		
-		
+		if (which_request) {
+			createPreviouslyReportedDamagesList();
+			handler.sendEmptyMessage(2);
+			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
+
+		}
+
 	}
 
-	@Override
 	public void onError(String status) {
 		this.response = null;
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 		if (CoreComponent.getErr() != null)
 			handler.sendEmptyMessage(Constants.TOAST);
-		
+
 	}
 
-	@Override
 	public HTTPRequest createRequest() {
-		
-		
-		if(which_request){
+
+		if (which_request) {
 			return CoreComponent.getRequest(Constants.PREVIOUS_DAMAGES);
-		}
-		else{
-		HTTPRequest request = CoreComponent.getRequest(Constants.HELPDESK_URL);
-		request.addParam("ticket_title", CoreComponent.getUserinfo().getContactname());
-		request.addParam("ticketstatus", "open");			
-		request.addParam("reportdamage", "yes");
-		CoreComponent.SENDING_IMAGES = true;		
-		return request;
+		} else {
+			HTTPRequest request = CoreComponent
+					.getRequest(Constants.HELPDESK_URL);
+			request.addParam("ticket_title", "Damage Report by "
+					+ CoreComponent.getUserinfo().getContactname());
+			request.addParam("ticketstatus", "open");
+			request.addParam("reportdamage", "yes");
+			CoreComponent.SENDING_IMAGES = true;
+			return request;
 		}
 	}
 }

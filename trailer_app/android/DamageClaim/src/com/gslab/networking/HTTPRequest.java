@@ -22,10 +22,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
-import com.gslab.core.CoreComponent;
-
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+
+import com.gslab.core.CoreComponent;
 
 public class HTTPRequest {
 	private ArrayList<NameValuePair> params;
@@ -89,8 +89,7 @@ public class HTTPRequest {
 			break;
 		}
 		case POST: {
-			HttpPost request = new HttpPost(url);
-
+			HttpPost request = new HttpPost(url);			
 			// Add headers
 			for (NameValuePair h : headers){
 				request.addHeader(h.getName(), h.getValue());
@@ -100,16 +99,17 @@ public class HTTPRequest {
 			if (!params.isEmpty())
 				request.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
 
+			Log.i("checking...", "sending images");
+			if(CoreComponent.SENDING_IMAGES){
+				
+				request.setEntity(CoreComponent.mpEntity);
+				Log.i("HTTPRequest", "inside image condition");
+			}
+			
 			if (body != null) {
 				StringEntity entity = new StringEntity(body, HTTP.UTF_8);
-				if(CoreComponent.SENDING_IMAGES){
-					entity.setContentType("application/x-www-form-urlencoded");
-					request.setEntity(CoreComponent.mpEntity);
-				}
-				else{
-					entity.setContentType("application/json");
-				request.setEntity(entity);
-				}
+				entity.setContentType("application/json");
+				request.setEntity(entity);				
 			}
 			executeRequest(request, url);
 			break;

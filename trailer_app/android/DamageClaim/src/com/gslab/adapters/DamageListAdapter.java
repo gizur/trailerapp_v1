@@ -27,25 +27,25 @@ public class DamageListAdapter extends BaseAdapter {
 		inflater = (LayoutInflater) activity.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 	}
 	
-	@Override
+	
 	public int getCount() {
 		return damageInfoList.size();
 		
 	}
 
-	@Override
+	
 	public DamageInfo getItem(int position) {
 		
 		return damageInfoList.get(position);
 	}
 
-	@Override
+	
 	public long getItemId(int position) {
 		
 		return position;
 	}
 
-	@Override
+	
 	public View getView(int position, View convertView, ViewGroup parent) {
 		
 		if(convertView == null)

@@ -72,7 +72,14 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <View
+        
+        
+        
+        
+        
+        
+        
+                <View
             android:layout_width="fill_parent"
             android:layout_height="1dp"
             android:layout_below="@id/reportnewdamage_textview_position"
@@ -82,10 +89,45 @@
             android:background="@android:color/darker_gray" />
 
         <TextView
+            android:id="@+id/reportnewdamage_textview_damagecaused"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/reportnewdamage_textview_position"
+            android:layout_marginTop="20dp"
+            android:drawableRight="@drawable/arrow_left_gif"
+            android:paddingBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/reportnewdamage_textview_damagecaused"
+            android:textColor="#6E6E6E"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/reportnewdamage_textview_damagecaused"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+
+        <TextView
             android:id="@+id/reportnewdamage_textview_damageimages"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/reportnewdamage_textview_position"
+            android:layout_below="@id/reportnewdamage_textview_damagecaused"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="20dp"
             android:text="@string/report_new_damage_textview_damageimages"
@@ -112,7 +154,7 @@
             android:id="@+id/reportnewdamage_listview_damageimages"
             android:layout_below="@id/reportnewdamage_button_damageimages"
             android:layout_width="fill_parent"
-            android:layout_height="100dp"
+            android:layout_height="200dp"
             android:layout_marginTop="10dp" />
 
         <Button

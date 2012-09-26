@@ -1,5 +1,7 @@
 package com.gslab.interfaces;
 
+import android.graphics.Bitmap;
+
 public interface Constants {
 	public static final int TRAILER_TYPE = 1;
 	public static final int ID = 2;
@@ -16,11 +18,13 @@ public interface Constants {
 
 	public static final int REPORT_DAMAGE = 1;
 	public static final int LOGOUT = 2;
-
+	
 	public static final int TYPE = 31;
 	public static final int POSITION = 32;
+	public static final int CAUSED_DAMAGE = 33;
 	
 	public static final int LISTVIEW = 9;
+	public static final int CAMERA = 10;
 
 	public static final int INTENT_DATA = 100;
 	public static final int DELETE = 1;
@@ -31,13 +35,12 @@ public interface Constants {
 	public static final int HELPDESK_URL = 53;
 	public static final int PREVIOUS_DAMAGES = 54;
 	public static final int DAMAGE_TYPE = 55;
+	public static final int DOCUMENT_ATTACHMENT = 56;
 	
 	public static final int TOAST = 72;
 
 	public static final String POST = "POST";
 	public static final String GET = "GET";
-
-	public static boolean SENDING_IMAGES = false;
 	
 	public static final int DISMISS_DIALOG = 71;
 
@@ -71,5 +74,7 @@ public interface Constants {
 	
 	public static final int MAX = 2147483647;			//maximum value that an integer can take
 	public static final String TIME_NO_IN_SYNC = "TIME_NOT_IN_SYNC";
+	public static final int SPLASH_DISPLAY_LENGTH = 3000;
+	public static Bitmap BITMAP = null;
 	
 }

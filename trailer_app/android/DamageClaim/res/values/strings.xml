@@ -1,7 +1,8 @@
 <resources>
 
+    <string name="addnewimage">Add a new image:</string>
     <string name="app_name">DamageClaim</string>        
-    <string name="title_activity_login">Login</string>
+    <string name="title_activity_login">DamageClaim</string>
     <string name="login_textview">Login</string>
     <string name="login_username_hint">Username</string>
     <string name="login_password_hint">Password</string>
@@ -50,6 +51,8 @@
 	<string name="login_pd">Logging in</string>
 	<string name="damages">Damages</string>
 	<string name="submit_survey">Survey successfully submitted</string>
+	<string name="reportnewdamage_textview_damagecaused">Caused by:</string>
+	<string name="damage_caused_by">Damage caused by:</string>
 	
 <!-- 	Drawable Values -->
 

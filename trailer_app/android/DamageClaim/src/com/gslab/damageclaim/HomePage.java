@@ -31,6 +31,7 @@ import com.gslab.networking.HTTPRequest;
 import com.gslab.uihelpers.ListViewDialog;
 import com.gslab.uihelpers.ProgressDialogHelper;
 import com.gslab.uihelpers.ToastUI;
+import com.gslab.utils.NetworkCallRequirements;
 import com.gslab.utils.Utility;
 
 public class HomePage extends Activity implements OnClickListener,
@@ -104,7 +105,7 @@ public class HomePage extends Activity implements OnClickListener,
 	
 	
 	private  Handler handler = new Handler() {
-		@Override
+		
 		public void handleMessage(Message msg) {
 			
 			switch(msg.what){
@@ -159,6 +160,12 @@ public class HomePage extends Activity implements OnClickListener,
 
 		values.clear();
 
+		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+			Log.i("got it", "the network info");
+			ToastUI.showToast(getApplicationContext(), "Network unavailable");
+			return;
+		}
+		
 		ProgressDialogHelper.showProgressDialog(this, "", "Fetching data");
 		
 		CoreComponent.processRequest(Constants.GET,
@@ -196,7 +203,11 @@ public class HomePage extends Activity implements OnClickListener,
 //		values.add(getString(string.sealed_yes));
 //		values.add(getString(string.sealed_no));
 		
-		
+		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+			Log.i("got it", "the network info");
+			ToastUI.showToast(getApplicationContext(), "Network unavailable");
+			return;
+		}
 		ProgressDialogHelper.showProgressDialog(this, "", "Fetching data");
 				
 		CoreComponent.processRequest(Constants.GET,
@@ -232,6 +243,10 @@ public class HomePage extends Activity implements OnClickListener,
 		case Constants.ID:
 			this.id.setText(getString(string.homepage_textview_ID) + " "
 					+ values.get((int) id));
+			if(values.get((int) id).equalsIgnoreCase(""))
+				CoreComponent.trailerid = null;
+			else
+				CoreComponent.trailerid = values.get((int) id);
 			checkSubmitButtonStatus();
 			break;
 
@@ -300,7 +315,7 @@ public class HomePage extends Activity implements OnClickListener,
 	}
 
 
-	@Override
+	
 	public void onClick(View v) {
 
 		if (v == trailertype) {
@@ -350,13 +365,7 @@ public class HomePage extends Activity implements OnClickListener,
 		}
 
 		if (v == damages) {
-			if(id.getText().toString().equalsIgnoreCase(getString(string.homepage_textview_ID))){
-				ToastUI.showToast(getApplicationContext(), "Please select id first");
-				return;
-			}
-			
-			CoreComponent.trailerid = id.getText().toString();
-			
+						
 			Intent intent = new Intent(getApplicationContext(), ReportDamage.class);
 			startActivity(intent);
 			
@@ -366,6 +375,12 @@ public class HomePage extends Activity implements OnClickListener,
 			
 			if(id.getText().toString().equalsIgnoreCase(getString(string.homepage_textview_ID))){
 				ToastUI.showToast(getApplicationContext(), "Please select id first");
+				return;
+			}
+			
+			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+				Log.i("got it", "the network info");
+				ToastUI.showToast(getApplicationContext(), "Network unavailable");
 				return;
 			}
 			
@@ -390,16 +405,16 @@ public class HomePage extends Activity implements OnClickListener,
 
 	}
 
-	@Override
+	
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		
 		menu.add(Menu.NONE, 1, Menu.NONE, "Reset");
-		menu.add(Menu.NONE, 2, Menu.NONE, "Logout");
+		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, "Logout");
 		return super.onCreateOptionsMenu(menu);
 	}
 
-	@Override
+	
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		super.onOptionsItemSelected(item);
@@ -410,13 +425,22 @@ public class HomePage extends Activity implements OnClickListener,
 			break;
 
 		case Constants.LOGOUT:
+			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+				Log.i("got it", "the network info");
+				ToastUI.showToast(getApplicationContext(), "Network unavailable");
+				
+			}
+			else{
+			ProgressDialogHelper.showProgressDialog(this, "", "Logging out...");
+			CoreComponent.logout(this);
+			}
 			break;
 		}
 
 		return true;
 	}
 
-	@Override
+	
 	public void onSuccessFinish(String response) {
 		
 		this.response = response;
@@ -424,7 +448,7 @@ public class HomePage extends Activity implements OnClickListener,
 
 	}
 
-	@Override
+	
 	public void onError(String status) {
 		this.response = null;
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
@@ -433,7 +457,7 @@ public class HomePage extends Activity implements OnClickListener,
 
 	}
 
-	@Override
+	
 	public void run() {
 		getSealedValues();
 		if(sealed_labels.contains(getString(string.sealed_no))){
@@ -447,7 +471,7 @@ public class HomePage extends Activity implements OnClickListener,
 		
 	}
 
-	@Override
+	
 	public HTTPRequest createRequest() {
 		
 		HTTPRequest request = null;

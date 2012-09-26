@@ -203,7 +203,7 @@
                 android:layout_below="@id/homepage_textview_straps"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="1dp"
                 android:background="@android:color/darker_gray" />
         </RelativeLayout>
 

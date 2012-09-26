@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -59,11 +60,13 @@ public class ListViewDialog implements OnItemClickListener {
 				ReportNewDamage reportnewdamage = (ReportNewDamage) activity;
 				reportnewdamage.setListSelectedItemId(id);
 				break;
+				
+			default : Log.i("In default case", "Listviewdialog"); 
 		}
 	}
 	
 
-	@Override
+	
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		dismissDialog(arg3);
 	}
