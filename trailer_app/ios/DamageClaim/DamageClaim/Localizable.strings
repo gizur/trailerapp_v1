@@ -67,3 +67,9 @@
 "TRAILER_ID_NULL_ERROR" = "Please choose a trailer-id first.";
 "SURVEY" = "Survey";
 "DAMAGES" = "Damages";
+
+
+
+"DRIVER_CAUSED_DAMAGE" = "Caused By:";
+"DRIVER" = "Driver";
+"OTHER" = "Other";

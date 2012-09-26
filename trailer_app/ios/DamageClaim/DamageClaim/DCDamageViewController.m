@@ -308,7 +308,10 @@
         }
     }
     
-    [self.navigationController pushViewController:damageDetailViewController animated:YES];
+    if (damageDetailViewController) {
+        [self.navigationController pushViewController:damageDetailViewController animated:YES];
+    }
+    
 }
 
 @end

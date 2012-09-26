@@ -17,6 +17,7 @@
 @synthesize damageImagePaths = _damageImagePaths;
 @synthesize damageThumbnailImagePaths = _damageThumbnailImagePaths;
 @synthesize surveyModel = _surveyModel;
+@synthesize damageDriverCausedDamage = _damageDriverCausedDamage;
 
 -(void) dealloc {
     [_damageId release];
@@ -25,6 +26,7 @@
     [_damagePosition release];
     [_damageType release];
     [_surveyModel release];
+    [_damageDriverCausedDamage release];
     [super dealloc];
 }
 

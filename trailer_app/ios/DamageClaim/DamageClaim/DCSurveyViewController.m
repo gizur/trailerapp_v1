@@ -94,6 +94,7 @@
         self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
     }
     
+    
     [self loadPickLists];
     [self toggleActionButtons];
     
@@ -198,7 +199,6 @@
         [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
     }
 
-    
     NSString *ticketTitle = @"";
     if ([[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]) {
         ticketTitle = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"SURVEY_TICKET_TITLE", @""), [[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]];
@@ -244,8 +244,8 @@
 }
 
 - (IBAction)resetSurvey:(id)sender {
+    //[DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, @"15x762"] requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
     //reset the survey form here
-    
     //reset trailer type
     UISegmentedControl *trailerTypeSegmentedControl = (UISegmentedControl *)[[self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]] viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
     [trailerTypeSegmentedControl setSelectedSegmentIndex:0];
@@ -378,6 +378,8 @@
     
     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
     
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_DRIVERCAUSEDDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+    
 }
 
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
@@ -400,6 +402,8 @@
                         }
                         [[[DCSharedObject sharedPreferences] preferences] setValue:ticketStatusDictionary forKey:HELPDESK_TICKETSTATUS];
                     }
+                    [self.surveyTableView reloadData];
+                    
                 }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
                     NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
                     if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
@@ -438,8 +442,12 @@
                             }
                         }
                         [[[DCSharedObject sharedPreferences] preferences] setValue:sealedDictionary forKey:HELPDESK_SEALED];
-                        [self.surveyTableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationNone];
+                        //as per the requirement, select trailer sealed to No
+                        self.surveyModel.surveyTrailerSealed = [NSNumber numberWithBool:NO];
+                        [self setTrailerInventoryVisible:YES];
+                        
                     }
+                    [self.surveyTableView reloadData];
                 }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
                     NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
                     if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
@@ -479,6 +487,7 @@
                         }
                         [[[DCSharedObject sharedPreferences] preferences] setValue:reportDamageDictionary forKey:HELPDESK_REPORTDAMAGE];
                     }
+                    [self.surveyTableView reloadData];
                 }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
                     NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
                     if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
@@ -490,6 +499,46 @@
                                 
                                 //timestamp is adjusted. call the same url again
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                            }
+                        } else {
+                            [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                        }
+                    }
+                } else {
+                    [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                }
+            }
+        }
+        
+        if ([identifier isEqualToString:HELPDESK_DRIVERCAUSEDDAMAGE]) {
+            if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+                if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                    if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                        NSArray *resultArray = [jsonDict valueForKey:@"result"];
+                        NSMutableDictionary *driverCausedDamageDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                        for (NSDictionary *result in resultArray) {
+                            if ((NSNull *)[result valueForKey:@"label"] != [NSNull null]) {
+                                NSString *label = [result valueForKey:@"label"];
+                                if ((NSNull *)[result valueForKey:@"value"] != [NSNull null]) {
+                                    NSString *value = [result valueForKey:@"value"];
+                                    [driverCausedDamageDictionary setValue:value forKey:label];
+                                }
+                            }
+                        }
+                        [[[DCSharedObject sharedPreferences] preferences] setValue:driverCausedDamageDictionary forKey:HELPDESK_DRIVERCAUSEDDAMAGE];
+                    }
+                    [self.surveyTableView reloadData];
+                    
+                }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                    NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                    if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                        NSString *errorCode = [errorDict valueForKey:@"code"];
+                        if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                            if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                
+                                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_DRIVERCAUSEDDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                             }
                         } else {
                             [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
@@ -814,7 +863,7 @@
                     }
                 }
                     break;
-                case 2: {                    
+                case 2: {
                     cell.selectionStyle = UITableViewCellSelectionStyleGray;
                     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     cell.textLabel.shadowColor = [UIColor whiteColor];

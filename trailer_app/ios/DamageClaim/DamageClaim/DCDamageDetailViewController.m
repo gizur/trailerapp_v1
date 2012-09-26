@@ -32,7 +32,7 @@
 
 #import "NSString+Base64.h"
 
-#define NEW_DAMAGE_SECTION_ONE_ROWS 2
+#define NEW_DAMAGE_SECTION_ONE_ROWS 3
 
 @interface DCDamageDetailViewController ()
 
@@ -62,6 +62,7 @@
 -(void) getImages;
 -(void) updateUI;
 -(void) showError;
+-(void) toggleDriverCausedDamage:(id) sender;
 @end
 
 @implementation DCDamageDetailViewController
@@ -120,7 +121,9 @@
 	// Do any additional setup after loading the view.
     [self customizeNavigationBar];
     [self getDamageDetail];
-    
+    if (!self.damageDetailModel) {
+        self.damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
+    }
     
 }
 
@@ -263,11 +266,12 @@
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSDictionary *resultDict = [jsonDict valueForKey:@"result"];
                         if ((NSNull *)[resultDict valueForKey:@"filecontent"] != [NSNull null]) {
-//#if kDebug
-//                            NSLog(@"Data: %@", [resultDict valueForKey:@"filecontent"]);
-//#endif
+#if kDebug
+                            NSLog(@"\n\nData: %@\n\n", [resultDict valueForKey:@"filecontent"]);
+#endif
                             NSData *imageData = [[resultDict valueForKey:@"filecontent"] base64DecodedData];
-                            UIImage *image = [UIImage imageWithData:imageData];
+                            //UIImage *image = [UIImage imageWithData:imageData];
+                            UIImage *image = [[[UIImage alloc] initWithData:imageData] autorelease];
                             if (!self.imagesArray) {
                                 self.imagesArray = [[[NSMutableArray alloc] init] autorelease];
                             }
@@ -275,10 +279,28 @@
                             if (!self.thumbnailImagesArray) {
                                 self.thumbnailImagesArray = [[[NSMutableArray alloc] init] autorelease];
                             }
+                            if (image) {
+                                [self.imagesArray addObject:image];
+                                UIImage *thumbnailImage = [image thumbnailImage:THUMBNAIL_IMAGE_SIZE transparentBorder:0 cornerRadius:0 interpolationQuality:kCGInterpolationLow];
+                                [self.thumbnailImagesArray addObject:thumbnailImage];
+                            } else {
+                                //remove an item from the indicator array
+                                if (self.documentIdArray) {
+                                    if ([self.documentIdArray count] > 0) {
+                                        [self.documentIdArray removeObjectAtIndex:0];
+                                    }
+                                }
+                                [self showError];
+                            }
                             
-                            [self.imagesArray addObject:image];
-                            UIImage *thumbnailImage = [image thumbnailImage:THUMBNAIL_IMAGE_SIZE transparentBorder:0 cornerRadius:0 interpolationQuality:kCGInterpolationLow];
-                            [self.thumbnailImagesArray addObject:thumbnailImage];
+                        } else {
+                            //remove an item from the indicator array
+                            if (self.documentIdArray) {
+                                if ([self.documentIdArray count] > 0) {
+                                    [self.documentIdArray removeObjectAtIndex:0];
+                                }
+                            }
+                            [self showError];
                         }
                     }
                     
@@ -289,10 +311,11 @@
                             [self.documentIdArray removeObjectAtIndex:0];
                         }
                     }
-                    [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
+                    [self showError];
                     
                 }
             }
+            [self.damageTableView reloadData];
         }
     }
 }
@@ -308,86 +331,87 @@
 #if kDebug
     NSLog(@"URL: %@", [DCSharedObject createURLStringFromIdentifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, imageId]]);
 #endif
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[DCSharedObject createURLStringFromIdentifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, imageId]]] cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:TIMEOUT_INTERVAL];
-    
-    [request setHTTPMethod:@"GET"];
-    
-    for (NSString *headerKey in [RequestHeaders commonHeaders]) {
-        [request setValue:[[RequestHeaders commonHeaders] objectForKey:headerKey] forHTTPHeaderField:headerKey];
-    }
-    
-    
-    
-    NSString *signature = [DCSharedObject generateSignatureFromModel:DOCUMENTATTACHMENTS requestType:@"GET"];
-#if kDebug
-    NSLog(@"Signature: %@", signature);
-#endif
-    [request setValue:signature forHTTPHeaderField:X_SIGNATURE];
-    
-#if kDebug
-    NSLog(@"headers: %@", [request allHTTPHeaderFields]);
-#endif
-
-    if (signature) {
-        NSURLResponse *response = nil;
-        NSError *error = nil;
-        NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-        if (error) {
-#if kDebug
-            NSLog(@"%@", [error description]);
-#endif
-
-            [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
-            //image was not loaded remove a row from the model array of the table
-            //removing any array from documentIdArray will do since this array only gives a hint 
-            //of how many images are there
-            if (self.documentIdArray) {
-                if ([self.documentIdArray count] > 0) {
-                    [self.documentIdArray removeObjectAtIndex:0];
-                }
-            }
-            return;
-        }
-        if (response) {
-            NSString *responseString = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
-#if kDebug
-            NSLog(@"here: %@", responseString);
-#endif
-            
-            if ([(NSHTTPURLResponse *)response statusCode] != 200) {
-
-                [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
-                //image was not loaded remove a row from the model array of the table
-                //removing any array from documentIdArray will do since this array only gives a hint 
-                //of how many images are there
-                if (self.documentIdArray) {
-                    if ([self.documentIdArray count] > 0) {
-                        [self.documentIdArray removeObjectAtIndex:0];
-                    }
-                }
-                [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
-                return;
-            } else {
-                [self parseResponse:responseString forIdentifier:DOCUMENTATTACHMENTS_ID];
-            }
-        }
-    }
-    [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, imageId] requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self showProgressView:NO];
+//    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[DCSharedObject createURLStringFromIdentifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, imageId]]] cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:TIMEOUT_INTERVAL];
+//    
+//    [request setHTTPMethod:@"GET"];
+//    
+//    for (NSString *headerKey in [RequestHeaders commonHeaders]) {
+//        [request setValue:[[RequestHeaders commonHeaders] objectForKey:headerKey] forHTTPHeaderField:headerKey];
+//    }
+//    
+//    NSString *signature = [DCSharedObject generateSignatureFromModel:DOCUMENTATTACHMENTS requestType:@"GET"];
+//#if kDebug
+//    NSLog(@"Signature: %@", signature);
+//#endif
+//    [request setValue:signature forHTTPHeaderField:X_SIGNATURE];
+//    
+//#if kDebug
+//    NSLog(@"headers: %@", [request allHTTPHeaderFields]);
+//#endif
+//
+//    if (signature) {
+//        NSURLResponse *response = nil;
+//        NSError *error = nil;
+//        NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+//        if (error) {
+//#if kDebug
+//            NSLog(@"%@", [error description]);
+//#endif
+//
+//            [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
+//            //image was not loaded remove a row from the model array of the table
+//            //removing any array from documentIdArray will do since this array only gives a hint 
+//            //of how many images are there
+//            if (self.documentIdArray) {
+//                if ([self.documentIdArray count] > 0) {
+//                    [self.documentIdArray removeObjectAtIndex:0];
+//                }
+//            }
+//            return;
+//        }
+//        if (response) {
+//            NSString *responseString = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
+//#if kDebug
+//            NSLog(@"here: %@", responseString);
+//#endif
+//            
+//            if ([(NSHTTPURLResponse *)response statusCode] != 200) {
+//
+//                [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
+//                //image was not loaded remove a row from the model array of the table
+//                //removing any array from documentIdArray will do since this array only gives a hint 
+//                //of how many images are there
+//                if (self.documentIdArray) {
+//                    if ([self.documentIdArray count] > 0) {
+//                        [self.documentIdArray removeObjectAtIndex:0];
+//                    }
+//                }
+//                [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
+//                return;
+//            } else {
+//                [self parseResponse:responseString forIdentifier:DOCUMENTATTACHMENTS_ID];
+//            }
+//        }
+//    }
+//    [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
 }
 
 -(void) getImages {
     if (self.documentIdArray) {
-        if (!self.opertationQueue) {
-            self.opertationQueue = [[[NSOperationQueue alloc] init] autorelease];
-        }
-        [self.opertationQueue cancelAllOperations];
+//        if (!self.opertationQueue) {
+//            self.opertationQueue = [[[NSOperationQueue alloc] init] autorelease];
+//        }
+//        [self.opertationQueue cancelAllOperations];
         
         for (NSString *imageId in self.documentIdArray) {
-            NSBlockOperation *blockOperation = [[[NSBlockOperation alloc] init] autorelease];
-            [blockOperation addExecutionBlock:^(void) {
-                [self getImageFromId:imageId];
-            }];
-            [self.opertationQueue addOperation:blockOperation];
+            [self getImageFromId:imageId];
+//            NSBlockOperation *blockOperation = [[[NSBlockOperation alloc] init] autorelease];
+//            [blockOperation addExecutionBlock:^(void) {
+//                [self getImageFromId:imageId];
+//            }];
+//            [self.opertationQueue addOperation:blockOperation];
             
         }
     }
@@ -401,6 +425,44 @@
     [self.damageTableView reloadData];
 }
 
+
+-(void) toggleDriverCausedDamage:(id)sender {
+    UISegmentedControl *segmentedControl = (UISegmentedControl *) sender;
+    if (!self.damageDetailModel) {
+        self.damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
+    }
+    
+    if (self.damageDetailModel.damageDriverCausedDamage) {
+        NSDictionary *driverCausedDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_DRIVERCAUSEDDAMAGE];
+        if (driverCausedDamageDict) {
+            NSString *yesValue = [driverCausedDamageDict valueForKey:@"Yes"];
+            NSString *noValue = [driverCausedDamageDict valueForKey:@"No"];
+            
+            if ([segmentedControl selectedSegmentIndex] == 0) {
+                self.damageDetailModel.damageDriverCausedDamage = yesValue;
+            } else {
+                self.damageDetailModel.damageDriverCausedDamage = noValue;
+            }
+        } else {
+            if ([segmentedControl selectedSegmentIndex] == 0) {
+                self.damageDetailModel.damageDriverCausedDamage = @"Yes";
+            } else {
+                self.damageDetailModel.damageDriverCausedDamage = @"No";
+            }
+        }
+    } else {
+        if ([segmentedControl selectedSegmentIndex] == 0) {
+            self.damageDetailModel.damageDriverCausedDamage = @"Yes";
+        } else {
+            self.damageDetailModel.damageDriverCausedDamage = @"No";
+        }
+    }
+
+    
+#if kDebug
+    NSLog(@"%@", self.damageDetailModel.damageDriverCausedDamage);
+#endif
+}
 
 #pragma mark - DCPickListViewControllerDelegate
 -(void) pickListDidPickItem:(id)item ofType:(NSInteger)type {
@@ -594,9 +656,30 @@
 
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         
-        [self parseResponse:responseString forIdentifier:identifier];
+        //if identifier is of kind DocumentAttachments/xyz, call the parsing function with DOCUMENTATTACHMENTS_ID
+        if ([identifier rangeOfString:DOCUMENTATTACHMENTS].location != NSNotFound) { 
+            [self parseResponse:responseString forIdentifier:DOCUMENTATTACHMENTS_ID];
+        } else {
+            [self parseResponse:responseString forIdentifier:identifier];
+        }
+        
     } else {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        if ([identifier rangeOfString:DOCUMENTATTACHMENTS].location != NSNotFound) {
+            //image was not loaded remove a row from the model array of the table
+            //removing any array from documentIdArray will do since this array only gives a hint 
+            //of how many images are there
+            if (self.documentIdArray) {
+                if ([self.documentIdArray count] > 0) {
+                    [self.documentIdArray removeObjectAtIndex:0];
+                }
+                [self.damageTableView reloadData];
+            }
+            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
+
+        } else {
+            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        }
+        
     }
 
 }
@@ -606,7 +689,22 @@
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        if ([identifier rangeOfString:DOCUMENTATTACHMENTS].location != NSNotFound) {
+            //image was not loaded remove a row from the model array of the table
+            //removing any array from documentIdArray will do since this array only gives a hint 
+            //of how many images are there
+            if (self.documentIdArray) {
+                if ([self.documentIdArray count] > 0) {
+                    [self.documentIdArray removeObjectAtIndex:0];
+                }
+                [self.damageTableView reloadData];
+            }
+            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
+            
+        } else {
+            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        }
+        
     }
 
 }
@@ -720,6 +818,10 @@
     UITableViewCell *cell;
     if (indexPath.section == 0) {
         cell = [tableView dequeueReusableCellWithIdentifier:@"SimpleCell"];
+        if ([self isEditable] && indexPath.row == 2) {
+            //reuse identifier is set in the Nib file
+            cell = [tableView dequeueReusableCellWithIdentifier:@"SegmentedCell"];
+        }
     } else {
         cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
     }
@@ -731,6 +833,19 @@
         
         if (indexPath.section == 0 && indexPath.row == 1) {
             cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SimpleCell"] autorelease];
+        }
+        
+        if (indexPath.section == 0 && indexPath.row == 2) {
+            if ([self isEditable]) {
+                NSArray *customCellSegmentView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellSegmentedView" owner:nil options:nil];
+                if (customCellSegmentView) {
+                    if ([customCellSegmentView count] > 0) {
+                        cell = [customCellSegmentView objectAtIndex:0];
+                    }
+                }
+            } else {
+                cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SimpleCell"] autorelease];
+            }
         }
         
         if (indexPath.section == 1) {
@@ -806,6 +921,68 @@
         }
     }
     
+    if (indexPath.section == 0 && indexPath.row == 2) {
+        
+        if ([self isEditable]) {
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            UILabel *titleLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_TITE_LABEL_TAG];
+            titleLabel.text = NSLocalizedString(@"DRIVER_CAUSED_DAMAGE", @"");
+            
+            UISegmentedControl *segmentedControl = (UISegmentedControl *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
+            [segmentedControl setTitle:NSLocalizedString(@"DRIVER", @"") forSegmentAtIndex:0];
+            [segmentedControl setTitle:NSLocalizedString(@"OTHER", @"") forSegmentAtIndex:1];
+#if kDebug
+            NSLog(@"%@", self.damageDetailModel.damageDriverCausedDamage);
+#endif
+            
+            if (self.damageDetailModel.damageDriverCausedDamage) {
+                NSDictionary *driverCausedDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_DRIVERCAUSEDDAMAGE];
+                if (driverCausedDamageDict) {
+                    NSString *yesValue = [driverCausedDamageDict valueForKey:@"Yes"];
+                    //NSString *noValue = [driverCausedDamageDict valueForKey:@"No"];
+                    
+                    if ([self.damageDetailModel.damageDriverCausedDamage isEqualToString:yesValue]) {
+                        [segmentedControl setSelectedSegmentIndex:0];
+                    } else {
+                        [segmentedControl setSelectedSegmentIndex:1];
+                    }
+                } else {
+                    if ([[self.damageDetailModel.damageDriverCausedDamage lowercaseString] isEqualToString:@"yes"]) {
+                        [segmentedControl setSelectedSegmentIndex:0];
+                    } else {
+                        [segmentedControl setSelectedSegmentIndex:1];
+                    }
+                }
+            } else {
+                if ([[self.damageDetailModel.damageDriverCausedDamage lowercaseString] isEqualToString:@"yes"]) {
+                    [segmentedControl setSelectedSegmentIndex:0];
+                } else {
+                    [segmentedControl setSelectedSegmentIndex:1];
+                }
+            }
+            [segmentedControl addTarget:self action:@selector(toggleDriverCausedDamage:) forControlEvents:UIControlEventValueChanged];
+            if ([self isEditable]) {
+                segmentedControl.userInteractionEnabled = YES;
+            } else {
+                segmentedControl.userInteractionEnabled = NO;
+            }
+        } else {
+            cell.textLabel.adjustsFontSizeToFitWidth = YES;
+            cell.textLabel.shadowColor = [UIColor whiteColor];
+            cell.textLabel.shadowOffset = CGSizeMake(1, 1);
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            if (self.damageDetailModel.damageDriverCausedDamage) {
+                if ([[self.damageDetailModel.damageDriverCausedDamage lowercaseString] isEqualToString:@"yes"]) {
+                    cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"DRIVER_CAUSED_DAMAGE", @""), NSLocalizedString(@"DRIVER", @"")];
+                } else {
+                    cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"DRIVER_CAUSED_DAMAGE", @""), NSLocalizedString(@"OTHER", @"")];
+                }
+            } else {
+                cell.textLabel.text = NSLocalizedString(@"DRIVER_CAUSED_DAMAGE", @"");
+            }
+        }
+    }
+    
     if (indexPath.section == 1) {
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -870,7 +1047,6 @@
             } else {
                 imageView.hidden = YES;
                 loadingImageView.hidden = NO;
-                imageView.frame = CGRectMake(imageView.frame.origin.x, imageView.frame.origin.y, LOADING_IMAGE_SIZE, LOADING_IMAGE_SIZE);
                 NSArray *imageArray = [NSArray arrayWithObjects:
                                        [UIImage imageNamed:@"1.tiff"],
                                        [UIImage imageNamed:@"2.tiff"], 

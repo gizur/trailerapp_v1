@@ -86,6 +86,7 @@
 								<string key="NSFrame">{{145, 7}, {170, 30}}</string>
 								<reference key="NSSuperview" ref="678395885"/>
 								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:9</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUITag">-2</int>
@@ -142,6 +143,7 @@
 				<string key="NSReuseIdentifierKey">_NS:9</string>
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 				<reference key="IBUIContentView" ref="678395885"/>
+				<string key="IBUIReuseIdentifier">SegmentedCell</string>
 			</object>
 		</array>
 		<object class="IBObjectContainer" key="IBDocument.Objects">

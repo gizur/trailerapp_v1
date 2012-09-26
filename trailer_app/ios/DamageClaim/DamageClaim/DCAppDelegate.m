@@ -63,7 +63,7 @@
     NSMutableString *parameterString = [[[url query] mutableCopy] autorelease];
     parameterString = [[[parameterString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] mutableCopy] autorelease];    
     //remove the double quotes
-    parameterString = [[parameterString stringByReplacingOccurrencesOfString:@"\"" withString:@""] mutableCopy];
+    parameterString = [[[parameterString stringByReplacingOccurrencesOfString:@"'" withString:@""] mutableCopy] autorelease];
 #if kDebug
     NSLog(@"%@", parameterString);
 #endif

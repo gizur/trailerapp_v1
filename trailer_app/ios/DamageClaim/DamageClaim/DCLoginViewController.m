@@ -22,6 +22,8 @@
 
 #import "DCSurveyViewController.h"
 
+#import "DCAboutViewController.h"
+
 @interface DCLoginViewController ()
 @property (retain, nonatomic) IBOutlet UIView *parentView;
 @property (retain, nonatomic) IBOutlet UITableView *loginTableView;
@@ -29,7 +31,10 @@
 @property (retain, nonatomic) DCLoginModel *loginModel;
 @property (nonatomic) NSInteger httpStatusCode;
 @property (retain, nonatomic) HTTPService *httpService;
+@property (retain, nonatomic) DCAboutViewController *aboutViewController;
+@property (nonatomic, getter = isAboutShown) BOOL aboutShown;
 
+- (IBAction)openAbout:(id)sender;
 -(void) keyboardWillShow:(NSNotification *)notification;
 -(void) keyboardWillHide:(NSNotification *)notification;
 - (IBAction)login:(id)sender;
@@ -45,6 +50,8 @@
 @synthesize loginModel = _loginModel;
 @synthesize httpStatusCode = _httpStatusCode;
 @synthesize httpService = _httpService;
+@synthesize aboutShown = _aboutShown;
+@synthesize aboutViewController = _aboutViewController;
 
 #pragma mark - View LifeCycle methods
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -118,10 +125,38 @@
     [_parentView release];
     [_loginModel release];
     [_httpService release];
+    [_aboutViewController release];
     [super dealloc];
 }
 
+#pragma mark - Touches delegate
+-(void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    if ([self isAboutShown]) {
+        if (self.aboutViewController) {
+            [self.aboutViewController viewDidDisappear:YES];
+            [self.aboutViewController viewDidUnload];
+            [self.aboutViewController.view removeFromSuperview];
+            self.aboutShown = NO;
+        }
+    }
+}
+
 #pragma mark - Others
+
+- (IBAction)openAbout:(id)sender {
+    if (![self isAboutShown]) {
+        if (self.aboutViewController) {
+            self.aboutViewController = nil;
+        }
+        self.aboutViewController = [[[DCAboutViewController alloc] initWithNibName:@"AboutView" bundle:nil] autorelease];
+        self.aboutViewController.delegate = self;
+        [self.aboutViewController viewDidLoad];
+        [self.aboutViewController viewDidAppear:YES];
+        [self.view addSubview:self.aboutViewController.view];
+        self.aboutViewController.view.center = self.view.center;
+        [self setAboutShown:YES];
+    }
+}
 
 -(void) keyboardWillShow:(NSNotification *)notification {
     NSDictionary *userInfo = [notification userInfo];
@@ -259,6 +294,13 @@
     }
     
     [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+
+#pragma mark - DCAboutViewControllerDelegate methods
+-(void) aboutViewWillClose {
+    //aboutViewController is getting closed, set BOOL to NO
+    self.aboutShown = NO;
 }
 
 #pragma mark - HTTPServiceDelegate

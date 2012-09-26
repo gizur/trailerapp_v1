@@ -15,6 +15,7 @@
 @property (nonatomic, retain) NSString *damageId;
 @property (nonatomic, retain) NSString *damageType;
 @property (nonatomic, retain) NSString *damagePosition;
+@property (nonatomic, retain) NSString *damageDriverCausedDamage; 
 @property (nonatomic, retain) NSMutableArray *damageImagePaths;
 @property (nonatomic, retain) NSMutableArray *damageThumbnailImagePaths;
 @property (nonatomic, retain) DCSurveyModel *surveyModel;

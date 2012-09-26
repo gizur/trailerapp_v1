@@ -24,6 +24,8 @@
 
 #import "JSONKit.h"
 
+#import "NSData+Base64.h"
+
 
 @interface DCDamageListViewController ()
 @property (retain, nonatomic) IBOutlet UIBarButtonItem *editBarButtonItem;
@@ -84,51 +86,7 @@
     [self customizeNavigationBar];
     [self getDamageList];
     
-    //fill array with dummy values
-//    self.damageListModelArray = [[[NSMutableArray alloc] init] autorelease];
-//    {
-//        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-//        damageModel.damageType = @"Doors";
-//        damageModel.damagePosition = @"Left Side";
-//        [self.damageListModelArray addObject:damageModel];
-//    }
-//    {
-//        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-//        damageModel.damageType = @"Outriggers";
-//        damageModel.damagePosition = @"Top Side";
-//        [self.damageListModelArray addObject:damageModel];
-//    }
-//    {
-//        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-//        damageModel.damageType = @"Undercover";
-//        damageModel.damagePosition = @"Right Side";
-//        [self.damageListModelArray addObject:damageModel];
-//    }
-//    {
-//        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-//        damageModel.damageType = @"Lighting";
-//        damageModel.damagePosition = @"Front Side";
-//        [self.damageListModelArray addObject:damageModel];
-//    }
-//    {
-//        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-//        damageModel.damageType = @"Breaks";
-//        damageModel.damagePosition = @"Device Hood";
-//        [self.damageListModelArray addObject:damageModel];
-//    }
-//    {
-//        DCDamageDetailModel *damageModel = [[[DCDamageDetailModel alloc] init] autorelease];
-//        damageModel.damageType = @"Doors";
-//        damageModel.damagePosition = @"Right Side";
-//        [self.damageListModelArray addObject:damageModel];
-//    }
-//    
-//#if kDebug
-//    for (DCDamageDetailModel *damage in self.damageListModelArray) {
-//        NSLog(@"%@", damage.damageType);
-//    }
-//    
-//#endif
+
     [self.damageTableView reloadData];
 }
 
@@ -219,7 +177,6 @@
             DCDamageDetailModel *damageDetailModel = [self.currentDamageArray objectAtIndex:index];
             //make a dictionary of post data
             NSMutableDictionary *bodyDict = [[[NSMutableDictionary alloc] init] autorelease];
-#warning Fetch this from the pick list
 
             NSDictionary *reportDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_REPORTDAMAGE];
             if (reportDamageDict) {
@@ -235,7 +192,6 @@
             } else {
                 [bodyDict setValue:@"Yes" forKey:@"reportdamage"];
             }
-#warning Fetch this from the pick list
 
             NSDictionary *ticketStatusDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_TICKETSTATUS];
             if (ticketStatusDict) {
@@ -266,7 +222,6 @@
             if (damageDetailModel.surveyModel.surveyPlace) {
                 [bodyDict setValue:damageDetailModel.surveyModel.surveyPlace forKey:@"damagereportlocation"];
             }
-#warning Fetch this from the pick list
 
             if (damageDetailModel.surveyModel.surveyTrailerSealed) {
                 NSDictionary *sealedDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_SEALED];
@@ -284,6 +239,30 @@
                 } else {
                     [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
                 }
+            }
+            
+            if (damageDetailModel.damageDriverCausedDamage) {
+                NSDictionary *driverCausedDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_DRIVERCAUSEDDAMAGE];
+                if (driverCausedDamageDict) {
+                    NSString *yesValue = [driverCausedDamageDict valueForKey:@"Yes"];
+                    NSString *noValue = [driverCausedDamageDict valueForKey:@"No"];
+#if kDebug
+                    NSLog(@"%@ %@", yesValue, noValue);
+#endif
+                    if ([[damageDetailModel.damageDriverCausedDamage lowercaseString] isEqualToString:@"yes"]) {
+                        [bodyDict setValue:yesValue forKey:@"drivercauseddamage"];
+                    } else {
+                        [bodyDict setValue:noValue forKey:@"drivercauseddamage"];
+                    }
+                } else {
+                    if ([[damageDetailModel.damageDriverCausedDamage lowercaseString] isEqualToString:@"yes"]) {
+                        [bodyDict setValue:@"Yes" forKey:@"drivercauseddamage"];
+                    } else {
+                        [bodyDict setValue:@"No" forKey:@"drivercauseddamage"];
+                    }
+                }
+            } else {
+                [bodyDict setValue:@"No" forKey:@"drivercauseddamage"];
             }
             
             if (damageDetailModel.surveyModel.surveyPlates) {
@@ -489,18 +468,12 @@
                         for (NSDictionary *damageDict in resultsArray) {
                             DCDamageDetailModel *damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
 #if kDebug
-                            NSLog(@"parsing id: %@", damageDict);
+                            NSLog(@"DamageDict: %@", damageDict);
 #endif
 
                             if ((NSNull *)[damageDict valueForKey:@"id"] != [NSNull null]) {
-#if kDebug
-                                NSLog(@"%@", [damageDict valueForKey:@"id"]);
-#endif
                                 damageDetailModel.damageId = [damageDict valueForKey:@"id"];
                             }
-#if kDebug
-                            NSLog(@"id parsed");
-#endif
 
                             if ((NSNull *)[damageDict valueForKey:@"trailerid"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
@@ -509,9 +482,6 @@
                                 }
                                 damageDetailModel.surveyModel.surveyTrailerId = [damageDict valueForKey:@"trailerid"];
                             }
-#if kDebug
-                            NSLog(@"trailer id parsed");
-#endif
 
                             
                             if ((NSNull *)[damageDict valueForKey:@"damagereportlocation"] != [NSNull null]) {
@@ -522,9 +492,6 @@
                                 damageDetailModel.surveyModel.surveyPlace = [damageDict valueForKey:@"damagereportlocation"];
 
                             }
-#if kDebug
-                            NSLog(@"damage report location parsed");
-#endif
 
                             
                             //sealed is received as a string and converted to NSNumber
@@ -537,10 +504,6 @@
                                 damageDetailModel.surveyModel.surveyTrailerSealed = [NSNumber numberWithBool:[[sealed lowercaseString] isEqualToString:@"yes"]? YES: NO];
 
                             }
-#if kDebug
-                            NSLog(@"sealed parsed");
-#endif
-
                             
                             if ((NSNull *)[damageDict valueForKey:@"plates"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
@@ -549,10 +512,6 @@
                                 damageDetailModel.surveyModel.surveyPlates = [NSNumber numberWithInt:[[damageDict valueForKey:@"plates"] intValue]];
                             }
                             
-#if kDebug
-                            NSLog(@"plates parsed");
-#endif
-
                             
                             if ((NSNull *)[damageDict valueForKey:@"straps"] != [NSNull null]) {
                                 if (!damageDetailModel.surveyModel) {
@@ -560,29 +519,21 @@
                                 }
                                 damageDetailModel.surveyModel.surveyStraps = [NSNumber numberWithInt:[[damageDict valueForKey:@"straps"] intValue]];
                             }
-                            
-#if kDebug
-                            NSLog(@"straps parsed");
-#endif
-
-                            
+                                                        
                             if ((NSNull *)[damageDict valueForKey:@"damagetype"] != [NSNull null]) {
                                 damageDetailModel.damageType = [damageDict valueForKey:@"damagetype"];
                             }
                             
-#if kDebug
-                            NSLog(@"damage type parsed");
-#endif
-
+                            
+                            if ((NSNull *)[damageDict valueForKey:@"drivercauseddamage"] != [NSNull null]) {
+                                damageDetailModel.damageDriverCausedDamage = [damageDict valueForKey:@"drivercauseddamage"];
+                            }
+                            
+                            
                             
                             if ((NSNull *)[damageDict valueForKey:@"damageposition"] != [NSNull null]) {
                                 damageDetailModel.damagePosition = [damageDict valueForKey:@"damageposition"];
                             }
-                            
-#if kDebug
-                            NSLog(@"damage position parsed");
-#endif
-
                             
                             if (!self.damageListModelArray) {
                                 self.damageListModelArray = [[[NSMutableArray alloc] init] autorelease];
@@ -802,37 +753,7 @@
         default:
             break;
     }
-//    if (self.currentDamageArray) {
-//        if ([self.currentDamageArray count] > 0) {
-//            switch (section) {
-//                case 0:
-//                    return 1;
-//                    break;
-//                case 1:
-//                    return [self.currentDamageArray count];
-//                    break;
-//                case 2:
-//                    if (self.damageListModelArray) {
-//                        return [self.damageListModelArray count];
-//                    }
-//                default:
-//                    break;
-//            }
-//        }
-//    }
-//    
-//    switch (section) {
-//        case 0:
-//            return 1;
-//            break;
-//        case 1:
-//            if (self.damageListModelArray) {
-//                return [self.damageListModelArray count];
-//            }
-//        default:
-//            break;
-//    }
-//    return 0;
+    return 0;
 }
 
 -(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
@@ -1034,7 +955,10 @@
         }
     }
     
-    [self.navigationController pushViewController:damageDetailViewController animated:YES];
+    if (damageDetailViewController) {
+        [self.navigationController pushViewController:damageDetailViewController animated:YES];
+    }
+    
 }
 
 

@@ -168,6 +168,7 @@ enum DCPickListItemTypes {
 #define HELPDESK_ID @"HelpDesk/%@"
 #define HELPDESK_DAMAGETYPE @"HelpDesk/damagetype"
 #define HELPDESK_DAMAGEPOSITION @"HelpDesk/damageposition"
+#define HELPDESK_DRIVERCAUSEDDAMAGE @"HelpDesk/drivercauseddamage"
 #define HELPDESK_DAMAGED @"HelpDesk/damaged"
 #define ASSETS @"Assets"
 #define HELPDESK_TICKETSTATUS @"HelpDesk/ticketstatus"
@@ -175,5 +176,6 @@ enum DCPickListItemTypes {
 #define HELPDESK_SEALED @"HelpDesk/sealed"
 #define HELPDESK_TICKETTITLE @"HelpDesk/ticket_title"
 #define DOCUMENTATTACHMENTS_ID @"DocumentAttachments/%@"
+#define ABOUT @"About"
 
 

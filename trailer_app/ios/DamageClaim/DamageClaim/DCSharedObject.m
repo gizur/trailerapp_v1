@@ -80,6 +80,7 @@ static DCSharedObject *sharedPreferences = nil;
 }
 
 +(void) hideProgressDialogInView:(UIView *)view {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [MBProgressHUD hideHUDForView:view animated:YES];
 }
 
@@ -95,6 +96,127 @@ static DCSharedObject *sharedPreferences = nil;
     return [NSString stringWithFormat:@"%@/%@", HTTP_URL, identifier];
     
 }
+
+//in case the body is name=value pairs with progress view optional
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView {
+    
+    NSString *urlString = [DCSharedObject createURLStringFromIdentifier:identifier];
+#if kDebug
+    NSLog(@"%@", urlString);
+#endif
+    
+    if (!httpService) {
+        httpService = [[[HTTPService alloc] initWithURLString:urlString headers:[RequestHeaders commonHeaders] body:nil delegate:delegateOrNil requestMethod:requestMethod identifier:identifier] autorelease];
+    } else {
+        [httpService setServiceURLString:urlString];
+        [httpService setHeadersDictionary:[[[RequestHeaders commonHeaders] mutableCopy] autorelease]];
+        [httpService setDelegate:delegateOrNil];
+        [httpService setServiceRequestMethod:requestMethod];
+        [httpService setIdentifier:identifier];
+        
+    }
+    
+    
+    for (NSString *key in headersDictionaryOrNil) {
+        [[httpService headersDictionary] setValue:[headersDictionaryOrNil valueForKey:key] forKey:key];
+    }
+    
+    NSString *signature;
+    if ([httpService serviceRequestMethod] == kRequestMethodPOST) {
+        NSString *bodyString = nil;
+        if (bodyDictionaryOrNil) {
+            bodyString = [DCSharedObject keyValuePairFromDictionary:bodyDictionaryOrNil];
+        }
+        httpService.bodyString = bodyString;
+#if kDebug
+        NSLog(@"%@", bodyString);
+#endif
+        signature  = [DCSharedObject generateSignatureFromModel:model requestType:POST];
+    } else {
+        signature = [DCSharedObject generateSignatureFromModel:model requestType:GET];
+    }
+#if kDebug
+    NSLog(@"%@", signature);
+#endif
+    
+    if (signature) {
+        [[httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
+        if (viewControllerOrNil && showProgressView) {
+            [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
+            [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+        }
+        
+        [httpService startService];
+#if kDebug
+        NSLog(@"%@", [[httpService headersDictionary] description]);
+#endif
+        
+    } else {
+        //something went wrong
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
+
+}
+
+//in case the body is NSData with progress view optional
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView {
+    NSString *urlString = [DCSharedObject createURLStringFromIdentifier:identifier];
+#if kDebug
+    NSLog(@"%@", urlString);
+#endif
+    
+    if (!httpService) {
+        httpService = [[[HTTPService alloc] initWithURLString:urlString headers:[RequestHeaders commonHeaders] body:nil delegate:delegateOrNil requestMethod:requestMethod identifier:identifier] autorelease];
+    } else {
+        [httpService setServiceURLString:urlString];
+        [httpService setHeadersDictionary:[[[RequestHeaders commonHeaders] mutableCopy] autorelease]];
+        [httpService setDelegate:delegateOrNil];
+        [httpService setServiceRequestMethod:requestMethod];
+        [httpService setIdentifier:identifier];
+        
+    }
+    
+    
+    for (NSString *key in headersDictionaryOrNil) {
+        [[httpService headersDictionary] setValue:[headersDictionaryOrNil valueForKey:key] forKey:key];
+    }
+    
+    NSString *signature;
+    if ([httpService serviceRequestMethod] == kRequestMethodPOST) {
+        NSString *bodyString = nil;
+        if (bodyOrNil) {
+            httpService.bodyData = bodyOrNil;
+        }
+        
+#if kDebug
+        NSLog(@"%@", bodyString);
+#endif
+        signature  = [DCSharedObject generateSignatureFromModel:model requestType:POST];
+    } else {
+        signature = [DCSharedObject generateSignatureFromModel:model requestType:GET];
+    }
+#if kDebug
+    NSLog(@"%@", signature);
+#endif
+    
+    if (signature) {
+        [[httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
+        if (viewControllerOrNil && showProgressView) {
+            [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
+            [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+        }
+        
+        [httpService startService];
+#if kDebug
+        NSLog(@"%@", [[httpService headersDictionary] description]);
+#endif
+        
+    } else {
+        //something went wrong
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
+}
+
 
 +(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil {
     
@@ -289,8 +411,8 @@ static DCSharedObject *sharedPreferences = nil;
     
     CCHmac(kCCHmacAlgSHA256, cKey, strlen(cKey), cData, strlen(cData), cHMAC);
     
-    NSData *HMAC = [[NSData alloc] initWithBytes:cHMAC
-                                          length:sizeof(cHMAC)];
+    NSData *HMAC = [[[NSData alloc] initWithBytes:cHMAC
+                                          length:sizeof(cHMAC)] autorelease];
     
     return [HMAC base64EncodedString];
     

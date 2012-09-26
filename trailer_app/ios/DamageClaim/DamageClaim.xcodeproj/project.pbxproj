@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D7094016160B459C0047D484 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D7094014160B459C0047D484 /* Icon@2x.png */; };
-		D7094017160B459C0047D484 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = D7094015160B459C0047D484 /* Icon.png */; };
+		D70FB04D16105FD40099790E /* AboutView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D70FB04C16105FD40099790E /* AboutView.xib */; };
+		D70FB0501610601E0099790E /* DCAboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D70FB04F1610601E0099790E /* DCAboutViewController.m */; };
 		D71E55CF15E1125900FE1CB1 /* DCDamageDetailModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55CE15E1125900FE1CB1 /* DCDamageDetailModel.m */; };
 		D71E55D315E1572800FE1CB1 /* DCLoginModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55D215E1572800FE1CB1 /* DCLoginModel.m */; };
 		D73F6BD915FE643F0018B118 /* 1.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D73F6BC515FE643F0018B118 /* 1.tiff */; };
@@ -84,8 +84,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		D7094014160B459C0047D484 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
-		D7094015160B459C0047D484 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		D70FB04C16105FD40099790E /* AboutView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AboutView.xib; sourceTree = "<group>"; };
+		D70FB04E1610601E0099790E /* DCAboutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCAboutViewController.h; sourceTree = "<group>"; };
+		D70FB04F1610601E0099790E /* DCAboutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCAboutViewController.m; sourceTree = "<group>"; };
 		D71E55CD15E1125900FE1CB1 /* DCDamageDetailModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageDetailModel.h; sourceTree = "<group>"; };
 		D71E55CE15E1125900FE1CB1 /* DCDamageDetailModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageDetailModel.m; sourceTree = "<group>"; };
 		D71E55D115E1572800FE1CB1 /* DCLoginModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCLoginModel.h; sourceTree = "<group>"; };
@@ -203,6 +204,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D70FB03A16104BCF0099790E /* AboutViewController */ = {
+			isa = PBXGroup;
+			children = (
+				D70FB04E1610601E0099790E /* DCAboutViewController.h */,
+				D70FB04F1610601E0099790E /* DCAboutViewController.m */,
+			);
+			name = AboutViewController;
+			sourceTree = "<group>";
+		};
+		D70FB03F16104C080099790E /* AboutView */ = {
+			isa = PBXGroup;
+			children = (
+				D70FB04C16105FD40099790E /* AboutView.xib */,
+			);
+			name = AboutView;
+			sourceTree = "<group>";
+		};
 		D71E55CB15E1123E00FE1CB1 /* DamageDetailModel */ = {
 			isa = PBXGroup;
 			children = (
@@ -347,8 +365,6 @@
 		D77722E415D912F50071FD06 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				D7094014160B459C0047D484 /* Icon@2x.png */,
-				D7094015160B459C0047D484 /* Icon.png */,
 				D73F6BC315FE642A0018B118 /* LoadingImages */,
 				D79590FF15DCDAE4008C5D77 /* settings.png */,
 				D78FC61515DC02010003C823 /* new.png */,
@@ -363,6 +379,7 @@
 		D77722E515D912FB0071FD06 /* Nibs */ = {
 			isa = PBXGroup;
 			children = (
+				D70FB03F16104C080099790E /* AboutView */,
 				D7B231AC15F513E2001A1560 /* ImageViewerView */,
 				D7ADF97215EDDDC40000BB4D /* DamageListView */,
 				D7992A0215DFC1CC00ACD417 /* DamageView */,
@@ -421,6 +438,7 @@
 		D77722EA15D914520071FD06 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				D70FB03A16104BCF0099790E /* AboutViewController */,
 				D7B231A815F5136E001A1560 /* ImageViewerViewController */,
 				D7ADF96E15EDDD900000BB4D /* DamageListViewController */,
 				D79929FD15DFC19600ACD417 /* DamageViewController */,
@@ -790,8 +808,7 @@
 				D73F6BEA15FE643F0018B118 /* 9@2x.tiff in Resources */,
 				D73F6BEB15FE643F0018B118 /* 10.tiff in Resources */,
 				D73F6BEC15FE643F0018B118 /* 10@2x.tiff in Resources */,
-				D7094016160B459C0047D484 /* Icon@2x.png in Resources */,
-				D7094017160B459C0047D484 /* Icon.png in Resources */,
+				D70FB04D16105FD40099790E /* AboutView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -827,6 +844,7 @@
 				D7B231AB15F51395001A1560 /* DCImageViewerViewController.m in Sources */,
 				D7B231B615F62F31001A1560 /* DCAssetModel.m in Sources */,
 				D75E4FCA16007D1000507C3A /* MBProgressHUD.m in Sources */,
+				D70FB0501610601E0099790E /* DCAboutViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
