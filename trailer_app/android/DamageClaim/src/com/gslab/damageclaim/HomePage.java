@@ -32,6 +32,7 @@ import com.gslab.uihelpers.ListViewDialog;
 import com.gslab.uihelpers.ProgressDialogHelper;
 import com.gslab.uihelpers.ToastUI;
 import com.gslab.utils.NetworkCallRequirements;
+import com.gslab.utils.URLList;
 import com.gslab.utils.Utility;
 
 public class HomePage extends Activity implements OnClickListener,
@@ -45,28 +46,26 @@ public class HomePage extends Activity implements OnClickListener,
 	private Button submit, damages;
 
 	private int selection;
-	
-	private String response;
-	
+
+	private String response, error;
+
 	private JSONObject object;
 	private JSONArray array;
-	
+
 	private Thread thread;
-	
+
 	private Context context;
 
-		
 	public void onCreate(Bundle savedInstanceState) {
-		
-			
-		super.onCreate(savedInstanceState);				
+
+		super.onCreate(savedInstanceState);
 		setContentView(R.layout.homepage);
-		
+
 		context = getApplicationContext();
-				
+
 		values = new ArrayList<String>();
 		sealed_labels = new ArrayList<String>();
-		
+
 		trailerinventory = (RelativeLayout) findViewById(R.id.trailer_inventory);
 
 		trailertype = (TextView) findViewById(R.id.homepage_textview_trailertype);
@@ -79,8 +78,8 @@ public class HomePage extends Activity implements OnClickListener,
 
 		place = (TextView) findViewById(R.id.homepage_textview_place);
 		place.setOnClickListener(this);
-		
-		sealed = (TextView) findViewById(R.id.homepage_textview_sealed);	
+
+		sealed = (TextView) findViewById(R.id.homepage_textview_sealed);
 		sealed.setOnClickListener(this);
 
 		plates = (TextView) findViewById(R.id.homepage_textview_plates);
@@ -98,38 +97,36 @@ public class HomePage extends Activity implements OnClickListener,
 		selection = Constants.SEALED;
 		thread = new Thread(this);
 		thread.start();
-		
-		addTrailerInventory();		
-	
+
+		addTrailerInventory();
+
 	}
-	
-	
-	private  Handler handler = new Handler() {
-		
+
+	private Handler handler = new Handler() {
+
 		public void handleMessage(Message msg) {
-			
-			switch(msg.what){
-			case Constants.DISMISS_DIALOG : ProgressDialogHelper.dismissProgressDialog();
-			break;
-			case 1 : setSealedValue();
-			break;
-			
-			case Constants.TOAST:
-				ToastUI.showToast(context, CoreComponent.getErr().getMessage());
+
+			switch (msg.what) {
+			case Constants.DISMISS_DIALOG:
+				ProgressDialogHelper.dismissProgressDialog();
 				break;
-				
-			
+			case 1:
+				setSealedValue();
+				break;
+
+			case Constants.TOAST:
+				ToastUI.showToast(context, error);
+				break;
+
 			}
 
 		}
 	};
-	
-	private void setSealedValue()
-	{
-		sealed.setText(
-				getString(string.homepage_textview_sealed) + " " +				
-				values.get(sealed_labels.indexOf(getString(string.sealed_no)))  				
-				);
+
+	private void setSealedValue() {
+		sealed.setText(getString(string.homepage_textview_sealed)
+				+ " "
+				+ values.get(sealed_labels.indexOf("No")));
 	}
 
 	private void getPlateValues() {
@@ -138,7 +135,7 @@ public class HomePage extends Activity implements OnClickListener,
 		values.add("2");
 		values.add("3");
 		values.add("4");
-		
+
 	}
 
 	private void getStrapsValues() {
@@ -162,30 +159,27 @@ public class HomePage extends Activity implements OnClickListener,
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), "Network unavailable");
+			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
 			return;
 		}
-		
-		ProgressDialogHelper.showProgressDialog(this, "", "Fetching data");
-		
-		CoreComponent.processRequest(Constants.GET,
-				Constants.ASSETS, this, createRequest());
+
+		ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
+
+		CoreComponent.processRequest(Constants.GET, Constants.ASSETS, this,
+				createRequest());
 		Utility.waitForThread();
-		if(this.response != null){
-		try{
-			object = new JSONObject(response);
-			array = object.getJSONArray("result");
-			for(int i = 0;i < array.length();i++)
-			{
-				values.add(array.getJSONObject(i).getString("id"));				
-			}
-			}
-			catch(Exception e)
-			{
+		if (this.response != null) {
+			try {
+				object = new JSONObject(response);
+				array = object.getJSONArray("result");
+				for (int i = 0; i < array.length(); i++) {
+					values.add(array.getJSONObject(i).getString("id"));
+				}
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}	
-		
+		}
+
 	}
 
 	private void getPlaceValues() // To be fetched from URL
@@ -200,37 +194,39 @@ public class HomePage extends Activity implements OnClickListener,
 	private void getSealedValues() {
 		values.clear();
 		sealed_labels.clear();
-//		values.add(getString(string.sealed_yes));
-//		values.add(getString(string.sealed_no));
-		
+		// values.add(getString(string.sealed_yes));
+		// values.add(getString(string.sealed_no));
+
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), "Network unavailable");
+			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
 			return;
 		}
-		ProgressDialogHelper.showProgressDialog(this, "", "Fetching data");
-				
-		CoreComponent.processRequest(Constants.GET,
-				Constants.HELPDESK, this, createRequest());
+		ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
+
+		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
+				createRequest());
 		Utility.waitForThread();
-		if(this.response != null){
-		try{
-			object = new JSONObject(response);
-			array = object.getJSONArray("result");
-			for(int i = 0;i < array.length();i++)
-			{
-				values.add(array.getJSONObject(i).getString("value"));
-				sealed_labels.add(array.getJSONObject(i).getString("label"));
-				Log.i("sealed label", sealed_labels.get(i));
-				
-			}
-		}
-			catch(Exception e)
-			{
+		if (this.response != null) {
+			try {
+				object = new JSONObject(response);
+				array = object.getJSONArray("result");
+				for (int i = 0; i < array.length(); i++) {
+					if(array.getJSONObject(i).getString("label").equalsIgnoreCase("yes"))
+						values.add(getString(string.sealed_yes));
+					if(array.getJSONObject(i).getString("label").equalsIgnoreCase("no"))
+						values.add(getString(string.sealed_no));
+					sealed_labels
+							.add(array.getJSONObject(i).getString("label"));
+					Log.i("sealed label", sealed_labels.get(i));
+					Log.i(getClass().getSimpleName(), values.get(i));
+
+				}
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 	public void setListSelectedItemId(long id) {
@@ -243,7 +239,7 @@ public class HomePage extends Activity implements OnClickListener,
 		case Constants.ID:
 			this.id.setText(getString(string.homepage_textview_ID) + " "
 					+ values.get((int) id));
-			if(values.get((int) id).equalsIgnoreCase(""))
+			if (values.get((int) id).equalsIgnoreCase(""))
 				CoreComponent.trailerid = null;
 			else
 				CoreComponent.trailerid = values.get((int) id);
@@ -277,19 +273,16 @@ public class HomePage extends Activity implements OnClickListener,
 		default:
 			Toast.makeText(this, getString(string.toast_no_list_item_selected),
 					Toast.LENGTH_LONG).show();
-		}		
+		}
 	}
 
 	private void checkSubmitButtonStatus() {
 
 		if (id.getText().toString()
-				.equalsIgnoreCase(getString(string.homepage_textview_ID)))
-		{
-			submit.setEnabled(false);			
-		}
-		else
-		{
-			submit.setEnabled(true);			
+				.equalsIgnoreCase(getString(string.homepage_textview_ID))) {
+			submit.setEnabled(false);
+		} else {
+			submit.setEnabled(true);
 		}
 
 	}
@@ -312,109 +305,116 @@ public class HomePage extends Activity implements OnClickListener,
 		plates.setText(getString(string.homepage_textview_plates));
 		straps.setText(getString(string.homepage_textview_straps));
 		trailerinventory.setVisibility(RelativeLayout.VISIBLE);
+		submit.setEnabled(false);
 	}
 
-
-	
 	public void onClick(View v) {
 
 		if (v == trailertype) {
 			selection = Constants.TRAILER_TYPE;
-			getTrailerTypeValues();			
+			getTrailerTypeValues();
+
 			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.trailer_type_dialog_title), values,
+					getString(string.homepage_textview_trailertype), values,
 					Constants.HOMEPAGE);
 		}
 
 		if (v == id) {
 			selection = Constants.ID;
-			getIDValues();			
-			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.id_dialog_title), values,
-					Constants.HOMEPAGE);
+			getIDValues();
+			if (this.response != null)
+				new ListViewDialog(this, layout.listviewdialog,
+						getString(string.homepage_textview_ID), values,
+						Constants.HOMEPAGE);
 		}
 
-		if (v == place) {			
+		if (v == place) {
 			selection = Constants.PLACE;
 			getPlaceValues();
+
 			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.id_dialog_title), values,
+					getString(string.homepage_textview_place), values,
 					Constants.HOMEPAGE);
 		}
 
-		if (v == sealed) {			
+		if (v == sealed) {
 			selection = Constants.SEALED;
 			getSealedValues();
-			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.id_dialog_title), values,
-					Constants.HOMEPAGE);
+			if (this.response != null)
+				new ListViewDialog(this, layout.listviewdialog,
+						getString(string.homepage_textview_sealed), values,
+						Constants.HOMEPAGE);
 		}
 
-		if (v == plates) {			
+		if (v == plates) {
 			selection = Constants.PLATES;
 			getPlateValues();
 			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.dialog_title), values, Constants.HOMEPAGE);
+					getString(string.homepage_textview_plates), values, Constants.HOMEPAGE);
 		}
 
 		if (v == straps) {
 			selection = Constants.STRAPS;
-			getStrapsValues();			
+			getStrapsValues();
 			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.dialog_title), values, Constants.HOMEPAGE);
+					getString(string.homepage_textview_straps), values, Constants.HOMEPAGE);
 		}
 
 		if (v == damages) {
-						
-			Intent intent = new Intent(getApplicationContext(), ReportDamage.class);
+
+			Intent intent = new Intent(getApplicationContext(),
+					ReportDamage.class);
 			startActivity(intent);
-			
+
 		}
-		
-		if(v == submit) {
-			
-			if(id.getText().toString().equalsIgnoreCase(getString(string.homepage_textview_ID))){
-				ToastUI.showToast(getApplicationContext(), "Please select id first");
+
+		if (v == submit) {
+
+			if (id.getText().toString()
+					.equalsIgnoreCase(getString(string.homepage_textview_ID))) {
+				ToastUI.showToast(getApplicationContext(),
+						"Please select id first");
 				return;
 			}
-			
+
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");
-				ToastUI.showToast(getApplicationContext(), "Network unavailable");
+				ToastUI.showToast(getApplicationContext(),
+						getString(string.networkunavailable));
 				return;
 			}
-			
-			ProgressDialogHelper.showProgressDialog(this, "", "Submitting");
-			
-			HTTPRequest request = CoreComponent.getRequest(Constants.HELPDESK_URL);
-			request.addParam("ticket_title", CoreComponent.getUserinfo().getContactname());
+
+			ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
+
+			HTTPRequest request = CoreComponent
+					.getRequest(Constants.HELPDESK_URL);
+			request.addParam("ticket_title", getString(string.surveyticketby) + CoreComponent.getUserinfo()
+					.getContactname());
 			request.addParam("ticketstatus", "closed");
 			request.addParam("trailerid", id.getText().toString());
 			request.addParam("reportdamage", "no");
-			CoreComponent.processRequest(Constants.POST, Constants.HELPDESK, this, request);
-			
+			CoreComponent.processRequest(Constants.POST, Constants.HELPDESK,
+					this, request);
+
 			Utility.waitForThread();
 			CoreComponent.trailerid = id.getText().toString();
 			Log.i("trailer id stored value", id.getText().toString());
-			if(this.response != null)
-			{
-				ToastUI.showToast(getApplicationContext(), getString(string.submit_survey));
+			if (this.response != null) {
+				ToastUI.showToast(getApplicationContext(),
+						getString(string.submit_survey));
 			}
-			
+
 		}
 
 	}
 
-	
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		
-		menu.add(Menu.NONE, 1, Menu.NONE, "Reset");
-		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, "Logout");
+	public boolean onCreateOptionsMenu(Menu menu) {
+
+		menu.add(Menu.NONE, 1, Menu.NONE, getString(string.homepage_button_reset));
+		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, getString(string.logout));
 		return super.onCreateOptionsMenu(menu);
 	}
 
-	
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		super.onOptionsItemSelected(item);
@@ -425,14 +425,19 @@ public class HomePage extends Activity implements OnClickListener,
 			break;
 
 		case Constants.LOGOUT:
+			CoreComponent.LOGOUT_CALL = true;
+			Log.i("logging out", "here");
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");
-				ToastUI.showToast(getApplicationContext(), "Network unavailable");
-				
-			}
-			else{
-			ProgressDialogHelper.showProgressDialog(this, "", "Logging out...");
-			CoreComponent.logout(this);
+				ToastUI.showToast(getApplicationContext(),
+						getString(string.networkunavailable));
+
+			} else {
+				Log.i(getClass().getSimpleName(), "logging out");
+				ProgressDialogHelper.showProgressDialog(this, "",
+						getString(string.loading));
+				Log.i(getClass().getSimpleName(), URLList.getURL(Constants.LOGOUT));
+				CoreComponent.logout(this);
 			}
 			break;
 		}
@@ -440,53 +445,52 @@ public class HomePage extends Activity implements OnClickListener,
 		return true;
 	}
 
-	
 	public void onSuccessFinish(String response) {
-		
+
 		this.response = response;
-		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);		
+		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 
 	}
 
-	
 	public void onError(String status) {
 		this.response = null;
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		if (CoreComponent.getErr() != null)
-			handler.sendEmptyMessage(Constants.TOAST);
+		error = status;
+		handler.sendEmptyMessage(Constants.TOAST);
 
 	}
 
-	
 	public void run() {
 		getSealedValues();
-		if(sealed_labels.contains(getString(string.sealed_no))){
+		if (sealed_labels.contains("No")) {
 			handler.sendEmptyMessage(1);
-			
-		}
-			else
-				ToastUI.showToast(getApplicationContext(), "Cannot get default value for sealed option");
-			
-		
-		
+
+		} else
+			ToastUI.showToast(getApplicationContext(),
+					"Cannot get default value for sealed option");
+
 	}
 
-	
 	public HTTPRequest createRequest() {
+
+		if(CoreComponent.LOGOUT_CALL){
+			return CoreComponent.getRequest(Constants.LOGOUT);
+		}
 		
 		HTTPRequest request = null;
 		Log.i("selection", selection + "");
-		switch(selection){
-		
-		case Constants.ID : 
-		request = CoreComponent.getRequest(Constants.ASSETS_DATA);
-		break;
-		
-		case Constants.SEALED : request = CoreComponent.getRequest(Constants.SEALED);
-		break;
+		switch (selection) {
+
+		case Constants.ID:
+			request = CoreComponent.getRequest(Constants.ASSETS_DATA);
+			break;
+
+		case Constants.SEALED:
+			request = CoreComponent.getRequest(Constants.SEALED);
+			break;
 		}
 		return request;
-		
+
 	}
 
 }

@@ -67,7 +67,7 @@ public class HTTPRequest {
 			if (!params.isEmpty()) {
 				combinedParams += "?";
 				for (NameValuePair p : params) {
-					
+
 					String paramString = p.getName() + "="
 							+ URLEncoder.encode(p.getValue(), "UTF-8");
 					if (combinedParams.length() > 1)
@@ -80,7 +80,7 @@ public class HTTPRequest {
 			HttpGet request = new HttpGet(url + combinedParams);
 
 			// Add headers
-			for (NameValuePair h : headers){
+			for (NameValuePair h : headers) {
 				Log.i("header info:", h.getName() + ":" + h.getValue());
 				request.addHeader(h.getName(), h.getValue());
 			}
@@ -89,9 +89,9 @@ public class HTTPRequest {
 			break;
 		}
 		case POST: {
-			HttpPost request = new HttpPost(url);			
+			HttpPost request = new HttpPost(url);
 			// Add headers
-			for (NameValuePair h : headers){
+			for (NameValuePair h : headers) {
 				request.addHeader(h.getName(), h.getValue());
 				Log.i("header info:", h.getName() + ":" + h.getValue());
 			}
@@ -100,16 +100,16 @@ public class HTTPRequest {
 				request.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
 
 			Log.i("checking...", "sending images");
-			if(CoreComponent.SENDING_IMAGES){
-				
+			if (CoreComponent.SENDING_IMAGES) {
+
 				request.setEntity(CoreComponent.mpEntity);
 				Log.i("HTTPRequest", "inside image condition");
 			}
-			
+
 			if (body != null) {
 				StringEntity entity = new StringEntity(body, HTTP.UTF_8);
 				entity.setContentType("application/json");
-				request.setEntity(entity);				
+				request.setEntity(entity);
 			}
 			executeRequest(request, url);
 			break;

@@ -80,6 +80,8 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 	private String response;
 
+	private static String error;
+
 	private boolean typeofcall;
 
 	private HashMap<String, ArrayList<String>> hashmap;
@@ -103,7 +105,8 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		position.setOnClickListener(this);
 
 		drivercauseddamage = (TextView) findViewById(id.reportnewdamage_textview_damagecaused);
-		drivercauseddamage.setText(drivercauseddamage.getText().toString() + " " + "Driver");
+		drivercauseddamage.setText(drivercauseddamage.getText().toString()
+				+ " " + getString(string.driver));
 		drivercauseddamage.setOnClickListener(this);
 
 		values = new ArrayList<String>();
@@ -148,7 +151,7 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 				break;
 
 			case Constants.TOAST:
-				ToastUI.showToast(context, CoreComponent.getErr().getMessage());
+				ToastUI.showToast(context, error);
 				break;
 			}
 		}
@@ -159,14 +162,14 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 				+ previous_data.getWhatIsDamaged());
 		position.setText(getString(string.reportnewdamage_textview_position)
 				+ " " + previous_data.getLocationOfDamage());
-		if(previous_data.getDriver_caused_damage().equalsIgnoreCase("no"))
-		drivercauseddamage
-				.setText(getString(string.reportnewdamage_textview_damagecaused)
-						+ " " + "Other");
+		if (previous_data.getDriver_caused_damage().equalsIgnoreCase("no"))
+			drivercauseddamage
+					.setText(getString(string.reportnewdamage_textview_damagecaused)
+							+ " " + getString(string.other));
 		else
 			drivercauseddamage
-			.setText(getString(string.reportnewdamage_textview_damagecaused)
-					+ " " + "Driver");
+					.setText(getString(string.reportnewdamage_textview_damagecaused)
+							+ " " + getString(string.driver));
 		Log.i("position:", previous_data.getLocationOfDamage());
 		images = previous_data.getImagePaths();
 		if (images == null) {
@@ -187,12 +190,12 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), "Network unavailable");
+			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
 			return;
 		}
-		
+
 		typeofcall = true;
-		ProgressDialogHelper.showProgressDialog(this, "", "Loading");
+		ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
 
 		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
 				createRequest());
@@ -267,27 +270,28 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		case Constants.CAMERA: {
 			switch ((int) id) {
 			case 0: {
-				
-				try{
-					if(!android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED))
-						throw new UnsupportedOperationException();
-				String fileName = String.valueOf(System.currentTimeMillis());
-				ContentValues values = new ContentValues();
-				values.put(MediaStore.Images.Media.TITLE, fileName);
-				uri = getContentResolver().insert(
-						MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
-				Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-				startActivityForResult(intent, Constants.CAMERA);
-				}
-				catch(UnsupportedOperationException e)
-				{
-					ToastUI.showToast(context, "There is a problem. Please insert the SD card and check again");
-				}
-				catch(Exception e)
-				{
-					ToastUI.showToast(context, "Some error has occurred. Please report");
+				try {
+					if (!android.os.Environment.getExternalStorageState()
+							.equals(android.os.Environment.MEDIA_MOUNTED))
+						throw new UnsupportedOperationException();
+					String fileName = String
+							.valueOf(System.currentTimeMillis());
+					ContentValues values = new ContentValues();
+					values.put(MediaStore.Images.Media.TITLE, fileName);
+					uri = getContentResolver().insert(
+							MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+							values);
+
+					Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+					intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+					startActivityForResult(intent, Constants.CAMERA);
+				} catch (UnsupportedOperationException e) {
+					ToastUI.showToast(context,
+							"There is a problem. Please insert the SD card and check again");
+				} catch (Exception e) {
+					ToastUI.showToast(context,
+							getString(string.problem));
 				}
 
 			}
@@ -373,9 +377,10 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		if (v == type) {
 			selection = Constants.TYPE;
 			getTypeValues();
-			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.reportnewdamage_select_type), values,
-					Constants.REPORT_NEW_DAMAGE);
+			if (this.response != null)
+				new ListViewDialog(this, layout.listviewdialog,
+						getString(string.reportnewdamage_select_type), values,
+						Constants.REPORT_NEW_DAMAGE);
 		}
 
 		if (v == position) {
@@ -388,9 +393,10 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 			}
 			selection = Constants.POSITION;
 			getPositionValues();
-			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.reportnewdamage_select_position), values,
-					Constants.REPORT_NEW_DAMAGE);
+			if (this.response != null)
+				new ListViewDialog(this, layout.listviewdialog,
+						getString(string.reportnewdamage_select_position),
+						values, Constants.REPORT_NEW_DAMAGE);
 		}
 
 		if (v == addnewimage) {
@@ -410,9 +416,10 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		if (v == drivercauseddamage) {
 			selection = Constants.CAUSED_DAMAGE;
 			getDamageCausedValues();
-			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.damage_caused_by), values,
-					Constants.REPORT_NEW_DAMAGE);
+			if (this.response != null)
+				new ListViewDialog(this, layout.listviewdialog,
+						getString(string.damage_caused_by), values,
+						Constants.REPORT_NEW_DAMAGE);
 		}
 
 	}
@@ -423,12 +430,12 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), "Network unavailable");
+			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
 			return;
 		}
-		
+
 		typeofcall = false;
-		ProgressDialogHelper.showProgressDialog(this, "", "Loading");
+		ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
 
 		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
 				createRequest());
@@ -441,10 +448,12 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 				array = object.getJSONArray("result");
 
 				for (int i = 0; i < array.length(); i++) {
-					if(array.getJSONObject(i).getString("value").equalsIgnoreCase("yes"))
-						values.add("Driver");
-					else if(array.getJSONObject(i).getString("value").equalsIgnoreCase("no"))
-						values.add("Other");
+					if (array.getJSONObject(i).getString("value")
+							.equalsIgnoreCase(getString(string.sealed_yes)))
+						values.add(getString(string.driver));
+					else if (array.getJSONObject(i).getString("value")
+							.equalsIgnoreCase(getString(string.sealed_no)))
+						values.add(getString(string.other));
 					else
 						values.add("-NA-");
 				}
@@ -459,8 +468,8 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 	private void getAddImageValues() {
 
 		values.clear();
-		values.add("Camera");
-		values.add("Gallery");
+		values.add(getString(string.camera));
+		values.add(getString(string.gallery));
 
 	}
 
@@ -477,18 +486,21 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 					.getText().toString()));
 			previous_data.setDriver_caused_damage(Utility
 					.getParsedString(drivercauseddamage.getText().toString()));
-			
-			if(previous_data.getDriver_caused_damage().equalsIgnoreCase("driver"))
-				previous_data.setDriver_caused_damage("yes");
-			else if(previous_data.getDriver_caused_damage().equalsIgnoreCase("other"))
-				previous_data.setDriver_caused_damage("no");
-			else
-			{}				
-			Log.i("driver caused damage", previous_data.getDriver_caused_damage());
+
+			if (previous_data.getDriver_caused_damage().equalsIgnoreCase(
+					getString(string.driver)))
+				previous_data.setDriver_caused_damage(getString(string.sealed_yes));
+			else if (previous_data.getDriver_caused_damage().equalsIgnoreCase(
+					getString(string.other)))
+				previous_data.setDriver_caused_damage(getString(string.sealed_no));
+			else {
+			}
+			Log.i("driver caused damage",
+					previous_data.getDriver_caused_damage());
 			bundle.putParcelable("updated_value", previous_data);
 			intent.putExtras(bundle);
 		}
-		
+
 		setResult(RESULT_OK, intent);
 		finish();
 	}
@@ -621,11 +633,11 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, "Logout");
+		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, getString(string.logout));
 
 		return super.onCreateOptionsMenu(menu);
 	}
-	
+
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		super.onOptionsItemSelected(item);
@@ -633,21 +645,22 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		switch (item.getItemId()) {
 
 		case Constants.LOGOUT:
+			CoreComponent.LOGOUT_CALL = true;
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");
-				ToastUI.showToast(getApplicationContext(), "Network unavailable");
-				
-			}
-			else{
-			ProgressDialogHelper.showProgressDialog(this, "", "Logging out...");
-			CoreComponent.logout(this);
+				ToastUI.showToast(getApplicationContext(),
+						getString(string.networkunavailable));
+
+			} else {
+				ProgressDialogHelper.showProgressDialog(this, "",
+						getString(string.loading));
+				CoreComponent.logout(this);
 			}
 			break;
 		}
 
 		return true;
 	}
-
 
 	public void onSuccessFinish(String response) {
 		this.response = response;
@@ -658,13 +671,17 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 	public void onError(String status) {
 		this.response = null;
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		if (CoreComponent.getErr() != null)
-			handler.sendEmptyMessage(Constants.TOAST);
+		error = status;
+		handler.sendEmptyMessage(Constants.TOAST);
 
 	}
 
 	public HTTPRequest createRequest() {
 
+		if(CoreComponent.LOGOUT_CALL){
+			return CoreComponent.getRequest(Constants.LOGOUT);
+		}
+		
 		if (typeofcall)
 			return CoreComponent.getRequest(Constants.DAMAGE_TYPE);
 		else

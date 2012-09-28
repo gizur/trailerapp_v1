@@ -11,26 +11,24 @@ import com.gslab.R.layout;
 import com.gslab.utils.Utility;
 
 public class DisplayDamageClaimImage extends Activity {
-	
+
 	ImageView imageview;
 	Bitmap bitmap;
 	Uri uri;
-	public void onCreate(Bundle savedInstanceState)
-	{
+
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(layout.displaydamageimage);
-		
+
 		imageview = (ImageView) findViewById(id.damage_claim_imageview_image);
-		
-		if(getIntent().getBooleanExtra("report_damage", true)){
-		uri = (Uri) getIntent().getExtras().getParcelable("uri");
-		imageview.setImageURI(uri);
+
+		if (getIntent().getBooleanExtra("report_damage", true)) {
+			uri = (Uri) getIntent().getExtras().getParcelable("uri");
+			imageview.setImageURI(uri);
+		} else {
+			imageview.setImageBitmap(Utility.BITMAP);
 		}
-		else
-		{
-			imageview.setImageBitmap(Utility.BITMAP);			
-		}
-		
+
 	}
 
 }

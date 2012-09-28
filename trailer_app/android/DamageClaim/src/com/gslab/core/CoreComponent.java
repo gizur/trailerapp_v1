@@ -36,21 +36,23 @@ import com.gslab.utils.Utility;
 
 public class CoreComponent {
 
-	private static UserInfo userinfo;
-	private static error err;
+	private static UserInfo userinfo = new UserInfo();
+	private static error err = new error();
 	private static HTTPRequest request;
 	private static String username, password, responseString;
 
 	private static Thread thread;
 	private static Runnable runnable;
-	
+
+	public static boolean LOGOUT_CALL = false;
+
 	private static int DIFFERENCE = 0;
-	
+
 	public static boolean SENDING_IMAGES = false;
 	public static String trailerid = null;
-	
-	public static MultipartEntity mpEntity;	
-	
+
+	public static MultipartEntity mpEntity;
+
 	public static String getResponseString() {
 		return responseString;
 	}
@@ -80,6 +82,8 @@ public class CoreComponent {
 	}
 
 	public static error getErr() {
+		if (err == null)
+			err = new error();
 		return err;
 	}
 
@@ -98,9 +102,8 @@ public class CoreComponent {
 	public static void setUserinfo(UserInfo userinfo) {
 		CoreComponent.userinfo = userinfo;
 	}
-	
-	public static void performInitialSettings()
-	{
+
+	public static void performInitialSettings() {
 		request.addHeader(NetworkCallRequirements.getUsernameString(),
 				CoreComponent.getUsername());
 
@@ -125,26 +128,26 @@ public class CoreComponent {
 		request = new HTTPRequest(URLList.getURL(url));
 
 		performInitialSettings();
-		
+
 		return request;
 	}
 
 	public synchronized static void processRequest(final String requestType,
 			final String model, final NetworkListener listener,
 			final HTTPRequest request) {
-		
+
 		if (!NetworkCallRequirements.isNetworkAvailable((Activity) listener)) {
-			Log.i("got it", "the network info");			
-			ToastUI.showToast( ((Activity) listener).getApplicationContext() , "Network unavailable");	
+			Log.i("got it", "the network info");
+			ToastUI.showToast(((Activity) listener).getApplicationContext(),
+					"Network unavailable");
 			listener.onError("Please check your network connection and retry");
 			return;
 		}
 
 		runnable = new Runnable() {
 
-			
 			public void run() {
-				
+
 				String timestamp = NetworkCallRequirements.getTimeStampValue();
 
 				request.addHeader(NetworkCallRequirements.getTimestampString(),
@@ -163,26 +166,31 @@ public class CoreComponent {
 					if (requestType.equalsIgnoreCase("get"))
 						request.execute(RequestMethod.GET);
 
-					Log.i("Response string:", request.getResponseString() + "---");
+					Log.i("Response string:", request.getResponseString()
+							+ "---");
 					Log.i("Response code:", request.getResponseCode() + "");
 
 					switch (request.getResponseCode()) {
 					case Constants.HTTP_STATUS_OK:
 						CoreComponent.setErr(null);
-						if (null != listener) {							
+						if (null != listener) {
 							listener.onSuccessFinish(request
 									.getResponseString());
 						}
+						if (new JSONObject(request.getResponseString())
+								.getString("success").equalsIgnoreCase("false")
+								&& listener != null)
+							listener.onError("Some unexpected error has occurred");
 						break;
 
 					case Constants.HTTP_FORBIDDEN:
-						Log.i("HTTP Stauts", "FORBIDDEN");						
-						if(checkForTIME_NO_IN_SYNC()){				
-							Log.i("time difference", "making a call again");							
-						processRequest(requestType, model, listener, listener.createRequest());		
-						Utility.waitForThread();
-						}
-						else
+						Log.i("HTTP Stauts", "FORBIDDEN");
+						if (checkForTIME_NO_IN_SYNC()) {
+							Log.i("time difference", "making a call again");
+							processRequest(requestType, model, listener,
+									listener.createRequest());
+							Utility.waitForThread();
+						} else if (listener != null)
 							listener.onError(request.getResponseString());
 						break;
 
@@ -191,22 +199,25 @@ public class CoreComponent {
 								new JSONObject(request.getResponseString())
 										.getJSONObject("error").toString(),
 								error.class));
-						//DIFFERENCE = 0;
 						responseString = request.getResponseString();
 						Log.i("Network Call Response", responseString);
-						listener.onError(request.getResponseString());
+						if (listener != null)
+							listener.onError(CoreComponent.getErr()
+									.getMessage());
 					}
 				} catch (Exception e) {
 					Log.i("Error message : ", request.getResponseCode() + "");
 					listener.onError(request.getResponseString());
-					e.printStackTrace();
+					if (listener != null)
+						e.printStackTrace();
 				}
-
+				responseString = request.getResponseString();
+				DIFFERENCE = 0;
 			}
 		};
 		thread = new Thread(runnable);
 		thread.start();
-		
+
 	}
 
 	public static String getUsername() {
@@ -232,59 +243,62 @@ public class CoreComponent {
 				DIFFERENCE = object.getInt("time_difference");
 				Log.i("got some difference", DIFFERENCE + "");
 				return true;
-				}
+			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 			return false;
 		}
-		return false;		
+		return false;
 	}
 
-	
 	@SuppressWarnings("deprecation")
-	public static void processRequestForImages(String requestType, String model,
-			NetworkListener listener, HTTPRequest request,
+	public static void processRequestForImages(String requestType,
+			String model, NetworkListener listener, HTTPRequest request,
 			ArrayList<Uri> imagePaths, Activity activity) {
 
-	
-		
-		
-		  try {
-			    
-		        for(int i = 0;i < imagePaths.size();i++){
-		        
-		        String[] projection = { MediaStore.Images.Media.DATA };
-		        Cursor cursor = activity.managedQuery(imagePaths.get(i), projection, null, null, null);
-		        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-		        cursor.moveToFirst();
-		        String path =  cursor.getString(column_index);		  		          
-		          
-		        Bitmap bitmap = BitmapFactory.decodeFile(path);  
-		  
-		        // you can change the format of you image compressed for what do you want;  
-		        //now it is set up to 640 x 480;  
-		  
-		        Bitmap bmpCompressed = Bitmap.createScaledBitmap(bitmap, 640, 480, true);  
-		        ByteArrayOutputStream bos = new ByteArrayOutputStream();  
-		  
-		        // CompressFormat set up to JPG, you can change to PNG or whatever you want;  
-		  
-		        bmpCompressed.compress(CompressFormat.JPEG, 100, bos);  
-		        byte[] data = bos.toByteArray(); 
-		        
-		        // sending a Image;  
-		        // note here, that you can send more than one image, just add another param, same rule to the String;  
-		        Log.i("Core Component", i + " added image");
-		        mpEntity.addPart("image"+i, new ByteArrayBody(data, "DamageImage"+i+".jpg"));		        
-		        Log.i("added to mpEntity", path);		        
-		        
-		        }
-		        CoreComponent.processRequest(requestType, model, listener, request);
-				
-          } catch (Exception e) {
-              e.printStackTrace();
-          }
-	
+		try {
+
+			for (int i = 0; i < imagePaths.size(); i++) {
+
+				String[] projection = { MediaStore.Images.Media.DATA };
+				Cursor cursor = activity.managedQuery(imagePaths.get(i),
+						projection, null, null, null);
+				int column_index = cursor
+						.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+				cursor.moveToFirst();
+				String path = cursor.getString(column_index);
+
+				Bitmap bitmap = BitmapFactory.decodeFile(path);
+
+				// you can change the format of you image compressed for what do
+				// you want;
+				// now it is set up to 640 x 480;
+
+				Bitmap bmpCompressed = Bitmap.createScaledBitmap(bitmap, 640,
+						480, true);
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+				// CompressFormat set up to JPG, you can change to PNG or
+				// whatever you want;
+
+				bmpCompressed.compress(CompressFormat.JPEG, 100, bos);
+				byte[] data = bos.toByteArray();
+
+				// sending a Image;
+				// note here, that you can send more than one image, just add
+				// another param, same rule to the String;
+				Log.i("Core Component", i + " added image");
+				mpEntity.addPart("image" + i, new ByteArrayBody(data,
+						"DamageImage" + i + ".jpg"));
+				Log.i("added to mpEntity", path);
+
+			}
+			CoreComponent.processRequest(requestType, model, listener, request);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public static MultipartEntity getMpEntity() {
@@ -297,21 +311,27 @@ public class CoreComponent {
 	}
 
 	public static void logout(Activity activity) {
-		
+
 		HTTPRequest request = getRequest(Constants.LOGOUT);
-		CoreComponent.processRequest(Constants.POST,
-				Constants.AUTHENTICATE, (NetworkListener)activity, request);	
-	
+
+		CoreComponent.processRequest(Constants.POST, Constants.AUTHENTICATE,
+				(NetworkListener) activity, request);
+
 		Utility.waitForThread();
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
+
+		SharedPreferences preferences = PreferenceManager
+				.getDefaultSharedPreferences(activity.getApplicationContext());
 		SharedPreferences.Editor editor = preferences.edit();
+
 		editor.putBoolean("credentials", false);
 		editor.commit();
-		Intent intent = new Intent(activity.getApplicationContext(), Login.class);		
+		Intent intent = new Intent(activity.getApplicationContext(),
+				Login.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 		activity.startActivity(intent);
 		activity.finish();
-		
+
+		CoreComponent.LOGOUT_CALL = false;
 	}
-	
+
 }

@@ -68,7 +68,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 	private Thread thread;
 
-	private String response;
+	private String response, error;
 
 	private Context context;
 
@@ -112,7 +112,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 			ToastUI.showToast(getApplicationContext(), "Network unavailable");
 
 		} else {
-			ProgressDialogHelper.showProgressDialog(this, "", "Loading");
+			ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
 			thread = new Thread(this);
 			thread.start();
 		}
@@ -137,6 +137,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 									object.getString("drivercauseddamage")));
 					Log.i(object.getString("damagetype"),
 							object.getString("damageposition"));
+					
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -165,8 +166,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 					ToastUI.showToast(context, CoreComponent.getErr()
 							.getMessage());
 				else
-					ToastUI.showToast(context,
-							"Some error has occurred. Please report this to the developers");
+					ToastUI.showToast(context, error);
 				break;
 
 			}
@@ -329,7 +329,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 						"Network unavailable");
 				return;
 			}
-			ProgressDialogHelper.showProgressDialog(this, "", "Submitting...");
+			ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
 			which_request = false;
 			HTTPRequest request = createRequest();
 
@@ -456,7 +456,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, "Logout");
+		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, getString(string.logout));
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -468,7 +468,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 		switch (item.getItemId()) {
 
 		case Constants.LOGOUT:
-
+			CoreComponent.LOGOUT_CALL = true;
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");
 				ToastUI.showToast(getApplicationContext(),
@@ -476,7 +476,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 			} else {
 				ProgressDialogHelper.showProgressDialog(this, "",
-						"Logging out...");
+						getString(string.loading));
 				CoreComponent.logout(this);
 			}
 			break;
@@ -514,13 +514,17 @@ public class ReportDamage extends Activity implements OnClickListener,
 	public void onError(String status) {
 		this.response = null;
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		if (CoreComponent.getErr() != null)
-			handler.sendEmptyMessage(Constants.TOAST);
+		error = status;
+		handler.sendEmptyMessage(Constants.TOAST);
 
 	}
 
 	public HTTPRequest createRequest() {
 
+		if(CoreComponent.LOGOUT_CALL){
+			return CoreComponent.getRequest(Constants.LOGOUT);
+		}
+		
 		if (which_request) {
 			return CoreComponent.getRequest(Constants.PREVIOUS_DAMAGES);
 		} else {

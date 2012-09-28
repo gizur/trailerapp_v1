@@ -12,6 +12,7 @@ public final class R {
     }
     public static final class color {
         /**  	Drawable Values 
+ 	Drawable Values 
          */
         public static final int app_theme=0x7f060000;
     }
@@ -97,11 +98,15 @@ public final class R {
         public static final int activity_title_damageinfo=0x7f05002a;
         public static final int addnewimage=0x7f050000;
         public static final int app_name=0x7f050001;
+        public static final int camera=0x7f05003d;
         public static final int confirm_new_password=0x7f05002f;
         public static final int damage_caused_by=0x7f050034;
         public static final int damaged_full_image=0x7f050020;
+        public static final int damagereportby=0x7f050039;
         public static final int damages=0x7f050031;
         public static final int dialog_title=0x7f050029;
+        public static final int driver=0x7f05003a;
+        public static final int gallery=0x7f05003e;
         public static final int homepage_button_reset=0x7f05002b;
         public static final int homepage_button_submit=0x7f05002c;
         public static final int homepage_textview_ID=0x7f050009;
@@ -114,14 +119,19 @@ public final class R {
         public static final int homepage_textview_trailertype=0x7f05000a;
         public static final int id_dialog_title=0x7f050012;
         public static final int listimage_adapter_description=0x7f05001e;
+        public static final int loading=0x7f050035;
         public static final int login_button_login=0x7f050006;
         public static final int login_password_hint=0x7f050005;
         public static final int login_pd=0x7f050030;
         public static final int login_textview=0x7f050003;
         public static final int login_username_hint=0x7f050004;
+        public static final int logout=0x7f050036;
         public static final int manifest_activity_title_damage_claim_image=0x7f050021;
+        public static final int networkunavailable=0x7f050037;
         public static final int new_password=0x7f05002e;
         public static final int old_password=0x7f05002d;
+        public static final int other=0x7f05003b;
+        public static final int problem=0x7f05003c;
         public static final int report_damage_button_report_new_damage=0x7f050022;
         public static final int report_damage_menu_item_delete=0x7f050026;
         public static final int report_damage_menu_title=0x7f050025;
@@ -141,6 +151,7 @@ public final class R {
         public static final int sealed_no=0x7f050014;
         public static final int sealed_yes=0x7f050013;
         public static final int submit_survey=0x7f050032;
+        public static final int surveyticketby=0x7f050038;
         public static final int title_activity_homepage=0x7f050007;
         public static final int title_activity_login=0x7f050002;
         public static final int toast_no_list_item_selected=0x7f050011;

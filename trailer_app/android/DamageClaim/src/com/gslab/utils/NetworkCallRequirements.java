@@ -2,7 +2,7 @@ package com.gslab.utils;
 
 import java.security.Key;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.Random;
 
 import javax.crypto.Mac;
@@ -34,7 +34,7 @@ public class NetworkCallRequirements {
 	private final static String GIZUR_CLOUD_SECRET_KEY = "9b45e67513cb3377b0b18958c4de55be";
 
 	private static int randomNumber;
-	
+
 	public static String getGizurCloudSecretKey() {
 		return GIZUR_CLOUD_SECRET_KEY;
 	}
@@ -82,11 +82,18 @@ public class NetworkCallRequirements {
 	@SuppressWarnings("deprecation")
 	public static String getTimeStampValue() {
 		SimpleDateFormat date = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ssZ");
-		Date d = new Date();
-		Log.i("before adding", d.toGMTString());
-		d.setSeconds(d.getSeconds() + CoreComponent.getDIFFERENCE());
-		Log.i("after adding", d.toGMTString());
-		String format = date.format(d);
+		// Date d = new Date();
+		// Log.i("before adding", d.toGMTString());
+		// d.setSeconds(d.getSeconds() + CoreComponent.getDIFFERENCE());
+		// Log.i("after adding", d.toGMTString());
+		// String format = date.format(d);
+
+		Calendar calendar = Calendar.getInstance();
+		Log.i("before adding", calendar.getTime().toGMTString());
+		calendar.set(calendar.SECOND,
+				calendar.SECOND + CoreComponent.getDIFFERENCE());
+		Log.i("after adding", calendar.getTime().toGMTString());
+		String format = date.format(calendar.getTime());
 		Log.i("Timestamp", format);
 		return format;
 	}
@@ -98,8 +105,8 @@ public class NetworkCallRequirements {
 	private static int generateRandomNumber() {
 		return new Random().nextInt(Constants.MAX);
 	}
-	
-	public static int getRandomNumber(){
+
+	public static int getRandomNumber() {
 		return randomNumber;
 	}
 
@@ -114,8 +121,8 @@ public class NetworkCallRequirements {
 		Log.i("Random number", randomNumber + "");
 		toencode = Constants.KEYID + getGizurApiKeyValue() + Constants.MODEL
 				+ model + Constants.TIMESTAMP + timestamp
-				+ Constants.UNIQUESALT + randomNumber + Constants.VERB
-				+ type + Constants.VERSION + "0.1";
+				+ Constants.UNIQUESALT + randomNumber + Constants.VERB + type
+				+ Constants.VERSION + "0.1";
 
 		Log.i("to encode string : ", toencode);
 		String afterBase64;

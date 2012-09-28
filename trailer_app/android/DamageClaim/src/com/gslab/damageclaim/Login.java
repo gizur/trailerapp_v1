@@ -36,6 +36,7 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 	private SharedPreferences preferences;
 	private SharedPreferences.Editor editor;
 	private String uname, pwd;
+	private static String error;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -49,12 +50,20 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 		if (preferences.getBoolean("credentials", false)) {
 			uname = preferences.getString("username", "username");
 			pwd = preferences.getString("password", "password");
-//			Log.i("login", "here");
-//			new Thread(){
-//				public void run(){
-//			login();
-//				}
-//			}.start();
+			// Log.i("login", "here");
+			// new Thread(){
+			// public void run(){
+			// login();
+			// }
+			// }.start();
+			if (!preferences.getString("accountname", "").equals(""))
+				;
+			CoreComponent.getUserinfo().setAccountname(
+					preferences.getString("accountname", ""));
+			if (!preferences.getString("contactname", "").equals(""))
+				;
+			CoreComponent.getUserinfo().setContactname(
+					preferences.getString("contactname", ""));
 			CoreComponent.setUsername(uname);
 			CoreComponent.setPassword(pwd);
 			Intent intent = new Intent(getApplicationContext(), HomePage.class);
@@ -89,17 +98,13 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 				break;
 
 			case Constants.TOAST:
-				ToastUI.showToast(context, CoreComponent.getErr().getMessage());
-				break;
-
-			case 2:
-				ToastUI.showToast(context,
-						"There seems to be an error.\nPlease report this to the developers");
+				ToastUI.showToast(context, error);
 				break;
 
 			default:
 				Log.i("Login.java", "in default case - handler");
-				ToastUI.showToast(context,
+				ToastUI.showToast(
+						context,
 						"There seems to be an error. Restart your connection.\n If problem exists, please report this to the developers");
 			}
 		}
@@ -109,8 +114,8 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 	private void login() {
 
 		ProgressDialogHelper.showProgressDialog(this, "",
-				getString(string.login_pd));
-		
+				getString(string.loading));
+
 		CoreComponent.setUsername(uname);
 		CoreComponent.setPassword(pwd);
 
@@ -123,7 +128,7 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 	private boolean performChecks() {
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), "Network unavailable");
+			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
 			return false;
 		}
 
@@ -140,7 +145,6 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 		if (v == loginButton) {
 
 			if (performChecks()) {
-			
 
 				uname = username.getText().toString();
 				pwd = password.getText().toString();
@@ -161,6 +165,10 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 		editor.putBoolean("credentials", true);
 		editor.putString("username", uname);
 		editor.putString("password", pwd);
+		editor.putString("contactname", CoreComponent.getUserinfo()
+				.getContactname());
+		editor.putString("accountname", CoreComponent.getUserinfo()
+				.getAccountname());
 		editor.commit();
 
 		Intent intent = new Intent(getApplicationContext(), HomePage.class);
@@ -173,10 +181,8 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 
 	public void onError(String status) {
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		if (CoreComponent.getErr() != null)
-			handler.sendEmptyMessage(Constants.TOAST);
-		else
-			handler.sendEmptyMessage(2);
+		status = error;
+		handler.sendEmptyMessage(Constants.TOAST);
 
 	}
 

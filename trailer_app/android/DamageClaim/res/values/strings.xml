@@ -53,6 +53,27 @@
 	<string name="submit_survey">Survey successfully submitted</string>
 	<string name="reportnewdamage_textview_damagecaused">Caused by:</string>
 	<string name="damage_caused_by">Damage caused by:</string>
+	<string name="loading">Loading</string>
+	
+	
+	
+	
+	
+	
+		<string name="logout">Logout</string>
+	<string name="networkunavailable">Network Error. Please check if your network is available and try again later!</string>
+	<string name="surveyticketby">Survey ticket by:</string>
+	<string name="damagereportby">Damage report by:</string>
+	<string name="driver">Driver</string>
+	<string name="other">Other</string>
+	<string name="problem">There is some problem with the server. Please report this to developers..</string>
+	<string name="camera">Camera</string>
+	<string name="gallery">Gallery</string>
+	
+	
+	
+	
+	
 	
 <!-- 	Drawable Values -->
 

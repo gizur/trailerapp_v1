@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -27,6 +28,7 @@ import android.widget.TextView;
 
 import com.gslab.R;
 import com.gslab.R.layout;
+import com.gslab.R.string;
 import com.gslab.adapters.ListImageAdapter;
 import com.gslab.core.CoreComponent;
 import com.gslab.helpers.DamageInfo;
@@ -51,11 +53,15 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 	private JSONObject object;
 	private JSONArray array;
+	
+	private Bitmap temp;
 
 	private String id[];
 	private String trouble_ticket_id, response, image_id;
 
 	private Context context;
+
+	private static String error;
 
 	private boolean FETCH_IMAGES;
 
@@ -90,7 +96,7 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 		gallery = (Gallery) findViewById(R.id.reportnewdamage_listview_damageimages);
 		gallery.setOnItemClickListener(this);
-		
+
 		damaged_images = new ArrayList<Bitmap>();
 
 		type.setText(type.getText() + " " + info.getWhatIsDamaged());
@@ -131,13 +137,7 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 				break;
 
 			case Constants.TOAST:
-				if (CoreComponent.getErr() != null) {
-					ToastUI.showToast(context, CoreComponent.getErr()
-							.getMessage());
-				} else {
-					ToastUI.showToast(context,
-							"An unexpected error has occurred, please report it to the developers");
-				}
+				ToastUI.showToast(context, error);
 				break;
 			}
 		}
@@ -146,21 +146,19 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 	private void setGalleryAdapter() {
 
-		int temp = gallery.getScrollX();
 		gallery.setAdapter(new ListImageAdapter(this, damaged_images));
-		gallery.setScrollX(temp);
 
 	}
 
 	private void getTroubleTicket(String id2) {
-		
+
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
 			ToastUI.showToast(getApplicationContext(), "Network unavailable");
 			return;
 		}
 
-		ProgressDialogHelper.showProgressDialog(this, "", "Loading...");
+		ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
 
 		id = null;
 
@@ -197,13 +195,15 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 		damaged_images.clear();
 
 		for (int i = 0; i < id.length; i++) {
-			Bitmap temp = BitmapFactory.decodeResource(getResources(),
+			temp = BitmapFactory.decodeResource(getResources(),
 					R.drawable.loading);
 			damaged_images.add(temp);
+			Log.i(getClass().getSimpleName(), id[i]);
 		}
 
 		handler.sendEmptyMessage(Constants.LISTVIEW);
 
+		int failures = 0;
 		for (int i = 0; i < id.length; i++) {
 			image_id = id[i];
 			HTTPRequest request = createRequest();
@@ -238,22 +238,29 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 						img.length, o2);
 				Log.i(getClass().getSimpleName(), "successfully decoded");
 
-				damaged_images.remove(i);
-				damaged_images.add(i, bitmap);
+				damaged_images.remove(i - failures);
+				damaged_images.add(0, bitmap);
 
 				handler.sendEmptyMessage(Constants.LISTVIEW);
 
-			} catch (Exception e) {
+			} catch(NullPointerException e) {
+				damaged_images.remove(i - failures);
+				failures++;
+				handler.sendEmptyMessage(Constants.LISTVIEW);
 				e.printStackTrace();
 			}
-
+			catch (Exception e) {
+				damaged_images.remove(i - failures);
+				handler.sendEmptyMessage(Constants.LISTVIEW);
+				e.printStackTrace();
+			}			
 		}
 
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		menu.add(Menu.NONE, 1, Menu.NONE, "Logout");
+		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, getString(string.logout));
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -267,13 +274,17 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 	public void onError(String status) {
 		this.response = null;
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		if (CoreComponent.getErr() != null)
-			handler.sendEmptyMessage(Constants.TOAST);
+		error = status;
+		handler.sendEmptyMessage(Constants.TOAST);
 
 	}
 
 	public HTTPRequest createRequest() {
 
+		if(CoreComponent.LOGOUT_CALL){
+			return CoreComponent.getRequest(Constants.LOGOUT);
+		}
+		
 		if (!FETCH_IMAGES) {
 
 			HTTPRequest request = new HTTPRequest(
@@ -296,15 +307,36 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 	}
 
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		super.onOptionsItemSelected(item);
+
+		switch (item.getItemId()) {
+
+		case Constants.LOGOUT:
+			CoreComponent.LOGOUT_CALL = true;
+			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+				Log.i("got it", "the network info");
+				ToastUI.showToast(getApplicationContext(),
+						"Network unavailable");
+
+			} else {
+				ProgressDialogHelper.showProgressDialog(this, "",
+						getString(string.loading));
+				CoreComponent.logout(this);
+			}
+			break;
+		}
+
+		return true;
+	}
+
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 
 		if (arg0 == gallery) {
 			Intent intent = new Intent(getApplicationContext(),
 					DisplayDamageClaimImage.class);
-			// Bitmap b = damaged_images.get((int) arg3);
-			// ByteArrayOutputStream bs = new ByteArrayOutputStream();
-			// b.compress(Bitmap.CompressFormat.PNG, 50, bs);
-			// intent.putExtra("byteArray", bs.toByteArray());
+
 			intent.putExtra("report_damage", false);
 			Utility.BITMAP = damaged_images.get((int) arg3);
 			startActivity(intent);

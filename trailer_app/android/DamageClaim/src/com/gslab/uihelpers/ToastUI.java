@@ -6,15 +6,14 @@ import android.widget.Toast;
 
 public class ToastUI {
 
-	public static void showToast(final Context context, final String message)
-	{		
-		new Thread(){
-			public void run(){
+	public static void showToast(final Context context, final String message) {
+		new Thread() {
+			public void run() {
 				Looper.prepare();
-		Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-		Looper.loop();
+				Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+				Looper.loop();
 			}
 		}.start();
 	}
-	
+
 }

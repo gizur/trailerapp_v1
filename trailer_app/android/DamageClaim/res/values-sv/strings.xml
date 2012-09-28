@@ -1,0 +1,109 @@
+<resources>
+
+    <string name="addnewimage">Add a new image:</string>
+    
+    <string name="app_name">DamageClaim</string>
+            
+    <string name="title_activity_login">DamageClaim</string>
+    
+    <string name="login_textview">Logga in</string>
+    <string name="login_username_hint">Username</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_button_login">Logga in</string>
+    
+	<string name="title_activity_homepage">Home Page</string>
+	
+	<string name="homepage_textview_survey">Kontrollbesiktning</string>
+	<string name="homepage_textview_ID">ID:</string>
+	<string name="homepage_textview_trailertype">Typ av trailer:</string>
+	<string name="homepage_textview_place">Plats:</string>
+	<string name="homepage_textview_sealed">Plomberad:</string>
+	<string name="homepage_textview_trailerinventory">Skivor och spännband</string>
+	
+	<string name="trailer_type_dialog_title">Select type of trailer:</string>
+	<string name="trailer_type_own">Egen</string>
+	<string name="trailer_type_rented">Hyrtrailer</string>
+	
+	<string name="toast_no_list_item_selected">Please select an item from the list</string>			
+	<string name="id_dialog_title">Select ID:</string>   
+	
+	<string name="sealed_yes">Ja</string>
+	<string name="sealed_no">Nej</string>
+	 
+	<string name="homepage_textview_plates">Skivor:</string>
+	<string name="homepage_textview_straps">Spännband:</string>
+	
+	<string name="report_new_damage_textview_damagedetails">Skadeuppgifter</string>
+	<string name="reportnewdamage_textview_type">Typ:</string>
+	<string name="reportnewdamage_textview_position">Position:</string>
+	<string name="reportnewdamage_select_type">Select type:</string>
+	<string name="reportnewdamage_select_position">Select position:</string>
+	<string name="report_new_damage_textview_damageimages">Foton</string>
+	<string name="reportnewdamage_button_addnewimage">Lägg till en bild</string>
+	
+	<string name="listimage_adapter_description">Image that describes the damage</string>
+	
+	<string name="reportnewdamage_button_done">Klar</string>
+	
+	<string name="damaged_full_image">Image showing the damage</string>
+	
+	<string name="manifest_activity_title_damage_claim_image">Image of the damage</string>
+	
+	<string name="report_damage_button_report_new_damage">Rapportera en ny skada</string>
+	<string name="report_damage_textview_previously_reported_damages">Rapporterade skador</string>
+	<string name="report_damage_textview_reporting_damage">Skada rapporteras</string>
+	<string name="report_damage_menu_title">Options:</string>
+	<string name="report_damage_menu_item_delete">Delete</string>
+	
+	<string name="reportnewdamage_textview_damageimages">Damage Images</string>
+	<string name="reportdamage_textview_empty">List is empty</string>
+	
+	<string name="dialog_title">Select an option:</string>
+	<string name="activity_title_damageinfo">Damage claim information</string>
+	
+	<string name="homepage_button_reset">Nollställ</string>
+	<string name="homepage_button_submit">Skicka</string>
+	
+	<string name="old_password">Old password</string>
+	<string name="new_password">New password</string>
+	<string name="confirm_new_password">Confirm new password</string>
+		
+	<string name="damages">Skador</string>
+	<string name="submit_survey">Survey successfully submitted</string>
+	
+	<string name="reportnewdamage_textview_damagecaused">Orsakad av:</string>
+	
+	<string name="damage_caused_by">Damage caused by:</string>
+	<string name="loading">Laddar</string>
+	
+	
+	
+	
+	
+	
+	<string name="logout">Logga ut</string>
+	<string name="networkunavailable">Kan inte kontakta servern. Kontrollera nätverket och försök igen.</string>
+	<string name="surveyticketby">Kontrollbesiktning gjord av:</string>
+	<string name="damagereportby">Skaderapport gjord av:</string>
+	<string name="driver">Chaufför</string>
+	<string name="other">Annan</string>
+	<string name="problem">Problem med tjänsten, kontakta support.</string>
+	<string name="camera">Kamera</string>
+	<string name="gallery">Kamerarulle</string>
+	
+	
+	
+<!-- 	Drawable Values -->
+
+
+
+	<color name="app_theme">#F3F3F3</color>
+	
+	
+	
+	<drawable name="all_textviews">#6E6E6E</drawable>
+	<drawable name="all_screens">#F3F3F3</drawable>
+	
+	
+    
+</resources>
