@@ -142,7 +142,7 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		checkDoneButtonStatus();
 	}
 
-	private static Handler handler = new Handler() {
+	private Handler handler = new Handler() {
 
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
@@ -151,12 +151,17 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 				break;
 
 			case Constants.TOAST:
-				ToastUI.showToast(context, error);
+				errordialog();
 				break;
 			}
 		}
 	};
 
+	private void errordialog()
+	{
+		Utility.showErrorDialog(this);
+	}
+	
 	private void loadPreviousData() {
 		type.setText(getString(string.reportnewdamage_textview_type) + " "
 				+ previous_data.getWhatIsDamaged());
@@ -190,12 +195,14 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
 			return;
 		}
 
 		typeofcall = true;
-		ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
+		ProgressDialogHelper.showProgressDialog(this, "",
+				getString(string.loading));
 
 		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
 				createRequest());
@@ -288,10 +295,9 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 					startActivityForResult(intent, Constants.CAMERA);
 				} catch (UnsupportedOperationException e) {
 					ToastUI.showToast(context,
-							"There is a problem. Please insert the SD card and check again");
+							getString(string.sdcard));
 				} catch (Exception e) {
-					ToastUI.showToast(context,
-							getString(string.problem));
+					ToastUI.showToast(context, getString(string.problem));
 				}
 
 			}
@@ -388,7 +394,7 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 					.toString()
 					.equalsIgnoreCase(
 							getString(string.reportnewdamage_textview_type))) {
-				ToastUI.showToast(getApplicationContext(), "Select type first");
+				ToastUI.showToast(getApplicationContext(), getString(string.selecttype));
 				return;
 			}
 			selection = Constants.POSITION;
@@ -430,12 +436,14 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
 			return;
 		}
 
 		typeofcall = false;
-		ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
+		ProgressDialogHelper.showProgressDialog(this, "",
+				getString(string.loading));
 
 		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
 				createRequest());
@@ -489,10 +497,12 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 			if (previous_data.getDriver_caused_damage().equalsIgnoreCase(
 					getString(string.driver)))
-				previous_data.setDriver_caused_damage(getString(string.sealed_yes));
+				previous_data
+						.setDriver_caused_damage(getString(string.sealed_yes));
 			else if (previous_data.getDriver_caused_damage().equalsIgnoreCase(
 					getString(string.other)))
-				previous_data.setDriver_caused_damage(getString(string.sealed_no));
+				previous_data
+						.setDriver_caused_damage(getString(string.sealed_no));
 			else {
 			}
 			Log.i("driver caused damage",
@@ -633,7 +643,10 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, getString(string.logout));
+		
+		//menu.add(Menu.NONE, 2, Menu.NONE, getString(string.resetpassword));
+		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE,
+				getString(string.logout));
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -657,6 +670,9 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 				CoreComponent.logout(this);
 			}
 			break;
+		case 2 : Intent intent = new Intent(getApplicationContext(), PasswordReset.class);
+		startActivity(intent);
+		break;
 		}
 
 		return true;
@@ -678,10 +694,10 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 	public HTTPRequest createRequest() {
 
-		if(CoreComponent.LOGOUT_CALL){
+		if (CoreComponent.LOGOUT_CALL) {
 			return CoreComponent.getRequest(Constants.LOGOUT);
 		}
-		
+
 		if (typeofcall)
 			return CoreComponent.getRequest(Constants.DAMAGE_TYPE);
 		else

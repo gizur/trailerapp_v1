@@ -15,6 +15,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.StringEntity;
@@ -38,7 +39,7 @@ public class HTTPRequest {
 	private String body;
 
 	public enum RequestMethod {
-		GET, POST
+		GET, POST, PUT
 	}
 
 	public HTTPRequest(String url) {
@@ -114,6 +115,24 @@ public class HTTPRequest {
 			executeRequest(request, url);
 			break;
 		}
+		
+		case PUT: {
+			HttpPut request = new HttpPut(url);
+			for(NameValuePair h : headers) {
+				request.addHeader(h.getName(), h.getValue());
+				Log.i("header info : ", h.getName() + " : " + h.getValue());
+			}
+			
+			if(!params.isEmpty())
+				request.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+			if(body != null) {
+				StringEntity entity = new StringEntity(body, HTTP.UTF_8);
+				entity.setContentType("application/json");
+				request.setEntity(entity);
+			}
+			executeRequest(request, url);
+		}
+		
 		}
 	}
 

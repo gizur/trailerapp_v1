@@ -12,10 +12,15 @@ public class ProgressDialogHelper {
 			final String title, final String message) {
 		new Thread() {
 			public void run() {
+				try{
 				Looper.prepare();
 				dismissProgressDialog();
 				pd = ProgressDialog.show(context, title, message);
 				Looper.loop();
+				}
+				catch(Exception e){
+					e.printStackTrace();
+				}
 			}
 		}.start();
 	}

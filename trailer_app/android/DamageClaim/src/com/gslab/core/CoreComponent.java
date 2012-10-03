@@ -22,6 +22,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.gslab.R.string;
 import com.gslab.damageclaim.Login;
 import com.gslab.helpers.UserInfo;
 import com.gslab.helpers.error;
@@ -29,6 +30,7 @@ import com.gslab.interfaces.Constants;
 import com.gslab.interfaces.NetworkListener;
 import com.gslab.networking.HTTPRequest;
 import com.gslab.networking.HTTPRequest.RequestMethod;
+import com.gslab.uihelpers.ProgressDialogHelper;
 import com.gslab.uihelpers.ToastUI;
 import com.gslab.utils.NetworkCallRequirements;
 import com.gslab.utils.URLList;
@@ -165,6 +167,8 @@ public class CoreComponent {
 						request.execute(RequestMethod.POST);
 					if (requestType.equalsIgnoreCase("get"))
 						request.execute(RequestMethod.GET);
+					if(requestType.equalsIgnoreCase("PUT"))
+						request.execute(RequestMethod.PUT);
 
 					Log.i("Response string:", request.getResponseString()
 							+ "---");
@@ -212,7 +216,7 @@ public class CoreComponent {
 						e.printStackTrace();
 				}
 				responseString = request.getResponseString();
-				DIFFERENCE = 0;
+			//	DIFFERENCE = 0;
 			}
 		};
 		thread = new Thread(runnable);
@@ -314,21 +318,28 @@ public class CoreComponent {
 
 		HTTPRequest request = getRequest(Constants.LOGOUT);
 
+		ProgressDialogHelper.showProgressDialog(activity, "", activity.getString(string.loading));
+		
 		CoreComponent.processRequest(Constants.POST, Constants.AUTHENTICATE,
 				(NetworkListener) activity, request);
 
 		Utility.waitForThread();
 
+		ProgressDialogHelper.dismissProgressDialog();
+		
 		SharedPreferences preferences = PreferenceManager
 				.getDefaultSharedPreferences(activity.getApplicationContext());
 		SharedPreferences.Editor editor = preferences.edit();
 
 		editor.putBoolean("credentials", false);
+		NetworkCallRequirements.setGIZUR_API_KEY_VALUE("");
+		NetworkCallRequirements.setGIZUR_CLOUD_SECRET_KEY("");
 		editor.commit();
 		Intent intent = new Intent(activity.getApplicationContext(),
 				Login.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 		activity.startActivity(intent);
+		
 		activity.finish();
 
 		CoreComponent.LOGOUT_CALL = false;

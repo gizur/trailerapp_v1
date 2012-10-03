@@ -39,7 +39,7 @@ public class HomePage extends Activity implements OnClickListener,
 		NetworkListener, Runnable {
 
 	private TextView trailertype, id, place, sealed, plates, straps;
-	private ArrayList<String> values, sealed_labels;
+	private ArrayList<String> values, sealed_labels, ids;
 
 	private RelativeLayout trailerinventory;
 
@@ -115,18 +115,22 @@ public class HomePage extends Activity implements OnClickListener,
 				break;
 
 			case Constants.TOAST:
-				ToastUI.showToast(context, error);
+				errordialog();
 				break;
 
 			}
 
 		}
 	};
+	
+	private void errordialog()
+	{
+		Utility.showErrorDialog(this);
+	}
 
 	private void setSealedValue() {
-		sealed.setText(getString(string.homepage_textview_sealed)
-				+ " "
-				+ values.get(sealed_labels.indexOf("No")));
+		sealed.setText(getString(string.homepage_textview_sealed) + " "
+				+ values.get(sealed_labels.indexOf(getString(string.sealed_no))));
 	}
 
 	private void getPlateValues() {
@@ -156,14 +160,17 @@ public class HomePage extends Activity implements OnClickListener,
 	{
 
 		values.clear();
-
+		ids = new ArrayList<String>();
+		
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
 			return;
 		}
 
-		ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
+		ProgressDialogHelper.showProgressDialog(this, "",
+				getString(string.loading));
 
 		CoreComponent.processRequest(Constants.GET, Constants.ASSETS, this,
 				createRequest());
@@ -173,7 +180,11 @@ public class HomePage extends Activity implements OnClickListener,
 				object = new JSONObject(response);
 				array = object.getJSONArray("result");
 				for (int i = 0; i < array.length(); i++) {
-					values.add(array.getJSONObject(i).getString("id"));
+					if (array.getJSONObject(i).getString("assetstatus")
+							.equalsIgnoreCase("In Service")){
+						values.add(array.getJSONObject(i).getString("assetname"));
+						ids.add(array.getJSONObject(i).getString("id"));
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -199,10 +210,12 @@ public class HomePage extends Activity implements OnClickListener,
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
 			return;
 		}
-		ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
+		ProgressDialogHelper.showProgressDialog(this, "",
+				getString(string.loading));
 
 		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
 				createRequest());
@@ -212,9 +225,11 @@ public class HomePage extends Activity implements OnClickListener,
 				object = new JSONObject(response);
 				array = object.getJSONArray("result");
 				for (int i = 0; i < array.length(); i++) {
-					if(array.getJSONObject(i).getString("label").equalsIgnoreCase("yes"))
+					if (array.getJSONObject(i).getString("label")
+							.equalsIgnoreCase(getString(string.sealed_yes)))
 						values.add(getString(string.sealed_yes));
-					if(array.getJSONObject(i).getString("label").equalsIgnoreCase("no"))
+					if (array.getJSONObject(i).getString("label")
+							.equalsIgnoreCase(getString(string.sealed_no)))
 						values.add(getString(string.sealed_no));
 					sealed_labels
 							.add(array.getJSONObject(i).getString("label"));
@@ -241,8 +256,10 @@ public class HomePage extends Activity implements OnClickListener,
 					+ values.get((int) id));
 			if (values.get((int) id).equalsIgnoreCase(""))
 				CoreComponent.trailerid = null;
-			else
-				CoreComponent.trailerid = values.get((int) id);
+			else {
+				CoreComponent.trailerid = ids.get((int) id);
+				Log.i(getClass().getSimpleName(), CoreComponent.trailerid + "");
+			}
 			checkSubmitButtonStatus();
 			break;
 
@@ -306,6 +323,7 @@ public class HomePage extends Activity implements OnClickListener,
 		straps.setText(getString(string.homepage_textview_straps));
 		trailerinventory.setVisibility(RelativeLayout.VISIBLE);
 		submit.setEnabled(false);
+		CoreComponent.trailerid = null;
 	}
 
 	public void onClick(View v) {
@@ -350,14 +368,16 @@ public class HomePage extends Activity implements OnClickListener,
 			selection = Constants.PLATES;
 			getPlateValues();
 			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.homepage_textview_plates), values, Constants.HOMEPAGE);
+					getString(string.homepage_textview_plates), values,
+					Constants.HOMEPAGE);
 		}
 
 		if (v == straps) {
 			selection = Constants.STRAPS;
 			getStrapsValues();
 			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.homepage_textview_straps), values, Constants.HOMEPAGE);
+					getString(string.homepage_textview_straps), values,
+					Constants.HOMEPAGE);
 		}
 
 		if (v == damages) {
@@ -373,9 +393,11 @@ public class HomePage extends Activity implements OnClickListener,
 			if (id.getText().toString()
 					.equalsIgnoreCase(getString(string.homepage_textview_ID))) {
 				ToastUI.showToast(getApplicationContext(),
-						"Please select id first");
+						getString(string.selectid));
 				return;
 			}
+
+			selection = Constants.SUBMIT;
 
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");
@@ -384,21 +406,21 @@ public class HomePage extends Activity implements OnClickListener,
 				return;
 			}
 
-			ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
+			ProgressDialogHelper.showProgressDialog(this, "",
+					getString(string.loading));
 
 			HTTPRequest request = CoreComponent
 					.getRequest(Constants.HELPDESK_URL);
-			request.addParam("ticket_title", getString(string.surveyticketby) + CoreComponent.getUserinfo()
-					.getContactname());
+			request.addParam("ticket_title", getString(string.surveyticketby)
+					+ CoreComponent.getUserinfo().getContactname());
 			request.addParam("ticketstatus", "closed");
 			request.addParam("trailerid", id.getText().toString());
 			request.addParam("reportdamage", "no");
 			CoreComponent.processRequest(Constants.POST, Constants.HELPDESK,
 					this, request);
 
-			Utility.waitForThread();
-			CoreComponent.trailerid = id.getText().toString();
-			Log.i("trailer id stored value", id.getText().toString());
+			Utility.waitForThread();		
+			
 			if (this.response != null) {
 				ToastUI.showToast(getApplicationContext(),
 						getString(string.submit_survey));
@@ -410,8 +432,12 @@ public class HomePage extends Activity implements OnClickListener,
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		menu.add(Menu.NONE, 1, Menu.NONE, getString(string.homepage_button_reset));
-		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, getString(string.logout));
+		menu.add(Menu.NONE, 1, Menu.NONE,
+				getString(string.homepage_button_reset));
+		
+	//	menu.add(Menu.NONE, 2, Menu.NONE, getString(string.resetpassword));
+		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE,
+				getString(string.logout));
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -436,10 +462,14 @@ public class HomePage extends Activity implements OnClickListener,
 				Log.i(getClass().getSimpleName(), "logging out");
 				ProgressDialogHelper.showProgressDialog(this, "",
 						getString(string.loading));
-				Log.i(getClass().getSimpleName(), URLList.getURL(Constants.LOGOUT));
+				Log.i(getClass().getSimpleName(),
+						URLList.getURL(Constants.LOGOUT));
 				CoreComponent.logout(this);
 			}
 			break;
+		case 2 : Intent intent = new Intent(getApplicationContext(), PasswordReset.class);
+		startActivity(intent);
+		break;
 		}
 
 		return true;
@@ -462,21 +492,19 @@ public class HomePage extends Activity implements OnClickListener,
 
 	public void run() {
 		getSealedValues();
-		if (sealed_labels.contains("No")) {
+		if (sealed_labels.contains(getString(string.sealed_no))) {
 			handler.sendEmptyMessage(1);
 
-		} else
-			ToastUI.showToast(getApplicationContext(),
-					"Cannot get default value for sealed option");
+		}
 
 	}
 
 	public HTTPRequest createRequest() {
 
-		if(CoreComponent.LOGOUT_CALL){
+		if (CoreComponent.LOGOUT_CALL) {
 			return CoreComponent.getRequest(Constants.LOGOUT);
 		}
-		
+
 		HTTPRequest request = null;
 		Log.i("selection", selection + "");
 		switch (selection) {
@@ -488,9 +516,16 @@ public class HomePage extends Activity implements OnClickListener,
 		case Constants.SEALED:
 			request = CoreComponent.getRequest(Constants.SEALED);
 			break;
+
+		case Constants.SUBMIT:
+			request = CoreComponent.getRequest(Constants.HELPDESK_URL);
+			request.addParam("ticket_title", getString(string.surveyticketby)
+					+ CoreComponent.getUserinfo().getContactname());
+			request.addParam("ticketstatus", "closed");
+			request.addParam("trailerid", id.getText().toString());
+			request.addParam("reportdamage", "no");
 		}
 		return request;
 
 	}
-
 }

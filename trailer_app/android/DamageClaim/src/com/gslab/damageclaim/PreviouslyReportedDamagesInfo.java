@@ -53,7 +53,7 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 	private JSONObject object;
 	private JSONArray array;
-	
+
 	private Bitmap temp;
 
 	private String id[];
@@ -137,12 +137,17 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 				break;
 
 			case Constants.TOAST:
-				ToastUI.showToast(context, error);
+				errordialog();
 				break;
 			}
 		}
 
 	};
+	
+	private void errordialog()
+	{
+		Utility.showErrorDialog(this);
+	}
 
 	private void setGalleryAdapter() {
 
@@ -154,11 +159,12 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), "Network unavailable");
+			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
 			return;
 		}
 
-		ProgressDialogHelper.showProgressDialog(this, "", getString(string.loading));
+		ProgressDialogHelper.showProgressDialog(this, "",
+				getString(string.loading));
 
 		id = null;
 
@@ -182,7 +188,7 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 				FETCH_IMAGES = false;
 			} catch (JSONException e) {
 				e.printStackTrace();
-				ToastUI.showToast(context, "No images for this damage");
+				ToastUI.showToast(context, getString(string.noimages));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -243,24 +249,26 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 				handler.sendEmptyMessage(Constants.LISTVIEW);
 
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				damaged_images.remove(i - failures);
 				failures++;
 				handler.sendEmptyMessage(Constants.LISTVIEW);
 				e.printStackTrace();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				damaged_images.remove(i - failures);
 				handler.sendEmptyMessage(Constants.LISTVIEW);
 				e.printStackTrace();
-			}			
+			}
 		}
 
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE, getString(string.logout));
+		
+		//menu.add(Menu.NONE, 2, Menu.NONE, getString(string.resetpassword));
+		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE,
+				getString(string.logout));
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -281,10 +289,10 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 	public HTTPRequest createRequest() {
 
-		if(CoreComponent.LOGOUT_CALL){
+		if (CoreComponent.LOGOUT_CALL) {
 			return CoreComponent.getRequest(Constants.LOGOUT);
 		}
-		
+
 		if (!FETCH_IMAGES) {
 
 			HTTPRequest request = new HTTPRequest(
@@ -318,7 +326,7 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");
 				ToastUI.showToast(getApplicationContext(),
-						"Network unavailable");
+						getString(string.networkunavailable));
 
 			} else {
 				ProgressDialogHelper.showProgressDialog(this, "",
@@ -326,6 +334,10 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 				CoreComponent.logout(this);
 			}
 			break;
+			
+		case 2 : Intent intent = new Intent(getApplicationContext(), PasswordReset.class);
+		startActivity(intent);
+		break;
 		}
 
 		return true;

@@ -1,7 +1,9 @@
 package com.gslab.damageclaim;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.google.gson.Gson;
 import com.gslab.R;
@@ -37,10 +40,16 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 	private SharedPreferences.Editor editor;
 	private String uname, pwd;
 	private static String error;
+	private ImageView imageview;
+	private boolean login_req = true;
+	private String response;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
+
+		imageview = (ImageView) findViewById(id.info_image);
+		imageview.setOnClickListener(this);
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		editor = preferences.edit();
@@ -86,7 +95,7 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 		}
 	}
 
-	private static Handler handler = new Handler() {
+	private Handler handler = new Handler() {
 
 		public void handleMessage(Message msg) {
 
@@ -98,18 +107,44 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 				break;
 
 			case Constants.TOAST:
-				ToastUI.showToast(context, error);
+				//ToastUI.showToast(context, context.getString(string.problem));
+				showErrorDialog();
 				break;
 
 			default:
 				Log.i("Login.java", "in default case - handler");
-				ToastUI.showToast(
-						context,
-						"There seems to be an error. Restart your connection.\n If problem exists, please report this to the developers");
+				ToastUI.showToast(context, context.getString(string.problem));
 			}
 		}
 
 	};
+	
+	private void showErrorDialog()
+	{
+		final Activity act = this;
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(getString(string.invalidlogin))
+				.setCancelable(false)
+				.setPositiveButton(getString(string.resetpassword),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int id) {
+								
+//								Intent intent = new Intent(act.getApplicationContext(), PasswordReset.class);
+//								startActivity(intent);
+								
+							}
+						})
+				.setNegativeButton(getString(string.cancel),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int id) {
+								dialog.cancel();
+							}
+						});
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
 
 	private void login() {
 
@@ -128,12 +163,13 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 	private boolean performChecks() {
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
 			return false;
 		}
 
 		if (!Utility.isEmailValid(username.getText().toString())) {
-			ToastUI.showToast(context, "Enter a valid email id");
+			ToastUI.showToast(context, getString(string.validemail));
 			return false;
 		}
 
@@ -155,40 +191,74 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 
 		}
 
+		if (v == imageview) {
+			login_req = false;
+
+			ProgressDialogHelper.showProgressDialog(this,
+					"", getString(string.loading));
+
+			CoreComponent.processRequest(Constants.GET, Constants.ABOUT, this,
+					createRequest());
+			Utility.waitForThread();
+			
+			//ProgressDialogHelper.dismissProgressDialog();
+
+			Intent intent = new Intent(getApplicationContext(), About.class);
+			intent.putExtra("about", response);
+			startActivity(intent);
+
+			login_req = true;
+
+		}
+
 	}
 
 	public void onSuccessFinish(String response) {
 
-		CoreComponent
-				.setUserinfo(new Gson().fromJson(response, UserInfo.class));
+		if (login_req) {
+			CoreComponent.setUserinfo(new Gson().fromJson(response,
+					UserInfo.class));
 
-		editor.putBoolean("credentials", true);
-		editor.putString("username", uname);
-		editor.putString("password", pwd);
-		editor.putString("contactname", CoreComponent.getUserinfo()
-				.getContactname());
-		editor.putString("accountname", CoreComponent.getUserinfo()
-				.getAccountname());
-		editor.commit();
+			editor.putBoolean("credentials", true);
+			editor.putString("username", uname);
+			editor.putString("password", pwd);
+			editor.putString("contactname", CoreComponent.getUserinfo()
+					.getContactname());
+			editor.putString("accountname", CoreComponent.getUserinfo()
+					.getAccountname());
+			editor.commit();
 
-		Intent intent = new Intent(getApplicationContext(), HomePage.class);
-		startActivity(intent);
+			Intent intent = new Intent(getApplicationContext(), HomePage.class);
+			startActivity(intent);
+			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
+			finish();
+		} else{
+			this.response = response;
+			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
+		}
 
-		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		finish();
+		
 
 	}
 
 	public void onError(String status) {
+		if (login_req) {
+			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
+			status = error;
+			handler.sendEmptyMessage(Constants.TOAST);
+		}
+		else{
+		this.response = status;
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		status = error;
-		handler.sendEmptyMessage(Constants.TOAST);
-
+		}
+		
 	}
 
 	public HTTPRequest createRequest() {
-
-		return CoreComponent.getRequest(Constants.LOGIN);
+		if (login_req)
+			return CoreComponent.getRequest(Constants.LOGIN);
+		else
+			return CoreComponent.getRequest(Constants.ABOUT_URL);
 	}
 
 }

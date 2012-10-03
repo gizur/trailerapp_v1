@@ -3,13 +3,19 @@ package com.gslab.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.gslab.R.string;
 import com.gslab.core.CoreComponent;
+import com.gslab.damageclaim.PasswordReset;
 
 public class Utility {
 
@@ -62,5 +68,43 @@ public class Utility {
 			isValid = true;
 		}
 		return isValid;
+	}
+
+	public static String parseQueryParameter(String param) {
+		if (param.contains("\"")) {
+			param = param.substring(param.indexOf("\"") + 1, param.length());
+
+			if (param.lastIndexOf("\"") != -1)
+				param = param.substring(0, param.lastIndexOf("\""));
+			else
+				param = param.substring(0, param.length());
+		}
+		return param;
+	}
+	
+	public static void showErrorDialog(final Activity activity)
+	{
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setMessage(activity.getString(string.problem))
+				.setCancelable(false)
+				.setPositiveButton(activity.getString(string.logout),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int id) {
+								
+								CoreComponent.logout(activity);
+								
+							}
+						})
+				.setNegativeButton(activity.getString(string.close),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int id) {
+								dialog.cancel();
+							}
+						});
+		AlertDialog alert = builder.create();
+		alert.show();
 	}
 }

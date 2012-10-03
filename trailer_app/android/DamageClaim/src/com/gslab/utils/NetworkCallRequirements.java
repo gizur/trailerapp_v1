@@ -30,8 +30,17 @@ public class NetworkCallRequirements {
 
 	private final static String ACCEPT_VALUE = "text/json";
 	private final static String ACCEPT_LANGUAGE_VALUE = "sv,en-us,en;q=0.5";
-	private final static String GIZUR_API_KEY_VALUE = "GZCLDFC4B35B";
-	private final static String GIZUR_CLOUD_SECRET_KEY = "9b45e67513cb3377b0b18958c4de55be";
+
+	public static void setGIZUR_API_KEY_VALUE(String gIZUR_API_KEY_VALUE) {
+		GIZUR_API_KEY_VALUE = gIZUR_API_KEY_VALUE;
+	}
+
+	public static void setGIZUR_CLOUD_SECRET_KEY(String gIZUR_CLOUD_SECRET_KEY) {
+		GIZUR_CLOUD_SECRET_KEY = gIZUR_CLOUD_SECRET_KEY;
+	}
+
+	private static String GIZUR_API_KEY_VALUE = "";
+	private static String GIZUR_CLOUD_SECRET_KEY = "";
 
 	private static int randomNumber;
 
@@ -90,8 +99,9 @@ public class NetworkCallRequirements {
 
 		Calendar calendar = Calendar.getInstance();
 		Log.i("before adding", calendar.getTime().toGMTString());
-		calendar.set(calendar.SECOND,
+		calendar.set(Calendar.SECOND,
 				calendar.SECOND + CoreComponent.getDIFFERENCE());
+		Log.i("Calculating time stamp value", CoreComponent.getDIFFERENCE() + "");
 		Log.i("after adding", calendar.getTime().toGMTString());
 		String format = date.format(calendar.getTime());
 		Log.i("Timestamp", format);
@@ -116,6 +126,9 @@ public class NetworkCallRequirements {
 
 	public static String getSignatureValue(String timestamp, String type,
 			String model) {
+		
+		Log.i("-------------------------", "Coming and generating signature");
+		
 		String toencode = "";
 		randomNumber = generateRandomNumber();
 		Log.i("Random number", randomNumber + "");

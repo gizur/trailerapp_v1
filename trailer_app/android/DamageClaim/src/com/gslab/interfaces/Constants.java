@@ -9,14 +9,14 @@ public interface Constants {
 	public static final int SEALED = 4;
 	public static final int PLATES = 5;
 	public static final int STRAPS = 6;
+	public static final int SUBMIT = 7;
 
 	public static final int HOMEPAGE = 11;
 	public static final int REPORT_NEW_DAMAGE = 12;
 
 	public static final int YES = 0;
 	public static final int NO = 1;
-	
-	
+
 	public static final int REPORT_DAMAGE = 1;
 	public static final int LOGOUT = 200;
 
@@ -37,11 +37,14 @@ public interface Constants {
 	public static final int PREVIOUS_DAMAGES = 54;
 	public static final int DAMAGE_TYPE = 55;
 	public static final int DOCUMENT_ATTACHMENT = 56;
+	public static final int ABOUT_URL = 57;
+	public static final int CHANGE_PWD = 58;
 
 	public static final int TOAST = 72;
 
 	public static final String POST = "POST";
 	public static final String GET = "GET";
+	public static final String PUT = "PUT";
 
 	public static final int DISMISS_DIALOG = 71;
 
