@@ -54,7 +54,6 @@ public class PasswordReset extends Activity implements OnClickListener, NetworkL
 		}
 	};
 
-	@Override
 	public void onClick(View v) {
 
 		if (v == submit) {
@@ -93,7 +92,6 @@ public class PasswordReset extends Activity implements OnClickListener, NetworkL
 		
 	}
 
-	@Override
 	public void onSuccessFinish(String response) {
 		
 		Log.i(getClass().getSimpleName(), "success");
@@ -101,14 +99,12 @@ public class PasswordReset extends Activity implements OnClickListener, NetworkL
 		
 	}
 
-	@Override
 	public void onError(String status) {
 		Log.i(getClass().getSimpleName(), "error");
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 		Utility.showErrorDialog(this);
 	}
 
-	@Override
 	public HTTPRequest createRequest() {
 		HTTPRequest request = CoreComponent.getRequest(Constants.CHANGE_PWD);
 		return request;

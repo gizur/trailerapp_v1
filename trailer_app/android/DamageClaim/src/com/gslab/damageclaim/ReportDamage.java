@@ -404,6 +404,8 @@ public class ReportDamage extends Activity implements OnClickListener,
 				reporting_damage_list.clear();
 				ToastUI.showToast(getApplicationContext(),
 						getString(string.damagessubmitted));
+				CoreComponent.trailerid = null;
+				finish();
 			} else
 				ToastUI.showToast(getApplicationContext(),
 						getString(string.errorreporting));
@@ -411,7 +413,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 			checkVisibility();
 			CoreComponent.SENDING_IMAGES = false;
 			which_request = true;
-			getReportedDamagesList();
+//			getReportedDamagesList();
 		}
 	}
 

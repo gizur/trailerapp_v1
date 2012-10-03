@@ -424,10 +424,19 @@ public class HomePage extends Activity implements OnClickListener,
 			if (this.response != null) {
 				ToastUI.showToast(getApplicationContext(),
 						getString(string.submit_survey));
+				setDefaultValues();
 			}
 
 		}
 
+	}
+	
+	
+
+	@Override
+	protected void onResume() {
+		setDefaultValues();
+		super.onResume();
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
