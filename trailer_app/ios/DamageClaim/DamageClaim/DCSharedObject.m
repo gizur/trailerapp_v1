@@ -516,15 +516,17 @@ static DCSharedObject *sharedPreferences = nil;
     return[sISO8601 stringFromDate:date];
 }
 
-+(void) processLogout:(UINavigationController *)navigationController {
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_NAME];
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:PASSWORD];
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_API_KEY];
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_SECRET_KEY];
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:CONTACT_NAME];
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:ACCOUNT_NAME];
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_LOGGED_IN];
++(void) processLogout:(UINavigationController *)navigationController clearData:(BOOL)clearData{
     
+    if (clearData) {
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_NAME];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:PASSWORD];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_API_KEY];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_SECRET_KEY];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:CONTACT_NAME];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:ACCOUNT_NAME];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_LOGGED_IN];
+    }
     //remove all the viewControllers from the array and push LoginViewController
     NSMutableArray *viewControllers = [[[navigationController viewControllers] mutableCopy] autorelease];
 #if kDebug

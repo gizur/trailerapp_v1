@@ -51,7 +51,7 @@
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *) identifier;
 -(void) disableActions;
 -(void) enableActions;
-
+-(void) goBack;
 @end
 
 @implementation DCDamageListViewController
@@ -129,6 +129,7 @@
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [DCSharedObject hideProgressDialogInView:self.view];
     self.httpService = nil;
+    
 }
 
 - (void)viewDidUnload
@@ -136,6 +137,7 @@
     [self setEditBarButtonItem:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
+    [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:RESET_SURVEY_NOTIFICATION object:nil]];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -158,6 +160,7 @@
 -(void) customizeNavigationBar {
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SUBMIT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(submitDamageReport)] autorelease];
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BACK", @"") style:UIBarButtonItemStylePlain target:self action:@selector(goBack)];
     [self toggleActionButtons];
 }
 
@@ -166,7 +169,7 @@
 }
 
 -(void) submitDamageReport {
-    if (!self.surveyModel.surveyTrailerId) {
+    if (!self.surveyModel.surveyAssetModel.trailerId) {
         [self showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
     } else {
         [self disableActions];
@@ -220,8 +223,8 @@
             [bodyDict setValue:ticketTitle forKey:@"ticket_title"];
 
             
-            if (damageDetailModel.surveyModel.surveyTrailerId) {
-                [bodyDict setValue:damageDetailModel.surveyModel.surveyTrailerId forKey:@"trailerid"];
+            if (damageDetailModel.surveyModel.surveyAssetModel.trailerId) {
+                [bodyDict setValue:damageDetailModel.surveyModel.surveyAssetModel.trailerId forKey:@"trailerid"];
             }
             
             if (damageDetailModel.surveyModel.surveyPlace) {
@@ -336,49 +339,6 @@
             [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:extraHeaders body:body identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
             
             
-//            // set URL
-//            [request setURL:[NSURL URLWithString:[DCSharedObject createURLStringFromIdentifier:HELPDESK]]];
-//            
-//            
-//            NSString *urlString = [DCSharedObject createURLStringFromIdentifier:HELPDESK];
-//#if kDebug
-//            NSLog(@"%@", urlString);
-//#endif
-//            
-//            if (!self.httpService) {
-//                self.httpService = [[[HTTPService alloc] initWithURLString:urlString headers:[RequestHeaders commonHeaders] body:nil delegate:self requestMethod:kRequestMethodPOST identifier:HELPDESK] autorelease];
-//            } else {
-//                [self.httpService setServiceURLString:urlString];
-//                [self.httpService setHeadersDictionary:[[[RequestHeaders commonHeaders] mutableCopy] autorelease]];
-//                [self.httpService setDelegate:self];
-//                [self.httpService setServiceRequestMethod:kRequestMethodPOST];
-//                [self.httpService setIdentifier:HELPDESK];
-//                
-//            }
-//            
-//            NSString *signature;
-//            signature  = [DCSharedObject generateSignatureFromModel:HELPDESK requestType:POST];
-//#if kDebug
-//            NSLog(@"%@", signature);
-//#endif
-//            
-//            if (signature) {
-//                [[self.httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
-//                MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-//                hud.animationType = MBProgressHUDAnimationFade;
-//                hud.labelText = NSLocalizedString(@"LOADING_MESSAGE", @"");
-//                [self.httpService startService];
-//#if kDebug
-//                NSLog(@"%@", [[self.httpService headersDictionary] description]);
-//#endif
-//                
-//            } else {
-//                //something went wrong
-//                [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
-//            }
-            
-            
-            
         }
     }
 }
@@ -469,7 +429,7 @@
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response string
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         return;
     } else
     if (responseString) {
@@ -500,7 +460,7 @@
                                     damageDetailModel.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
 
                                 }
-                                damageDetailModel.surveyModel.surveyTrailerId = [damageDict valueForKey:@"trailerid"];
+                                damageDetailModel.surveyModel.surveyAssetModel.trailerId = [damageDict valueForKey:@"trailerid"];
                             }
 
                             
@@ -599,11 +559,14 @@
                         [self.currentDamageArray removeObjectAtIndex:self.submittingDamageIndex];
                         if ([self.currentDamageArray count] == 0) { //if all the damages were sent successfully, make the array nil
                             self.currentDamageArray = nil;
+                            [DCSharedObject hideProgressDialogInView:self.view];
+                            [self showAlertWithMessage:NSLocalizedString(@"DAMAGE_REPORTED_SUCCESSFULLY", @"")];
+                            [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:RESET_SURVEY_NOTIFICATION object:nil]];
                         }
                         [self enableActions];
                         
                         //update the damage list
-                        [self getDamageList];
+                        //[self getDamageList];
                     }
                     //check if the call failed because of timestamp
                     //if yes, adjust the timestamp and hit the url again
@@ -630,8 +593,6 @@
                             [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                         }
                     }
-                } else {
-                    [self toggleActionButtons];
                 }
             }
         }
@@ -640,6 +601,7 @@
     NSLog(@"Parse Ended");
 #endif
 
+    [self toggleActionButtons];
     [self.damageTableView reloadData];
 }
 
@@ -652,12 +614,20 @@
     [self toggleActionButtons];
 }
 
+-(void) goBack {
+    [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:RESET_SURVEY_NOTIFICATION object:nil]];
+    [self.navigationController popViewControllerAnimated:YES];
+}
 
 #pragma mark - UIAlertViewDelegate methods
 -(void) alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
     [super alertView:alertView didDismissWithButtonIndex:buttonIndex];
     if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"LOGOUT", @"")]) {
         [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:AUTHENTICATE_LOGOUT requestMethod:kRequestMethodGET model:AUTHENTICATE delegate:self viewController:self];
+    }
+    
+    if ([[alertView message] isEqualToString:NSLocalizedString(@"DAMAGE_REPORTED_SUCCESSFULLY", @"")]) {
+        [self.navigationController popViewControllerAnimated:YES];
     }
 }
 
@@ -677,7 +647,7 @@
         [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
     } else {
         if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-            [DCSharedObject processLogout:self.navigationController];
+            [DCSharedObject processLogout:self.navigationController clearData:NO];
 
         }
     }
@@ -704,7 +674,7 @@
         if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
             [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
         } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-            [DCSharedObject processLogout:self.navigationController];
+            [DCSharedObject processLogout:self.navigationController clearData:NO];
             
         } else {
             [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
@@ -939,7 +909,7 @@
     if (self.currentDamageArray) {
         if ([self.currentDamageArray count] > 0) {
             if (indexPath.section == 0) {
-                if (!self.surveyModel.surveyTrailerId) { // the user can submit the damage report only after setting the trailer id.
+                if (!self.surveyModel.surveyAssetModel.trailerId) { // the user can submit the damage report only after setting the trailer id.
                     [self showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
                     return;
                 } else {
@@ -959,7 +929,7 @@
             }
         } else {
             if (indexPath.section == 0) {
-                if (!self.surveyModel.surveyTrailerId) { // the user can submit the damage report only after setting the trailer id.
+                if (!self.surveyModel.surveyAssetModel.trailerId) { // the user can submit the damage report only after setting the trailer id.
                     [self showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
                     return;
                 } else {
@@ -977,9 +947,9 @@
         }
     }else {
         if (indexPath.section == 0) {
-            if (!self.surveyModel.surveyTrailerId) { // the user can submit the damage report only after setting the trailer id.
+            if (!self.surveyModel.surveyAssetModel.trailerId) { // the user can submit the damage report only after setting the trailer id.
 #if kDebug
-                NSLog(@"%@", self.surveyModel.surveyTrailerId);
+                NSLog(@"%@", self.surveyModel.surveyAssetModel.trailerId);
 #endif
                 [self showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
                 return;

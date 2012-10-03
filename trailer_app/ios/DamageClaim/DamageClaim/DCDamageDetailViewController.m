@@ -136,6 +136,8 @@
         [self.editBarButtonItem setEnabled:YES];
     }
     
+    [self toggleEditButton];
+    
 }
 
 - (void)viewDidUnload
@@ -231,7 +233,7 @@
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response string
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         return;
     } else
     if (responseString) {
@@ -497,6 +499,18 @@
 }
 
 -(void) toggleEditButton {
+    if ([self isEditable]) {
+        if (self.damageDetailModel.damageImagePaths) {
+            if ([self.damageDetailModel.damageImagePaths count] > 0) {
+                [self.editBarButtonItem setEnabled:YES];
+            } else {
+                [self.editBarButtonItem setEnabled:NO];
+            }
+        } else {
+            [self.editBarButtonItem setEnabled:NO];
+        }
+    }
+    
 }
 
 #pragma mark - UIAlertViewDelegate methods
@@ -510,12 +524,14 @@
 
 #pragma mark - DCPickListViewControllerDelegate
 -(void) pickListDidPickItem:(id)item ofType:(NSInteger)type {
+    
+    NSDictionary *dict = item;
     switch (type) {
         case DCPickListItemTypeDamageType:
             if (!self.damageDetailModel) {
                 self.damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
             }
-            self.damageDetailModel.damageType = item;
+            self.damageDetailModel.damageType = [dict valueForKey:VALUE];
             //if the damage type is changed, reset the damage position since it depends on damage type
             self.damageDetailModel.damagePosition = nil;
             break;
@@ -523,7 +539,7 @@
             if (!self.damageDetailModel) {
                 self.damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
             }
-            self.damageDetailModel.damagePosition = item;
+            self.damageDetailModel.damagePosition = [dict valueForKey:VALUE];
         default:
             break;
     }
@@ -685,6 +701,7 @@
     
     self.imagePickerController = nil;
     [[self modalViewController] dismissModalViewControllerAnimated:YES];
+    [self toggleEditButton];
 }
 
 #pragma mark - HTTPServiceDelegate
@@ -722,7 +739,7 @@
             [self showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
             
         } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-            [DCSharedObject processLogout:self.navigationController];
+            [DCSharedObject processLogout:self.navigationController clearData:NO];
             
         } else {
             [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
@@ -750,7 +767,7 @@
             [self showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
             
         } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-            [DCSharedObject processLogout:self.navigationController];
+            [DCSharedObject processLogout:self.navigationController clearData:NO];
             
         } else {
             [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
@@ -1104,9 +1121,14 @@
             DCPickListViewController *pickListViewController;
             if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_LABEL_DICTIONARY]) {
                 NSDictionary *damagePositionLabelDictionary = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_LABEL_DICTIONARY];
+                
                 NSArray *damagePositionLabels = [damagePositionLabelDictionary valueForKey:self.damageDetailModel.damageType];
                 if (damagePositionLabels) {
                     if ([damagePositionLabels count] > 0) {
+#if kDebug
+                        NSLog(@"damage position labels: %@", damagePositionLabels);
+#endif
+
                         pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:damagePositionLabels type:DCPickListItemTypeDamagePosition isSingleValue:YES] autorelease];
                     } else {
                         pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:nil type:DCPickListItemTypeDamagePosition isSingleValue:YES] autorelease];
@@ -1182,6 +1204,7 @@
             [self.damageTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationTop];
             self.damageDetailModel.damageImagePaths = nil;
             self.damageDetailModel.damageThumbnailImagePaths = nil;
+            
         } else {
             [self.damageTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationTop];
         }

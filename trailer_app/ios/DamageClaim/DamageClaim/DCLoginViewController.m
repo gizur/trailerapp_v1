@@ -239,7 +239,7 @@
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response string
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         return;
     } else
     if ([identifier isEqualToString:AUTHENTICATE_LOGIN]) {
@@ -335,7 +335,7 @@
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {        
         [self parseResponse:responseString forIdentifier:identifier];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
@@ -348,7 +348,7 @@
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
@@ -449,7 +449,6 @@
         textField.secureTextEntry = YES;
         textField.placeholder = NSLocalizedString(@"PASSWORD", nil);
         textField.tag = LOGIN_PASSWORD_TEXTFIELD_TAG;
-        textField.returnKeyType = UIReturnKeyGo;
         if (self.loginModel.loginPassword) {
             textField.text = self.loginModel.loginPassword;
         }

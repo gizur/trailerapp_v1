@@ -71,6 +71,7 @@
         // Custom initialization
         _labelArray = [modelArrayOrNil mutableCopy];
         _valueArray = [modelArrayOrNil mutableCopy];
+        _modelArray = [modelArrayOrNil mutableCopy];
         _storageKey = key; [_storageKey retain];
         _singleValue = singleValue;
     }
@@ -84,6 +85,7 @@
         // Custom initialization
         _labelArray = [modelArrayOrNil mutableCopy];
         _valueArray = [modelArrayOrNil mutableCopy];
+        _modelArray = [modelArrayOrNil mutableCopy];
         _type = type;
         _singleValue = singleValue;
     }
@@ -140,7 +142,7 @@
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         return;
     } else
     if (responseString) {
@@ -153,19 +155,35 @@
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSArray *assetsArray = [jsonDict valueForKey:@"result"];
                         for (NSDictionary *assetDict in assetsArray) {
+                            
+                            NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                            
+                            NSString *trailerId, *trailerName;
                             if ((NSNull *)[assetDict valueForKey:@"id"] != [NSNull null]) {
-                                NSString *trailerId = [assetDict valueForKey:@"id"];
+                                trailerId = [assetDict valueForKey:@"id"];
+                                [dictionary setValue:trailerId forKey:VALUE];
                                 
-                                if (!self.labelArray) {
-                                    self.labelArray = [[[NSMutableArray alloc] init] autorelease];
-                                }
-                                [self.labelArray addObject:trailerId];
-                                
-                                if (!self.valueArray) {
-                                    self.valueArray = [[[NSMutableArray alloc] init] autorelease];
-                                }
-                                [self.valueArray addObject:trailerId];
                             }
+                            if ((NSNull *)[assetDict valueForKey:@"assetname"] != [NSNull null]) {
+                                trailerName = [assetDict valueForKey:@"assetname"];
+                                [dictionary setValue:trailerName forKey:LABEL];
+                                
+                            }
+                            
+                            if (!self.modelArray) {
+                                self.modelArray = [[[NSMutableArray alloc] init] autorelease];
+                            }
+                            [self.modelArray addObject:dictionary];
+                            
+//                            if (!self.labelArray) {
+//                                self.labelArray = [[[NSMutableArray alloc] init] autorelease];
+//                            }
+//                            [self.labelArray addObject:trailerId];
+//                            
+//                            if (!self.valueArray) {
+//                                self.valueArray = [[[NSMutableArray alloc] init] autorelease];
+//                            }
+//                            [self.valueArray addObject:trailerId];
                         }
                     }
                 }
@@ -177,6 +195,7 @@
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSArray *damageTypeArray = [jsonDict valueForKey:@"result"];
                         for (NSDictionary *damageTypeDict in damageTypeArray) {
+                            NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
                             NSString *label;
                             NSString *value;
                             if ((NSNull *)[damageTypeDict valueForKey:@"label"] != [NSNull null]) {
@@ -185,6 +204,8 @@
                                     self.labelArray = [[[NSMutableArray alloc] init] autorelease];
                                 }
                                 [self.labelArray addObject:label];
+                                
+                                [dictionary setValue:label forKey:LABEL];
                             }
                             if ((NSNull *)[damageTypeDict valueForKey:@"value"] != [NSNull null]) {
                                 value = [damageTypeDict valueForKey:@"value"];
@@ -192,44 +213,60 @@
                                     self.valueArray = [[[NSMutableArray alloc] init] autorelease];
                                 }
                                 [self.valueArray addObject:value];
+                                
+                                [dictionary setValue:value forKey:VALUE];
                             }
-                            
+                            if (!self.modelArray) {
+                                self.modelArray = [[[NSMutableArray alloc] init] autorelease];
+                            }
+                            [self.modelArray addObject:dictionary];
                             NSMutableArray *damagePositionLabelArray = [[[NSMutableArray alloc] init] autorelease];
                             NSMutableArray *damagePositionValueArray = [[[NSMutableArray alloc] init] autorelease];
+                            
+                            
+                            NSMutableArray *damageLabelValuePositionsArray = [[[NSMutableArray alloc] init] autorelease];
                             
                             if ((NSNull *)[damageTypeDict valueForKey:@"dependency"] != [NSNull null]) {
                                 NSDictionary *dependencyDict = [damageTypeDict valueForKey:@"dependency"];
                                 if ((NSNull *)[dependencyDict valueForKey:@"damageposition"] != [NSNull null]) {
                                     NSArray *damagePositionArray = [dependencyDict valueForKey:@"damageposition"];
                                     for (NSDictionary *damagePositionDict in damagePositionArray) {
+                                        NSString *damagePositionLabel, *damagePositionValue;
+                                        
+                                        NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
                                         
                                         if ((NSNull *)[damagePositionDict valueForKey:@"label"] != [NSNull null]) {
-                                            NSString *label = [damagePositionDict valueForKey:@"label"];
+                                            damagePositionLabel = [damagePositionDict valueForKey:@"label"];
                                             [damagePositionLabelArray addObject:label];
+                                            [dict setValue:damagePositionLabel forKey:LABEL];
                                         }
                                         
                                         if ((NSNull *)[damagePositionDict valueForKey:@"value"] != [NSNull null]) {
-                                            NSString *label = [damagePositionDict valueForKey:@"value"];
+                                            damagePositionValue = [damagePositionDict valueForKey:@"value"];
                                             [damagePositionValueArray addObject:label];
+                                            [dict setValue:damagePositionValue forKey:VALUE];
                                         }
+                                        
+                                        [damageLabelValuePositionsArray addObject:dict];
+                                        
                                     }
-                                    if (label && [damagePositionLabelArray count] > 0) {
+                                    if (label && [damageLabelValuePositionsArray count] > 0) {
                                         
                                         NSMutableDictionary *damagePositionLabelDictionary;
                                         NSMutableDictionary *damagePositionValueDictionary;
                                         
                                         if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_LABEL_DICTIONARY]) {
                                             damagePositionLabelDictionary = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_LABEL_DICTIONARY];
-                                            [damagePositionLabelDictionary setValue:damagePositionLabelArray forKey:label];
+                                            [damagePositionLabelDictionary setValue:damageLabelValuePositionsArray forKey:label];
                                             
                                             damagePositionValueDictionary = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_VALUE_DICTIONARY];
-                                            [damagePositionValueDictionary setValue:damagePositionValueArray forKey:value];
+                                            [damagePositionValueDictionary setValue:damageLabelValuePositionsArray forKey:value];
                                         } else {
                                             damagePositionLabelDictionary = [[[NSMutableDictionary alloc] init] autorelease];
-                                            [damagePositionLabelDictionary setValue:damagePositionLabelArray forKey:label];
+                                            [damagePositionLabelDictionary setValue:damageLabelValuePositionsArray forKey:label];
                                             
                                             damagePositionValueDictionary = [[[NSMutableDictionary alloc] init] autorelease];
-                                            [damagePositionValueDictionary setValue:damagePositionValueArray forKey:value];
+                                            [damagePositionValueDictionary setValue:damageLabelValuePositionsArray forKey:value];
                                         }
                                         [[[DCSharedObject sharedPreferences] preferences] setValue:damagePositionLabelDictionary forKey:DAMAGE_POSITION_LABEL_DICTIONARY];
                                         [[[DCSharedObject sharedPreferences] preferences] setValue:damagePositionValueDictionary forKey:DAMAGE_POSITION_VALUE_DICTIONARY];
@@ -247,20 +284,28 @@
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSArray *damageTypeArray = [jsonDict valueForKey:@"result"];
                         for (NSDictionary *damageTypeDict in damageTypeArray) {
+                            NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
                             if ((NSNull *)[damageTypeDict valueForKey:@"label"] != [NSNull null]) {
                                 NSString *label = [damageTypeDict valueForKey:@"label"];
                                 if (!self.labelArray) {
                                     self.labelArray = [[[NSMutableArray alloc] init] autorelease];
                                 }
                                 [self.labelArray addObject:label];
+                                [dictionary setValue:label forKey:LABEL];
                             }
                             if ((NSNull *)[damageTypeDict valueForKey:@"value"] != [NSNull null]) {
                                 NSString *value = [damageTypeDict valueForKey:@"value"];
                                 if (!self.valueArray) {
                                     self.valueArray = [[[NSMutableArray alloc] init] autorelease];
                                 }
+                                [dictionary setValue:value forKey:VALUE];
                                 [self.valueArray addObject:value];
                             }
+                            
+                            if (!self.modelArray) {
+                                self.modelArray = [[[NSMutableArray alloc] init] autorelease];
+                            }
+                            [self.modelArray addObject:dictionary];
                         }
                     }
                 }
@@ -296,6 +341,11 @@
             }
         }
     }
+    
+#if kDebug
+    NSLog(@"%@", self.modelArray);
+#endif
+
 }
 -(void) customizeNavigationBar {
 //    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
@@ -380,7 +430,7 @@
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
@@ -392,7 +442,7 @@
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
@@ -411,8 +461,8 @@
 }
 
 -(NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (self.labelArray) {
-        return [self.labelArray count];
+    if (self.modelArray) {
+        return [self.modelArray count];
     }
     return 0;
 }
@@ -430,21 +480,27 @@
     
     UILabel *nameLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_NAME_PICK_LIST_VIEW_TAG];
     nameLabel.text = @"";
-    if (self.labelArray) {
-        if (indexPath.row < [self.labelArray count]) {
-            nameLabel.text = [self.labelArray objectAtIndex:indexPath.row];
+    
+    if (self.modelArray) {
+        if (indexPath.row < [self.modelArray count]) {
+            NSDictionary *dict = [self.modelArray objectAtIndex:indexPath.row];
+            NSString *label = [dict valueForKey:LABEL];
+            nameLabel.text = label;
         }
     }
     
     UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_PICK_LIST_VIEW_TAG];
     if (self.selectedObjects) {
-        for (NSString *itemInSelectedObjects in self.selectedObjects) {
-            if (self.labelArray) {
-                if (indexPath.row < [self.labelArray count]) {
-                    NSString *currentItem = [self.labelArray objectAtIndex:indexPath.row];
-                    if ([[currentItem lowercaseString] isEqualToString:[itemInSelectedObjects lowercaseString]]) {
+        for (NSDictionary *itemInSelectedObjects in self.selectedObjects) {
+            NSString *labelInSelectedObjects = [itemInSelectedObjects valueForKey:LABEL];
+            if (self.modelArray) {
+                if (indexPath.row < [self.modelArray count]) {
+                    NSDictionary *dict = [self.modelArray objectAtIndex:indexPath.row];
+                    
+                    NSString *currentItem = [dict valueForKey:LABEL];
+                    if ([[currentItem lowercaseString] isEqualToString:[labelInSelectedObjects lowercaseString]]) {
 #if kDebug
-                        NSLog(@"%@, %@", currentItem, itemInSelectedObjects);
+                        NSLog(@"%@, %@", currentItem, labelInSelectedObjects);
 #endif
                         imageView.hidden = NO;
                     }
@@ -478,15 +534,15 @@
             if (!self.selectedObjects) {
                 self.selectedObjects = [[[NSMutableArray alloc] init] autorelease];
             }
-            if (self.valueArray) {
-                if (indexPath.row < [self.valueArray count]) {
+            if (self.modelArray) {
+                if (indexPath.row < [self.modelArray count]) {
                     [self.selectedObjects removeAllObjects];
-                    [self.selectedObjects addObject:[self.valueArray objectAtIndex:indexPath.row]];
+                    [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
                 }
             }
             if (self.delegate) {
                 if ([self.delegate respondsToSelector:@selector(pickListDidPickItem:ofType:)]) {
-                    [self.delegate pickListDidPickItem:[self.valueArray objectAtIndex:indexPath.row] ofType:self.type];
+                    [self.delegate pickListDidPickItem:[self.modelArray objectAtIndex:indexPath.row] ofType:self.type];
                 }
             }
         }
@@ -508,18 +564,18 @@
             if (!self.selectedObjects) {
                 self.selectedObjects = [[[NSMutableArray alloc] init] autorelease];
             }
-            if (self.valueArray) {
+            if (self.modelArray) {
                 if (indexPath.row < [self.valueArray count]) {
                     [self.selectedObjects removeAllObjects];
-                    [self.selectedObjects addObject:[self.valueArray objectAtIndex:indexPath.row]];
+                    [self.selectedObjects addObject:[self.modelArray objectAtIndex:indexPath.row]];
                 }
             }
             
         } else {
             imageView.hidden = YES;
-            if (self.valueArray) {
-                if (indexPath.row < [self.valueArray count]) {
-                    [self.selectedObjects removeObject:[self.valueArray objectAtIndex:indexPath.row]];
+            if (self.modelArray) {
+                if (indexPath.row < [self.modelArray count]) {
+                    [self.selectedObjects removeObject:[self.modelArray objectAtIndex:indexPath.row]];
                 }
             }
         }

@@ -10,11 +10,12 @@
 
 #import "Const.h"
 
+
 @implementation DCSurveyModel
 @synthesize surveyPlace = _surveyPlace;
 @synthesize surveyPlates = _surveyPlates;
 @synthesize surveyStraps = _surveyStraps;
-@synthesize surveyTrailerId = _surveyTrailerId;
+@synthesize surveyAssetModel = _surveyAssetModel;
 @synthesize surveyTrailerType = _surveyTrailerType;
 @synthesize surveyTrailerSealed = _surveyTrailerSealed;
 
@@ -24,7 +25,7 @@
     [_surveyPlace release];
     [_surveyPlates release];
     [_surveyStraps release];
-    [_surveyTrailerId release];
+    [_surveyAssetModel release];
     [_surveyTrailerSealed release];
     [_surveyTrailerType release];
     [super dealloc];

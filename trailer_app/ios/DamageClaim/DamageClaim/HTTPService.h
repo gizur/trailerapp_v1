@@ -40,7 +40,8 @@ typedef enum {
 
 @property (nonatomic, retain) NSMutableData *receivedData;
 @property (nonatomic, retain) NSURLConnection *connection;
-@property (nonatomic, assign) id<HTTPServiceDelegate>delegate;
+//retaining the delegate instead of assigning it.
+@property (nonatomic, retain) id<HTTPServiceDelegate>delegate;
 @property (nonatomic, retain) NSString *serviceURLString;
 @property (nonatomic, retain) NSMutableDictionary *headersDictionary;
 @property (nonatomic, retain) NSString *bodyString;

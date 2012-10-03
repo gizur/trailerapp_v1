@@ -73,12 +73,23 @@
 "IMAGE_LOADING_ERROR" = "Kunde inte ladda foto. Försök igen.";
 
 
-"TRAILER_ID_NULL_ERROR" = "Please choose a trailer-id first.";
-"SURVEY" = "Survey";
+"TRAILER_ID_NULL_ERROR" = "Ett ID måste väljas innan skador kan rapporteras.";
+"SURVEY" = "Kontrollbesiktning";
 "DAMAGES" = "Skador";
 
-"CLOSE" = "Close";
-"DRIVER_CAUSED_DAMAGE" = "Caused By:";
-"DRIVER" = "Driver";
-"OTHER" = "Other";
-"ADD" = "Add";
+"CLOSE" = "Stäng";
+"DRIVER_CAUSED_DAMAGE" = "Orsakad av:";
+"DRIVER" = "Chaufför";
+"OTHER" = "Annan";
+"ADD" = "Lägg till";
+"BACK" = "Tillbaka";
+
+"SURVEY_SUBMITTED_SUCCESSFULLY" = "Kontrollbesiktningen har skickats.";
+"DAMAGE_REPORTED_SUCCESSFULLY" = "Rapporten har sparats.";
+
+
+"RESET_PASSWORD" = "Återställ lösenord";
+"CHANGE_PASSWORD" = "Ändra lösenord";
+"ENTER_OLD_PASSWORD" = "Ange gammalt lösenord";
+"ENTER_NEW_PASSWORD" = "Ange nytt lösenord";
+"CONFIRM_NEW_PASSWORD" = "Bekräfta nytt lösenord";

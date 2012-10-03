@@ -54,5 +54,5 @@
 
 +(void)showProgressDialogInView:(UIView *)view message:(NSString *)labelText;
 +(void)hideProgressDialogInView:(UIView *)view;
-+(void) processLogout:(UINavigationController *)navigationController;
++(void) processLogout:(UINavigationController *)navigationController clearData:(BOOL) clearData;
 @end

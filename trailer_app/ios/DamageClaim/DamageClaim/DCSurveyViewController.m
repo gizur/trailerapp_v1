@@ -98,6 +98,8 @@
     [self loadPickLists];
     [self toggleActionButtons];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:RESET_SURVEY_NOTIFICATION object:nil];
+    
 }
 
 - (void)viewDidUnload
@@ -106,6 +108,7 @@
     [self setCustomCellSegmentedView:nil];
     [self setCustomCellTextFieldView:nil];
     [self setSubmitToolBarButton:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RESET_SURVEY_NOTIFICATION object:nil];
     [super viewDidUnload];
     
     // Release any retained subviews of the main view.
@@ -176,7 +179,7 @@
     if (reportDamageDict) {
         NSString *reportDamageNoValue = [reportDamageDict valueForKey:@"No"];
 #if kDebug
-        NSLog(@"%@", reportDamageNoValue);
+        NSLog(@"%@", reportDamageDict);
 #endif
         if (reportDamageDict) {
             [bodyDict setValue:reportDamageNoValue forKey:@"reportdamage"];
@@ -209,8 +212,8 @@
     [bodyDict setValue:ticketTitle forKey:@"ticket_title"];
     
     
-    if (self.surveyModel.surveyTrailerId) {
-        [bodyDict setValue:self.surveyModel.surveyTrailerId forKey:@"trailerid"];
+    if (self.surveyModel.surveyAssetModel.trailerId) {
+        [bodyDict setValue:self.surveyModel.surveyAssetModel.trailerId forKey:@"trailerid"];
     }
     
     if (self.surveyModel.surveyPlace) {
@@ -243,6 +246,10 @@
         [bodyDict setValue:[NSString stringWithFormat:@"%d", [self.surveyModel.surveyStraps intValue]] forKey:@"straps"];
     }
     
+#if kDebug
+    NSLog(@"Body dict: %@", bodyDict);
+#endif
+    
     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:bodyDict identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
 }
 
@@ -260,8 +267,8 @@
     //reset trailer id
     UITableViewCell *idCell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
     idCell.textLabel.text = NSLocalizedString(@"ID", @"");
-    if (self.surveyModel.surveyTrailerId) {
-        self.surveyModel.surveyTrailerId = nil;
+    if (self.surveyModel.surveyAssetModel.trailerId) {
+        self.surveyModel.surveyAssetModel.trailerId = nil;
     }
     
     //reset survey place
@@ -287,14 +294,14 @@
     
     //reset survey trailer sealed field
     UISegmentedControl *trailerSealedSegmentedControl = (UISegmentedControl *)[[self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:3 inSection:0]] viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
-    [trailerSealedSegmentedControl setSelectedSegmentIndex:0];
+    [trailerSealedSegmentedControl setSelectedSegmentIndex:1];
     if (self.surveyModel.surveyTrailerSealed) {
         self.surveyModel.surveyTrailerSealed = nil;
     }
-    if ([self isTrailerInventoryVisible]) {
+    if (![self isTrailerInventoryVisible]) {
         [self toggleInventorySection:trailerSealedSegmentedControl];
     }
-    [self setTrailerInventoryVisible:NO];
+    [self setTrailerInventoryVisible:YES];
     
     [self toggleActionButtons];
 }
@@ -365,7 +372,7 @@
 }
 
 -(void) toggleActionButtons {
-    if (!self.surveyModel.surveyTrailerId) {
+    if (!self.surveyModel.surveyAssetModel.trailerId) {
         //[self.navigationItem.rightBarButtonItem setEnabled:NO];
         [self.submitToolBarButton setEnabled:NO];
     } else {
@@ -388,7 +395,7 @@
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response string
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         return;
     } else
     if (responseString) {
@@ -572,16 +579,26 @@
                                     //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
                                     
                                     //timestamp is adjusted. call the same url again
-                                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
                                 }
                             } else {
                                 [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                             }
                         }
                     }
+                } else {
+                    [DCSharedObject hideProgressDialogInView:self.view];
+                    [self showAlertWithMessage:NSLocalizedString(@"SURVEY_SUBMITTED_SUCCESSFULLY", @"")];
+                    [self resetSurvey:nil];
                 }
             }
         }
+    }
+}
+
+-(void) handleNotification:(NSNotification *)notification {
+    if ([[notification name] isEqualToString:RESET_SURVEY_NOTIFICATION]) {
+        [self resetSurvey:nil];
     }
 }
 
@@ -597,30 +614,41 @@
 
 #pragma mark - DCPickListViewControllerDelegate
 -(void) pickListDidPickItem:(id)item ofType:(NSInteger)type {
+    NSDictionary *dict = item;
     switch (type) {
         case DCPickListItemSurveyTrailerId:
             if (!self.surveyModel) {
                 self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
             }
-            self.surveyModel.surveyTrailerId = item;
+            
+            if (!self.surveyModel.surveyAssetModel) {
+                self.surveyModel.surveyAssetModel = [[[DCAssetModel alloc] init] autorelease];
+            }
+            
+            
+            self.surveyModel.surveyAssetModel.trailerName = [dict valueForKey:LABEL];
+#if kDebug
+            NSLog(@"%@", self.surveyModel.surveyAssetModel);
+#endif
+            self.surveyModel.surveyAssetModel.trailerId = [dict valueForKey:VALUE];
             break;
         case DCPickListItemSurveyPlace:
             if (!self.surveyModel) {
                 self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
             }
-            self.surveyModel.surveyPlace = item;
+            self.surveyModel.surveyPlace = [item valueForKey:VALUE];
             break;
         case DCPickListItemSurveyPlates:
             if (!self.surveyModel) {
                 self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
             }
-            self.surveyModel.surveyPlates = item;
+            self.surveyModel.surveyPlates = [item valueForKey:VALUE];
             break;
         case DCPickListItemSurveyStraps:
             if (!self.surveyModel) {
                 self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
             }
-            self.surveyModel.surveyStraps = item;
+            self.surveyModel.surveyStraps = [item valueForKey:VALUE];
             break;
         default:
             break;
@@ -726,7 +754,7 @@
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
@@ -739,7 +767,7 @@
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-        [DCSharedObject processLogout:self.navigationController];
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
         
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
@@ -824,8 +852,8 @@
                     
                     cell.textLabel.shadowColor = [UIColor whiteColor];
                     cell.textLabel.shadowOffset = CGSizeMake(1, 1);
-                    if (self.surveyModel.surveyTrailerId) {
-                        cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"ID", @""), self.surveyModel.surveyTrailerId];
+                    if (self.surveyModel.surveyAssetModel.trailerName) {
+                        cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"ID", @""), self.surveyModel.surveyAssetModel.trailerName];
                          [self.navigationItem.rightBarButtonItem setEnabled:YES];
                         
                     } else {
@@ -938,7 +966,20 @@
                     break;
                 case 2: {
                     //dummy values
-                    NSArray *trailerIdArray = [NSArray arrayWithObjects:@"Place 1", @"Place 2", @"Place 3", @"Place 4", nil];
+                    NSArray *trailerIdArray = [NSArray arrayWithObjects:
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"Place1", LABEL,
+                                                @"Place1", VALUE, nil],
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"Place2", LABEL,
+                                                @"Place2", VALUE, nil],
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"Place3", LABEL,
+                                                @"Place3", VALUE, nil],
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"Place4", LABEL,
+                                                @"Place4", VALUE, nil],
+                                               nil];
                     
                     DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyPlace isSingleValue:YES] autorelease];
                     pickListViewController.delegate = self;
@@ -953,18 +994,44 @@
             switch (indexPath.row) {
                 case 0: {
                     //dummy values
-                    NSArray *trailerIdArray = [NSArray arrayWithObjects:@"1", @"2", @"3", @"4", nil];
+                    NSArray *surveyPlatesArray = [NSArray arrayWithObjects:
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"1", LABEL,
+                                                @"1", VALUE, nil],
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"2", LABEL,
+                                                @"2", VALUE, nil],
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"3", LABEL,
+                                                @"3", VALUE, nil],
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"4", LABEL,
+                                                @"4", VALUE, nil],
+                                               nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyPlates isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:surveyPlatesArray type:DCPickListItemSurveyPlates isSingleValue:YES] autorelease];
                     pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;
                 case 1: {
                     //dummy values
-                    NSArray *trailerIdArray = [NSArray arrayWithObjects:@"1", @"2", @"3", @"4", nil];
+                    NSArray *surveyStrapsArray = [NSArray arrayWithObjects:
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"1", LABEL,
+                                                @"1", VALUE, nil],
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"2", LABEL,
+                                                @"2", VALUE, nil],
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"3", LABEL,
+                                                @"3", VALUE, nil],
+                                               [NSDictionary dictionaryWithObjectsAndKeys:
+                                                @"4", LABEL,
+                                                @"4", VALUE, nil],
+                                               nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyStraps isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:surveyStrapsArray type:DCPickListItemSurveyStraps isSingleValue:YES] autorelease];
                     pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }

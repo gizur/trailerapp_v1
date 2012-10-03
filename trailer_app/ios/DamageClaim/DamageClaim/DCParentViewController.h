@@ -13,5 +13,6 @@
 @property (nonatomic, getter = isAlertViewShown) BOOL alertViewShown;
 
 -(void)showAlertWithMessage:(NSString *)alertMessage;
+-(void) handleNotification:(NSNotification *)notification;
 
 @end

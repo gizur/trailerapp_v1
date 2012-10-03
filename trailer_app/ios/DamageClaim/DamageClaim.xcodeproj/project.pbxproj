@@ -22,6 +22,8 @@
 		D70FB086161420A40099790E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D70FB088161420A40099790E /* Localizable.strings */; };
 		D71E55CF15E1125900FE1CB1 /* DCDamageDetailModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55CE15E1125900FE1CB1 /* DCDamageDetailModel.m */; };
 		D71E55D315E1572800FE1CB1 /* DCLoginModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D71E55D215E1572800FE1CB1 /* DCLoginModel.m */; };
+		D731B9D3161C575100F3FA08 /* DCResetPasswordViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D731B9D2161C575100F3FA08 /* DCResetPasswordViewController.m */; };
+		D731B9D6161C578900F3FA08 /* ResetPasswordView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D731B9D5161C578900F3FA08 /* ResetPasswordView.xib */; };
 		D73F6BD915FE643F0018B118 /* 1.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D73F6BC515FE643F0018B118 /* 1.tiff */; };
 		D73F6BDA15FE643F0018B118 /* 1@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D73F6BC615FE643F0018B118 /* 1@2x.tiff */; };
 		D73F6BDB15FE643F0018B118 /* 2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D73F6BC715FE643F0018B118 /* 2.tiff */; };
@@ -115,6 +117,9 @@
 		D71E55CE15E1125900FE1CB1 /* DCDamageDetailModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageDetailModel.m; sourceTree = "<group>"; };
 		D71E55D115E1572800FE1CB1 /* DCLoginModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCLoginModel.h; sourceTree = "<group>"; };
 		D71E55D215E1572800FE1CB1 /* DCLoginModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCLoginModel.m; sourceTree = "<group>"; };
+		D731B9D1161C575100F3FA08 /* DCResetPasswordViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCResetPasswordViewController.h; sourceTree = "<group>"; };
+		D731B9D2161C575100F3FA08 /* DCResetPasswordViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCResetPasswordViewController.m; sourceTree = "<group>"; };
+		D731B9D5161C578900F3FA08 /* ResetPasswordView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ResetPasswordView.xib; sourceTree = "<group>"; };
 		D73F6BC515FE643F0018B118 /* 1.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = 1.tiff; sourceTree = "<group>"; };
 		D73F6BC615FE643F0018B118 /* 1@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "1@2x.tiff"; sourceTree = "<group>"; };
 		D73F6BC715FE643F0018B118 /* 2.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = 2.tiff; sourceTree = "<group>"; };
@@ -267,6 +272,23 @@
 			name = "New Group";
 			sourceTree = "<group>";
 		};
+		D731B9D0161C573000F3FA08 /* ResetPasswordViewController */ = {
+			isa = PBXGroup;
+			children = (
+				D731B9D1161C575100F3FA08 /* DCResetPasswordViewController.h */,
+				D731B9D2161C575100F3FA08 /* DCResetPasswordViewController.m */,
+			);
+			name = ResetPasswordViewController;
+			sourceTree = "<group>";
+		};
+		D731B9D4161C577600F3FA08 /* ResetPasswordView */ = {
+			isa = PBXGroup;
+			children = (
+				D731B9D5161C578900F3FA08 /* ResetPasswordView.xib */,
+			);
+			name = ResetPasswordView;
+			sourceTree = "<group>";
+		};
 		D73F6BC315FE642A0018B118 /* LoadingImages */ = {
 			isa = PBXGroup;
 			children = (
@@ -412,6 +434,7 @@
 		D77722E515D912FB0071FD06 /* Nibs */ = {
 			isa = PBXGroup;
 			children = (
+				D731B9D4161C577600F3FA08 /* ResetPasswordView */,
 				D70FB03F16104C080099790E /* AboutView */,
 				D7B231AC15F513E2001A1560 /* ImageViewerView */,
 				D7ADF97215EDDDC40000BB4D /* DamageListView */,
@@ -472,6 +495,7 @@
 		D77722EA15D914520071FD06 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				D731B9D0161C573000F3FA08 /* ResetPasswordViewController */,
 				D7CD849B161BFE6C00B00719 /* ParentViewController */,
 				D70FB03A16104BCF0099790E /* AboutViewController */,
 				D7B231A815F5136E001A1560 /* ImageViewerViewController */,
@@ -859,6 +883,7 @@
 				D70FB0601612C6980099790E /* Icon.png in Resources */,
 				D70FB0611612C6980099790E /* Icon@2x.png in Resources */,
 				D76EC08416143C200025FB2B /* loadingImage.png in Resources */,
+				D731B9D6161C578900F3FA08 /* ResetPasswordView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -896,6 +921,7 @@
 				D75E4FCA16007D1000507C3A /* MBProgressHUD.m in Sources */,
 				D70FB0501610601E0099790E /* DCAboutViewController.m in Sources */,
 				D7CD849F161BFE8F00B00719 /* DCParentViewController.m in Sources */,
+				D731B9D3161C575100F3FA08 /* DCResetPasswordViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

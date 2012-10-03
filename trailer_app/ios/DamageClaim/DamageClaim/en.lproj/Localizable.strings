@@ -68,8 +68,16 @@
 "SURVEY" = "Survey";
 "DAMAGES" = "Damages";
 
-
-
 "DRIVER_CAUSED_DAMAGE" = "Caused By:";
 "DRIVER" = "Driver";
 "OTHER" = "Other";
+"BACK" = "Back";
+
+"SURVEY_SUBMITTED_SUCCESSFULLY" = "Survey submitted successfully";
+"DAMAGE_REPORTED_SUCCESSFULLY" = "Damage reported successfully";
+
+"RESET_PASSWORD" = "Reset password";
+"CHANGE_PASSWORD" = "Change password";
+"ENTER_OLD_PASSWORD" = "Enter old password";
+"ENTER_NEW_PASSWORD" = "Enter new password";
+"CONFIRM_NEW_PASSWORD" = "Confirm new password";

@@ -150,7 +150,7 @@
 #pragma mark -
 - (void)dealloc {
     [receivedData release];
-    delegate = nil;
+    //delegate = nil;
     [connection release];
     [serviceURLString release];
     [headersDictionary release];
