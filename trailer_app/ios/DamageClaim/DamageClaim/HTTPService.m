@@ -107,21 +107,25 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    if (self.delegate) {
+#if kDebug
+    NSLog(@"%@", self.delegate);
+#endif
+    if (self.delegate != nil) {
         [self.delegate didReceiveResponse:self.receivedData forIdentifier:self.identifier];
     }
-    if ([(UIViewController *)self.delegate respondsToSelector:@selector(storeResponse:forCallType:)]) {
-        if (self.delegate) {
-            [self.delegate storeResponse:self.receivedData forIdentifier:self.identifier];
-        }
+    if (self.delegate != nil) {
+        [self.delegate storeResponse:self.receivedData forIdentifier:self.identifier];
     }
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
 #if kDebug
+    NSLog(@"%@", self.delegate);
+#endif
+#if kDebug
     NSLog(@"ERROR: %@", [error description]);
 #endif
-    if (self.delegate) {
+    if (self.delegate != nil) {
         [self.delegate serviceDidFailWithError:error forIdentifier:self.identifier];
     }
 }
@@ -133,7 +137,10 @@
 - (void) connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response{
     NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
     int code = [httpResponse statusCode];
-    if (self.delegate) {
+#if kDebug
+    NSLog(@"%@", self.delegate);
+#endif
+    if (self.delegate != nil) {
         [self.delegate responseCode:code];
     }
     

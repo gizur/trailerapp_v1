@@ -53,8 +53,8 @@
     if (self.image) {
         [self.imageView setImage:self.image];
         self.scrollView.maximumZoomScale = 5;
-//        [self.imageView setBounds:CGRectMake(0, 0, self.image.size.width, self.image.size.height)];
-//        self.scrollView.contentSize = self.image.size;
+        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        
     }
 }
 

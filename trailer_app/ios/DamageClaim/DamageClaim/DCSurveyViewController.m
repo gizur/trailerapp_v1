@@ -118,6 +118,9 @@
 -(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     [self.httpService cancelHTTPService];
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    [DCSharedObject hideProgressDialogInView:self.view];
+    self.httpService = nil;
 }
 
 
@@ -217,8 +220,8 @@
     if (self.surveyModel.surveyTrailerSealed) {
         NSDictionary *sealedDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_SEALED];
         if (sealedDict) {
-            NSString *sealedYesValue = [reportDamageDict valueForKey:@"Yes"];
-            NSString *sealedNoValue = [reportDamageDict valueForKey:@"No"];
+            NSString *sealedYesValue = [sealedDict valueForKey:@"Yes"];
+            NSString *sealedNoValue = [sealedDict valueForKey:@"No"];
 #if kDebug
             NSLog(@"%@ %@", sealedYesValue, sealedNoValue);
 #endif
@@ -383,6 +386,11 @@
 }
 
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
+    //logout irrespective of the response string
+    if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        [DCSharedObject processLogout:self.navigationController];
+        return;
+    } else
     if (responseString) {
         NSDictionary *jsonDict = [responseString objectFromJSONString];
         if ([identifier isEqualToString:HELPDESK_TICKETSTATUS]) {
@@ -416,11 +424,11 @@
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_TICKETSTATUS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                             }
                         } else {
-                            [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                         }
                     }
                 } else {
-                    [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                    [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                 }
             }
         }
@@ -460,11 +468,11 @@
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_SEALED requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                             }
                         } else {
-                            [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                         }
                     }
                 } else {
-                    [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                    [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                 }
             }
         }
@@ -501,11 +509,11 @@
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                             }
                         } else {
-                            [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                         }
                     }
                 } else {
-                    [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                    [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                 }
             }
         }
@@ -541,11 +549,11 @@
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_DRIVERCAUSEDDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                             }
                         } else {
-                            [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                         }
                     }
                 } else {
-                    [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                    [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                 }
             }
         }
@@ -567,68 +575,24 @@
                                     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                                 }
                             } else {
-                                [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
+                                [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                             }
                         }
                     }
-                }
-            }
-        }
-        
-        if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
-            if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
-                if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
-                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_NAME];
-                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:PASSWORD];
-                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_API_KEY];
-                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_SECRET_KEY];
-                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:CONTACT_NAME];
-                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:ACCOUNT_NAME];
-                    
-                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:USER_NAME]) {
-                        [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:USER_NAME];
-                    }
-                    
-                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:PASSWORD]) {
-                        [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:PASSWORD];
-                    }
-                    
-                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_LOGGED_IN];
-#if kDebug
-                    NSLog(@"%@", self.navigationController);
-#endif
-                    id parentViewController = [self.navigationController parentViewController];
-                    if ([parentViewController isKindOfClass:[DCLoginViewController class]]) {
-                        [self.navigationController popViewControllerAnimated:YES];
-                    } else {
-                        DCLoginViewController *loginViewController = [[[DCLoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
-                        [self.navigationController pushViewController:loginViewController animated:YES];
-                    }
-                    
-
-                } else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
-                    NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
-                    if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
-                        NSString *errorCode = [errorDict valueForKey:@"code"];
-                        if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
-                            if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
-                                [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                //timestamp is adjusted. call the same url again
-                                
-                                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
-                            }
-                        } else {
-                            [DCSharedObject showAlertWithMessage:@"INTERNAL_SERVER_ERROR"];
-                        }
-                    }
-                } else {
-                    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                 }
             }
         }
     }
 }
+
+#pragma mark - UIAlertViewDelegate methods
+-(void) alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    [super alertView:alertView didDismissWithButtonIndex:buttonIndex];
+    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"LOGOUT", @"")]) {
+        [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:AUTHENTICATE_LOGOUT requestMethod:kRequestMethodGET model:AUTHENTICATE delegate:self viewController:self];
+    }
+}
+
 
 
 #pragma mark - DCPickListViewControllerDelegate
@@ -761,8 +725,11 @@
 
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
+    } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        [DCSharedObject processLogout:self.navigationController];
+        
     } else {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
 
 }
@@ -770,9 +737,12 @@
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
     [DCSharedObject hideProgressDialogInView:self.view];
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+        [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+    } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        [DCSharedObject processLogout:self.navigationController];
+        
     } else {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
     
 

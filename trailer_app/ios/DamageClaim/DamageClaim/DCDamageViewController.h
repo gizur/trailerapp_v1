@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface DCDamageViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
+#import "DCParentViewController.h"
+
+@interface DCDamageViewController : DCParentViewController<UITableViewDelegate, UITableViewDataSource>
 
 
 -(id) initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil reportedDamageDetails:(NSMutableArray *) reportedDamageDetailArrayOrNil;

@@ -7,8 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DCParentViewController.h"
 
-@interface DCImageViewerViewController : UIViewController<UIScrollViewDelegate>
+@interface DCImageViewerViewController : DCParentViewController<UIScrollViewDelegate>
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil image:(UIImage *)image;
 

@@ -10,15 +10,20 @@
 
 #import "HTTPService.h"
 
+#import "DCParentViewController.h"
+
 @class MBProgressHUD;
 
 @interface DCSharedObject : NSObject
 @property(nonatomic, retain) NSMutableDictionary *preferences;
 
-
 +(DCSharedObject *) sharedPreferences;
 
++(BOOL) alertViewShown;
+
 +(void)showAlertWithMessage:(NSString *)alertMessage;
+
++(void)showAlertWithMessage:(NSString *)alertMessage delegate:(id<UIAlertViewDelegate>) delegate;
 
 +(NSString *) generateSignatureFromModel:(NSString *)model requestType:(NSString *)requestType;
 
@@ -28,17 +33,17 @@
 
 
 //in case the body is name=value pairs with progress view optional
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView;
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView;
 
 //in case the body is NSData with progress view optional
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView;
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView;
 
 
 //in case the body is name=value pairs
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil;
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil;
 
 //in case the body is NSData
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil;
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil;
 
 
 +(NSString *) keyValuePairFromDictionary:(NSDictionary *)dict;
@@ -49,4 +54,5 @@
 
 +(void)showProgressDialogInView:(UIView *)view message:(NSString *)labelText;
 +(void)hideProgressDialogInView:(UIView *)view;
++(void) processLogout:(UINavigationController *)navigationController;
 @end

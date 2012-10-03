@@ -40,6 +40,7 @@
 @property (retain, nonatomic) IBOutlet UITableViewCell *customCellNewImageDamageView;
 @property (retain, nonatomic) IBOutlet UITableView *damageTableView;
 @property (retain, nonatomic) UIImagePickerController *imagePickerController;
+@property (retain, nonatomic) IBOutlet UIBarButtonItem *editBarButtonItem;
 @property (retain, nonatomic) DCDamageDetailModel *damageDetailModel;
 @property (retain, nonatomic) NSOperationQueue *opertationQueue;
 @property (nonatomic, getter = isEditable) BOOL editable;
@@ -63,6 +64,8 @@
 -(void) updateUI;
 -(void) showError;
 -(void) toggleDriverCausedDamage:(id) sender;
+- (IBAction)editTable:(id)sender;
+-(void) toggleEditButton;
 @end
 
 @implementation DCDamageDetailViewController
@@ -70,6 +73,7 @@
 @synthesize customCellNewImageDamageView = _customCellNewImageDamageView;
 @synthesize damageTableView = _damageTableView;
 @synthesize imagePickerController = _imagePickerController;
+@synthesize editBarButtonItem = _editBarButtonItem;
 @synthesize damageDetailModel = _damageDetailModel;
 @synthesize editable = _editable;
 @synthesize httpService = _httpService;
@@ -125,6 +129,13 @@
         self.damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
     }
     
+    //if the view is not editable, disable edit button
+    if (![self isEditable]) {
+        [self.editBarButtonItem setEnabled:NO];
+    } else {
+        [self.editBarButtonItem setEnabled:YES];
+    }
+    
 }
 
 - (void)viewDidUnload
@@ -132,17 +143,17 @@
     [self setDamageTableView:nil];
     [self setCustomCellImageDamageView:nil];
     [self setCustomCellNewImageDamageView:nil];
+    [self setEditBarButtonItem:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
-}
-
--(void) viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
 }
 
 -(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     [self.httpService cancelHTTPService];
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    [DCSharedObject hideProgressDialogInView:self.view];
+    self.httpService = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -160,6 +171,7 @@
     [_thumbnailImagesArray release];
     [_documentIdArray release];
     [_opertationQueue release];
+    [_editBarButtonItem release];
     [super dealloc];
 }
 
@@ -186,22 +198,22 @@
 }
 
 -(void) goBack {
-//    //user cancelled damage claim procedure.
-//    //delete all the locally stored images;
-//    if (self.numberOfImages > 0) {
-//        for (NSInteger i = 0; i < self.numberOfImages; i++) {
-//            NSArray *pathArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDirectory, YES);
-//            if (pathArray) {
-//                if ([pathArray count] > 0) {
-//                    NSString *docDirURL = [pathArray objectAtIndex:0];
-//                    NSString *thumbnailImageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, i]];
-//                    NSString *imageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, i]];
-//                    [[NSFileManager defaultManager] removeItemAtPath:imageNamePath error:nil];
-//                    [[NSFileManager defaultManager] removeItemAtPath:thumbnailImageNamePath error:nil];
-//                }
-//            }
-//        }
-//    }
+    //    //user cancelled damage claim procedure.
+    //    //delete all the locally stored images;
+    //    if (self.numberOfImages > 0) {
+    //        for (NSInteger i = 0; i < self.numberOfImages; i++) {
+    //            NSArray *pathArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDirectory, YES);
+    //            if (pathArray) {
+    //                if ([pathArray count] > 0) {
+    //                    NSString *docDirURL = [pathArray objectAtIndex:0];
+    //                    NSString *thumbnailImageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, i]];
+    //                    NSString *imageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, i]];
+    //                    [[NSFileManager defaultManager] removeItemAtPath:imageNamePath error:nil];
+    //                    [[NSFileManager defaultManager] removeItemAtPath:thumbnailImageNamePath error:nil];
+    //                }
+    //            }
+    //        }
+    //    }
     if (self.opertationQueue) {
         [self.opertationQueue cancelAllOperations];
     }
@@ -217,6 +229,11 @@
 }
 
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
+    //logout irrespective of the response string
+    if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        [DCSharedObject processLogout:self.navigationController];
+        return;
+    } else
     if (responseString) {
         NSDictionary *jsonDict = [responseString objectFromJSONString];
         if ([identifier isEqualToString:[NSString stringWithFormat:HELPDESK_ID, self.damageDetailModel.damageId]]) {
@@ -251,11 +268,11 @@
                                 [self getDamageDetail];
                             }
                         } else {
-                            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                         }
                     }
                 } else {
-                    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                    [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                 }
             }
         }
@@ -266,9 +283,9 @@
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSDictionary *resultDict = [jsonDict valueForKey:@"result"];
                         if ((NSNull *)[resultDict valueForKey:@"filecontent"] != [NSNull null]) {
-#if kDebug
-                            NSLog(@"\n\nData: %@\n\n", [resultDict valueForKey:@"filecontent"]);
-#endif
+                            //#if kDebug
+                            //                            NSLog(@"\n\nData: %@\n\n", [resultDict valueForKey:@"filecontent"]);
+                            //#endif
                             NSData *imageData = [[resultDict valueForKey:@"filecontent"] base64DecodedData];
                             //UIImage *image = [UIImage imageWithData:imageData];
                             UIImage *image = [[[UIImage alloc] initWithData:imageData] autorelease];
@@ -333,92 +350,92 @@
 #endif
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, imageId] requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self showProgressView:NO];
-//    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[DCSharedObject createURLStringFromIdentifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, imageId]]] cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:TIMEOUT_INTERVAL];
-//    
-//    [request setHTTPMethod:@"GET"];
-//    
-//    for (NSString *headerKey in [RequestHeaders commonHeaders]) {
-//        [request setValue:[[RequestHeaders commonHeaders] objectForKey:headerKey] forHTTPHeaderField:headerKey];
-//    }
-//    
-//    NSString *signature = [DCSharedObject generateSignatureFromModel:DOCUMENTATTACHMENTS requestType:@"GET"];
-//#if kDebug
-//    NSLog(@"Signature: %@", signature);
-//#endif
-//    [request setValue:signature forHTTPHeaderField:X_SIGNATURE];
-//    
-//#if kDebug
-//    NSLog(@"headers: %@", [request allHTTPHeaderFields]);
-//#endif
-//
-//    if (signature) {
-//        NSURLResponse *response = nil;
-//        NSError *error = nil;
-//        NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-//        if (error) {
-//#if kDebug
-//            NSLog(@"%@", [error description]);
-//#endif
-//
-//            [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
-//            //image was not loaded remove a row from the model array of the table
-//            //removing any array from documentIdArray will do since this array only gives a hint 
-//            //of how many images are there
-//            if (self.documentIdArray) {
-//                if ([self.documentIdArray count] > 0) {
-//                    [self.documentIdArray removeObjectAtIndex:0];
-//                }
-//            }
-//            return;
-//        }
-//        if (response) {
-//            NSString *responseString = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
-//#if kDebug
-//            NSLog(@"here: %@", responseString);
-//#endif
-//            
-//            if ([(NSHTTPURLResponse *)response statusCode] != 200) {
-//
-//                [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
-//                //image was not loaded remove a row from the model array of the table
-//                //removing any array from documentIdArray will do since this array only gives a hint 
-//                //of how many images are there
-//                if (self.documentIdArray) {
-//                    if ([self.documentIdArray count] > 0) {
-//                        [self.documentIdArray removeObjectAtIndex:0];
-//                    }
-//                }
-//                [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
-//                return;
-//            } else {
-//                [self parseResponse:responseString forIdentifier:DOCUMENTATTACHMENTS_ID];
-//            }
-//        }
-//    }
-//    [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
+    //    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[DCSharedObject createURLStringFromIdentifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, imageId]]] cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:TIMEOUT_INTERVAL];
+    //    
+    //    [request setHTTPMethod:@"GET"];
+    //    
+    //    for (NSString *headerKey in [RequestHeaders commonHeaders]) {
+    //        [request setValue:[[RequestHeaders commonHeaders] objectForKey:headerKey] forHTTPHeaderField:headerKey];
+    //    }
+    //    
+    //    NSString *signature = [DCSharedObject generateSignatureFromModel:DOCUMENTATTACHMENTS requestType:@"GET"];
+    //#if kDebug
+    //    NSLog(@"Signature: %@", signature);
+    //#endif
+    //    [request setValue:signature forHTTPHeaderField:X_SIGNATURE];
+    //    
+    //#if kDebug
+    //    NSLog(@"headers: %@", [request allHTTPHeaderFields]);
+    //#endif
+    //
+    //    if (signature) {
+    //        NSURLResponse *response = nil;
+    //        NSError *error = nil;
+    //        NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    //        if (error) {
+    //#if kDebug
+    //            NSLog(@"%@", [error description]);
+    //#endif
+    //
+    //            [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
+    //            //image was not loaded remove a row from the model array of the table
+    //            //removing any array from documentIdArray will do since this array only gives a hint 
+    //            //of how many images are there
+    //            if (self.documentIdArray) {
+    //                if ([self.documentIdArray count] > 0) {
+    //                    [self.documentIdArray removeObjectAtIndex:0];
+    //                }
+    //            }
+    //            return;
+    //        }
+    //        if (response) {
+    //            NSString *responseString = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
+    //#if kDebug
+    //            NSLog(@"here: %@", responseString);
+    //#endif
+    //            
+    //            if ([(NSHTTPURLResponse *)response statusCode] != 200) {
+    //
+    //                [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
+    //                //image was not loaded remove a row from the model array of the table
+    //                //removing any array from documentIdArray will do since this array only gives a hint 
+    //                //of how many images are there
+    //                if (self.documentIdArray) {
+    //                    if ([self.documentIdArray count] > 0) {
+    //                        [self.documentIdArray removeObjectAtIndex:0];
+    //                    }
+    //                }
+    //                [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
+    //                return;
+    //            } else {
+    //                [self parseResponse:responseString forIdentifier:DOCUMENTATTACHMENTS_ID];
+    //            }
+    //        }
+    //    }
+    //    [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
 }
 
 -(void) getImages {
     if (self.documentIdArray) {
-//        if (!self.opertationQueue) {
-//            self.opertationQueue = [[[NSOperationQueue alloc] init] autorelease];
-//        }
-//        [self.opertationQueue cancelAllOperations];
+        //        if (!self.opertationQueue) {
+        //            self.opertationQueue = [[[NSOperationQueue alloc] init] autorelease];
+        //        }
+        //        [self.opertationQueue cancelAllOperations];
         
         for (NSString *imageId in self.documentIdArray) {
             [self getImageFromId:imageId];
-//            NSBlockOperation *blockOperation = [[[NSBlockOperation alloc] init] autorelease];
-//            [blockOperation addExecutionBlock:^(void) {
-//                [self getImageFromId:imageId];
-//            }];
-//            [self.opertationQueue addOperation:blockOperation];
+            //            NSBlockOperation *blockOperation = [[[NSBlockOperation alloc] init] autorelease];
+            //            [blockOperation addExecutionBlock:^(void) {
+            //                [self getImageFromId:imageId];
+            //            }];
+            //            [self.opertationQueue addOperation:blockOperation];
             
         }
     }
 }
 
 -(void) showError {
-    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
+    [self showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
 }
 
 -(void) updateUI {
@@ -457,12 +474,39 @@
             self.damageDetailModel.damageDriverCausedDamage = @"No";
         }
     }
-
+    
     
 #if kDebug
     NSLog(@"%@", self.damageDetailModel.damageDriverCausedDamage);
 #endif
 }
+
+- (IBAction)editTable:(id)sender {
+    UIBarButtonItem *editButton = (UIBarButtonItem *)sender;
+    if (self.editing) {
+        [super setEditing:NO];
+        [self.damageTableView setEditing:NO];
+        [editButton setTitle:NSLocalizedString(@"EDIT", @"")];
+        [self toggleEditButton];
+    } else {
+        [super setEditing:YES];
+        [self.damageTableView setEditing:YES];
+        [editButton setTitle:NSLocalizedString(@"DONE", @"")];
+    }
+
+}
+
+-(void) toggleEditButton {
+}
+
+#pragma mark - UIAlertViewDelegate methods
+-(void) alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    [super alertView:alertView didDismissWithButtonIndex:buttonIndex];
+    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"LOGOUT", @"")]) {
+        [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:AUTHENTICATE_LOGOUT requestMethod:kRequestMethodGET model:AUTHENTICATE delegate:self viewController:self];
+    }
+}
+
 
 #pragma mark - DCPickListViewControllerDelegate
 -(void) pickListDidPickItem:(id)item ofType:(NSInteger)type {
@@ -565,7 +609,7 @@
                 NSString *imageNamePath;
                 NSString *thumbnailImagePath;
                 
-
+                
                 //retrieve the number of images already stored using NSDefaultManager
                 //and name this image accordingly. number starts from 0.
                 if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:NUMBER_OF_IMAGES]) {
@@ -604,7 +648,6 @@
 #if kDebug
                         NSLog(@"%@\n%@", self.damageDetailModel.damageImagePaths, self.damageDetailModel.damageThumbnailImagePaths);
 #endif
-
                         
                         
                         //insert a new row in tableview
@@ -615,7 +658,9 @@
                         [self.damageTableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
                         [self.damageTableView endUpdates];
                         
-                                            } else {
+                        [self.damageTableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
+                        
+                    } else {
 #if kDebug
                         NSLog(@"Some error occurred: %d, %s", errno, strerror(errno));
 #endif
@@ -633,7 +678,7 @@
             NSLog(@"%@", urlArray);
 #endif
         } else {
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"ADD_PHOTO_NIL_IMAGE_MESSAGE", @"")];
+            [self showAlertWithMessage:NSLocalizedString(@"ADD_PHOTO_NIL_IMAGE_MESSAGE", @"")];
         }
         
     }
@@ -650,10 +695,10 @@
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
     [DCSharedObject hideProgressDialogInView:self.view];
     NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
-#if kDebug
-    NSLog(@"%@", responseString);
-#endif
-
+//#if kDebug
+//    NSLog(@"%@", responseString);
+//#endif
+    
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         
         //if identifier is of kind DocumentAttachments/xyz, call the parsing function with DOCUMENTATTACHMENTS_ID
@@ -674,20 +719,23 @@
                 }
                 [self.damageTableView reloadData];
             }
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
-
+            [self showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
+            
+        } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+            [DCSharedObject processLogout:self.navigationController];
+            
         } else {
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
         }
         
     }
-
+    
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
     [DCSharedObject hideProgressDialogInView:self.view];
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+        [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else {
         if ([identifier rangeOfString:DOCUMENTATTACHMENTS].location != NSNotFound) {
             //image was not loaded remove a row from the model array of the table
@@ -699,14 +747,17 @@
                 }
                 [self.damageTableView reloadData];
             }
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
+            [self showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
+            
+        } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+            [DCSharedObject processLogout:self.navigationController];
             
         } else {
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
         }
         
     }
-
+    
 }
 
 -(void) storeResponse:(NSData *)data forIdentifier:(NSString *)identifier {
@@ -825,7 +876,7 @@
     } else {
         cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
     }
-        
+    
     if (!cell) {
         if (indexPath.section == 0 && indexPath.row == 0) {
             cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SimpleCell"] autorelease];
@@ -1027,42 +1078,12 @@
                 } else {
                     imageView.hidden = YES;
                     loadingImageView.hidden = NO;
-                    NSArray *imageArray = [NSArray arrayWithObjects:
-                                           [UIImage imageNamed:@"1.tiff"],
-                                           [UIImage imageNamed:@"2.tiff"], 
-                                           [UIImage imageNamed:@"3.tiff"], 
-                                           [UIImage imageNamed:@"4.tiff"], 
-                                           [UIImage imageNamed:@"5.tiff"], 
-                                           [UIImage imageNamed:@"6.tiff"], 
-                                           [UIImage imageNamed:@"7.tiff"], 
-                                           [UIImage imageNamed:@"8.tiff"], 
-                                           [UIImage imageNamed:@"9.tiff"], 
-                                           [UIImage imageNamed:@"10.tiff"], 
-                                           nil];
-                    
-                    loadingImageView.animationImages = imageArray;
-                    loadingImageView.animationDuration = 0.5;
-                    [loadingImageView startAnimating];
+                    [loadingImageView setImage:[UIImage imageNamed:@"loadingImage.png"]];
                 }
             } else {
                 imageView.hidden = YES;
                 loadingImageView.hidden = NO;
-                NSArray *imageArray = [NSArray arrayWithObjects:
-                                       [UIImage imageNamed:@"1.tiff"],
-                                       [UIImage imageNamed:@"2.tiff"], 
-                                       [UIImage imageNamed:@"3.tiff"], 
-                                       [UIImage imageNamed:@"4.tiff"], 
-                                       [UIImage imageNamed:@"5.tiff"], 
-                                       [UIImage imageNamed:@"6.tiff"], 
-                                       [UIImage imageNamed:@"7.tiff"], 
-                                       [UIImage imageNamed:@"8.tiff"], 
-                                       [UIImage imageNamed:@"9.tiff"], 
-                                       [UIImage imageNamed:@"10.tiff"], 
-                                       nil];
-                
-                loadingImageView.animationImages = imageArray;
-                loadingImageView.animationDuration = 0.5;
-                [loadingImageView startAnimating];
+                [loadingImageView setImage:[UIImage imageNamed:@"loadingImage.png"]];
             }
         }
     }
@@ -1101,7 +1122,7 @@
             pickListViewController.delegate = self;
             [self.navigationController pushViewController:pickListViewController animated:YES];
         } else {
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"SELECT_DAMAGE_TYPE", @"")];
+            [self showAlertWithMessage:NSLocalizedString(@"SELECT_DAMAGE_TYPE", @"")];
         }
     }
     
@@ -1134,51 +1155,39 @@
                 if (indexPath.row < [self.imagesArray count]) {
                     DCImageViewerViewController *viewer = [[[DCImageViewerViewController alloc] initWithNibName:@"ImageViewerView" bundle:nil image:[self.imagesArray objectAtIndex:indexPath.row]] autorelease];
                     [self.navigationController pushViewController:viewer animated:YES];
-                } else {
-                    [self.damageTableView deselectRowAtIndexPath:indexPath animated:NO];
-                    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-                    UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG];
-                    NSArray *imageArray = [NSArray arrayWithObjects:
-                                           [UIImage imageNamed:@"1.tiff"],
-                                           [UIImage imageNamed:@"2.tiff"], 
-                                           [UIImage imageNamed:@"3.tiff"], 
-                                           [UIImage imageNamed:@"4.tiff"], 
-                                           [UIImage imageNamed:@"5.tiff"], 
-                                           [UIImage imageNamed:@"6.tiff"], 
-                                           [UIImage imageNamed:@"7.tiff"], 
-                                           [UIImage imageNamed:@"8.tiff"], 
-                                           [UIImage imageNamed:@"9.tiff"], 
-                                           [UIImage imageNamed:@"10.tiff"], 
-                                           nil];
-                    
-                    imageView.animationImages = imageArray;
-                    imageView.animationDuration = 0.5;
-                    [imageView startAnimating];
-                    
-                } 
-            } else {
-                [self.damageTableView deselectRowAtIndexPath:indexPath animated:NO];
-                UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-                UIImageView *imageView = (UIImageView *)[cell viewWithTag:CUSTOM_CELL_IMAGE_NEW_IMAGE_DAMAGE_TAG];
-                NSArray *imageArray = [NSArray arrayWithObjects:
-                                       [UIImage imageNamed:@"1.tiff"],
-                                       [UIImage imageNamed:@"2.tiff"], 
-                                       [UIImage imageNamed:@"3.tiff"], 
-                                       [UIImage imageNamed:@"4.tiff"], 
-                                       [UIImage imageNamed:@"5.tiff"], 
-                                       [UIImage imageNamed:@"6.tiff"], 
-                                       [UIImage imageNamed:@"7.tiff"], 
-                                       [UIImage imageNamed:@"8.tiff"], 
-                                       [UIImage imageNamed:@"9.tiff"], 
-                                       [UIImage imageNamed:@"10.tiff"], 
-                                       nil];
-                
-                imageView.animationImages = imageArray;
-                imageView.animationDuration = 0.5;
-                [imageView startAnimating];
+                }
             }
         }
     }
 }
+
+-(BOOL) tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (self.damageDetailModel.damageImagePaths) {
+        if ([self.damageDetailModel.damageImagePaths count] > 0) {
+            if (indexPath.section == 1 && indexPath.row != 0) {
+                return YES;
+            }
+        }
+    }
+    return NO;
+}
+
+
+-(void) tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        [self.damageDetailModel.damageImagePaths removeObjectAtIndex:indexPath.row - 1];
+        [self.damageDetailModel.damageThumbnailImagePaths removeObjectAtIndex:indexPath.row - 1];
+        if ([self.damageDetailModel.damageImagePaths count] == 0) {
+            [self.damageTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationTop];
+            self.damageDetailModel.damageImagePaths = nil;
+            self.damageDetailModel.damageThumbnailImagePaths = nil;
+        } else {
+            [self.damageTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationTop];
+        }
+        
+    }
+}
+
 
 @end

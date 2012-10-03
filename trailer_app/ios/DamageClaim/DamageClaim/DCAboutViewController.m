@@ -12,6 +12,8 @@
 
 #import "Const.h"
 
+#import <QuartzCore/QuartzCore.h>
+
 @interface DCAboutViewController ()
 @property (retain, nonatomic) IBOutlet UIWebView *webView;
 
@@ -37,6 +39,9 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+#if kDebug
+    NSLog(@"%@", [DCSharedObject createURLStringFromIdentifier:ABOUT]);
+#endif
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[DCSharedObject createURLStringFromIdentifier:ABOUT]]];
     [request setHTTPMethod:@"GET"];
     [request setValue:@"text/json" forHTTPHeaderField:@"Accept"];
@@ -47,6 +52,8 @@
 #endif
     
     [self.webView loadRequest:request];
+    self.view.layer.cornerRadius = 10;
+    self.view.layer.masksToBounds = YES;
     
 }
 

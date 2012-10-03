@@ -100,6 +100,9 @@
 -(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     [self.httpService cancelHTTPService];
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    [DCSharedObject hideProgressDialogInView:self.view];
+    self.httpService = nil;
 }
 
 
@@ -209,7 +212,7 @@
         [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_SECRET_KEY]) {
         
         if ([self isEmpty:usernameTextField.text] || [self isEmpty:passwordTextField.text]) {
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"EMPTY_USERNAME_PASSWORD", @"")];
+            [self showAlertWithMessage:NSLocalizedString(@"EMPTY_USERNAME_PASSWORD", @"")];
             
         } else {
             [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:AUTHENTICATE_LOGIN requestMethod:kRequestMethodPOST model:AUTHENTICATE delegate:self viewController:self];
@@ -219,7 +222,7 @@
 //            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:@"DocumentAttachments/15x503" requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
         }
     } else {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NO_API_KEY_ERROR", @"")];
+        [self showAlertWithMessage:NSLocalizedString(@"NO_API_KEY_ERROR", @"")];
     }
 }
 
@@ -234,6 +237,11 @@
 
 
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
+    //logout irrespective of the response string
+    if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        [DCSharedObject processLogout:self.navigationController];
+        return;
+    } else
     if ([identifier isEqualToString:AUTHENTICATE_LOGIN]) {
         NSDictionary *jsonDict = [responseString objectFromJSONString];
         if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
@@ -283,18 +291,27 @@
                             [self login:nil];
                         }
                     } else {
-                        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INVALID_LOGIN", @"")];
+                        [self showAlertWithMessage:NSLocalizedString(@"INVALID_LOGIN", @"")];
                     }
                 }
             }
             else {
-                [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INVALID_LOGIN", @"")];
+                [self showAlertWithMessage:NSLocalizedString(@"INVALID_LOGIN", @"")];
             }
         }
     }
     
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
+
+#pragma mark - UIAlertViewDelegate methods
+-(void) alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    [super alertView:alertView didDismissWithButtonIndex:buttonIndex];
+    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"LOGOUT", @"")]) {
+        [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:AUTHENTICATE_LOGOUT requestMethod:kRequestMethodGET model:AUTHENTICATE delegate:self viewController:self];
+    }
+}
+
 
 
 #pragma mark - DCAboutViewControllerDelegate methods
@@ -317,8 +334,11 @@
 
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {        
         [self parseResponse:responseString forIdentifier:identifier];
+    } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        [DCSharedObject processLogout:self.navigationController];
+        
     } else {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
     
 }
@@ -326,9 +346,12 @@
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
     [MBProgressHUD hideHUDForView:self.view animated:YES];
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+        [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+    } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        [DCSharedObject processLogout:self.navigationController];
+        
     } else {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
 }
 

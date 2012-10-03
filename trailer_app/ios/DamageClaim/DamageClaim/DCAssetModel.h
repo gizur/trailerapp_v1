@@ -12,5 +12,6 @@
 //right now ony trailer id is used
 //more fields can be added here later
 @property (nonatomic, retain) NSString *trailerId;
+@property (nonatomic, retain) NSString *trailerName;
 
 @end

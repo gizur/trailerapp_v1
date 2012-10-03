@@ -18,6 +18,8 @@
 
 #import "DCDamageDetailViewController.h"
 
+#import "DCLoginViewController.h"
+
 #import "MBProgressHUD.h"
 
 #import "RequestHeaders.h"
@@ -124,6 +126,9 @@
 -(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     [self.httpService cancelHTTPService];
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    [DCSharedObject hideProgressDialogInView:self.view];
+    self.httpService = nil;
 }
 
 - (void)viewDidUnload
@@ -162,7 +167,7 @@
 
 -(void) submitDamageReport {
     if (!self.surveyModel.surveyTrailerId) {
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
+        [self showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
     } else {
         [self disableActions];
         self.submittingDamageIndex = 0;
@@ -299,8 +304,20 @@
                     if (imageData) {
                         [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
                         //the file name is a combination of damageType, damagePosition and the index of this image in the array
-                        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"image.jpg\"\r\n", [NSString stringWithFormat:@"%@%@%d", damageDetailModel.damageType, damageDetailModel.damageType, [damageDetailModel.damageImagePaths indexOfObject:imagePath]]] dataUsingEncoding:NSUTF8StringEncoding]];
-                        [body appendData:[[NSString stringWithString:@"Content-Type: image/jpeg\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+                        [body appendData:[[NSString stringWithFormat:
+                                           @"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n", 
+                                           [NSString stringWithFormat:@"%@%@%d", damageDetailModel.damageType, damageDetailModel.damageType, [damageDetailModel.damageImagePaths indexOfObject:imagePath]],
+                                           [NSString stringWithFormat:@"image%d", [damageDetailModel.damageImagePaths indexOfObject:imagePath]]]
+                                          dataUsingEncoding:NSUTF8StringEncoding]];
+                        
+#if kDebug
+                        NSLog(@"%@", [[NSString stringWithFormat:
+                                      @"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n", 
+                                      [NSString stringWithFormat:@"%@%@%d", damageDetailModel.damageType, damageDetailModel.damageType, [damageDetailModel.damageImagePaths indexOfObject:imagePath]],
+                                      [NSString stringWithFormat:@"%@%@%d", damageDetailModel.damageType, damageDetailModel.damageType, [damageDetailModel.damageImagePaths indexOfObject:imagePath]]]
+                              dataUsingEncoding:NSUTF8StringEncoding]);
+#endif
+                        [body appendData:[@"Content-Type: image/jpeg\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
                         [body appendData:imageData];
                         [body appendData:[[NSString stringWithFormat:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
                     }
@@ -317,6 +334,7 @@
                                           contentType, @"Content-Type",
                                           [NSString stringWithFormat:@"%d", [body length]], @"Content-Length", nil];
             [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:extraHeaders body:body identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
+            
             
 //            // set URL
 //            [request setURL:[NSURL URLWithString:[DCSharedObject createURLStringFromIdentifier:HELPDESK]]];
@@ -356,7 +374,7 @@
 //                
 //            } else {
 //                //something went wrong
-//                [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+//                [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
 //            }
             
             
@@ -449,9 +467,11 @@
 }
 
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
-#if kDebug
-    NSLog(@"Parse started for identifier: %@", identifier);
-#endif
+    //logout irrespective of the response string
+    if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        [DCSharedObject processLogout:self.navigationController];
+        return;
+    } else
     if (responseString) {
         NSDictionary *jsonDict = [responseString objectFromJSONString];
         if ([identifier isEqualToString:HELPDESK_DAMAGED]) {
@@ -554,11 +574,11 @@
                                 [self getDamageList];
                             }
                         } else {
-                            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERRO", @"")];
+                            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                         }
                     }
                 } else {
-                    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                    [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                 }
             }
         }
@@ -607,7 +627,7 @@
                                 }
                             }
                         } else {
-                            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERRO", @"")];
+                            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
                         }
                     }
                 } else {
@@ -632,6 +652,15 @@
     [self toggleActionButtons];
 }
 
+
+#pragma mark - UIAlertViewDelegate methods
+-(void) alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    [super alertView:alertView didDismissWithButtonIndex:buttonIndex];
+    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"LOGOUT", @"")]) {
+        [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:AUTHENTICATE_LOGOUT requestMethod:kRequestMethodGET model:AUTHENTICATE delegate:self viewController:self];
+    }
+}
+
 #pragma mark - HTTPServiceDelegate methods
 -(void) responseCode:(int)code {
     self.httpStatusCode = code;
@@ -646,6 +675,11 @@
 
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
+    } else {
+        if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+            [DCSharedObject processLogout:self.navigationController];
+
+        }
     }
 }
 
@@ -655,8 +689,12 @@
         if (self.submittingDamageIndex < [self.currentDamageArray count]) {
             self.submittingDamageIndex++;
             [self submitDamageReportAtIndex:self.submittingDamageIndex];
-        } else if (self.submittingDamageIndex == [self.currentDamageArray count] - 1) {
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"SUBMIT_DAMAGE_ERROR", @"")];
+#if kDebug
+            NSLog(@"submittingindex: %d, array: %d", self.submittingDamageIndex, [self.currentDamageArray count]);
+#endif
+        }
+        if (self.submittingDamageIndex == [self.currentDamageArray count] - 1) {
+            [self showAlertWithMessage:NSLocalizedString(@"SUBMIT_DAMAGE_ERROR", @"")];
             [self enableActions];
             
             //update the damage list
@@ -664,9 +702,12 @@
         }
     } else {
         if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+            [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+        } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+            [DCSharedObject processLogout:self.navigationController];
+            
         } else {
-            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
         }
 
     }
@@ -899,7 +940,7 @@
         if ([self.currentDamageArray count] > 0) {
             if (indexPath.section == 0) {
                 if (!self.surveyModel.surveyTrailerId) { // the user can submit the damage report only after setting the trailer id.
-                    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
+                    [self showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
                     return;
                 } else {
                     damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil isEditable:YES] autorelease];
@@ -919,7 +960,7 @@
         } else {
             if (indexPath.section == 0) {
                 if (!self.surveyModel.surveyTrailerId) { // the user can submit the damage report only after setting the trailer id.
-                    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
+                    [self showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
                     return;
                 } else {
                     damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil isEditable:YES] autorelease];
@@ -940,7 +981,7 @@
 #if kDebug
                 NSLog(@"%@", self.surveyModel.surveyTrailerId);
 #endif
-                [DCSharedObject showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
+                [self showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
                 return;
             } else {
                 damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil isEditable:YES] autorelease];

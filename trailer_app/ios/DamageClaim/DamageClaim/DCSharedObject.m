@@ -13,6 +13,7 @@
 #import "NSData+Base64.h"
 #import "RequestHeaders.h"
 #import "MBProgressHUD.h"
+#import "DCLoginViewController.h"
 
 static DCSharedObject *sharedPreferences = nil;
 
@@ -85,20 +86,43 @@ static DCSharedObject *sharedPreferences = nil;
 }
 
 
-+(void)showAlertWithMessage:(NSString *)alertMessage
++(void)showAlertWithMessage:(NSString *)alertMessage 
 {
-	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(alertMessage, @"") delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", @"") otherButtonTitles:nil] autorelease];
-	[alertView show];
+
+    UIAlertView *alertView;
+    if ([alertMessage isEqualToString:@"INTERNAL_SERVER_ERROR"]) {
+        alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(alertMessage, @"") delegate:nil cancelButtonTitle:NSLocalizedString(@"LOGOUT", @"") otherButtonTitles:NSLocalizedString(@"OK", @""), nil] autorelease];
+    } else {
+        alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(alertMessage, @"") delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", @"") otherButtonTitles:nil] autorelease];
+    }
+    
+    [alertView show];
 	
 }
 
++(void)showAlertWithMessage:(NSString *)alertMessage delegate:(id<UIAlertViewDelegate>) delegate {
+    
+    UIAlertView *alertView;
+    if ([alertMessage isEqualToString:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")]) {
+        alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(alertMessage, @"") delegate:delegate cancelButtonTitle:NSLocalizedString(@"LOGOUT", @"") otherButtonTitles:NSLocalizedString(@"OK", @""), nil] autorelease];
+    } else {
+        alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(alertMessage, @"") delegate:delegate cancelButtonTitle:NSLocalizedString(@"OK", @"") otherButtonTitles:nil] autorelease];
+    }
+    
+    [alertView show];
+}
+
 +(NSString *) createURLStringFromIdentifier:(NSString *)identifier {
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_URL]) {
+        NSString *url = [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_URL];
+        return [NSString stringWithFormat:@"%@/%@", url, identifier];
+    }
     return [NSString stringWithFormat:@"%@/%@", HTTP_URL, identifier];
     
 }
 
 //in case the body is name=value pairs with progress view optional
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView {
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView {
     
     NSString *urlString = [DCSharedObject createURLStringFromIdentifier:identifier];
 #if kDebug
@@ -153,13 +177,14 @@ static DCSharedObject *sharedPreferences = nil;
         
     } else {
         //something went wrong
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        [viewControllerOrNil showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    
     }
 
 }
 
 //in case the body is NSData with progress view optional
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView {
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView {
     NSString *urlString = [DCSharedObject createURLStringFromIdentifier:identifier];
 #if kDebug
     NSLog(@"%@", urlString);
@@ -213,12 +238,12 @@ static DCSharedObject *sharedPreferences = nil;
         
     } else {
         //something went wrong
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        [viewControllerOrNil showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
 }
 
 
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil {
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil {
     
     NSString *urlString = [DCSharedObject createURLStringFromIdentifier:identifier];
 #if kDebug
@@ -276,11 +301,11 @@ static DCSharedObject *sharedPreferences = nil;
         
     } else {
         //something went wrong
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        [viewControllerOrNil showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
 }
 
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(UIViewController *) viewControllerOrNil {
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil {
     
     NSString *urlString = [DCSharedObject createURLStringFromIdentifier:identifier];
 #if kDebug
@@ -338,7 +363,7 @@ static DCSharedObject *sharedPreferences = nil;
         
     } else {
         //something went wrong
-        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+        [viewControllerOrNil showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
 }
 
@@ -489,6 +514,28 @@ static DCSharedObject *sharedPreferences = nil;
         [sISO8601 setDateFormat:strFormat];
     }
     return[sISO8601 stringFromDate:date];
+}
+
++(void) processLogout:(UINavigationController *)navigationController {
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_NAME];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:PASSWORD];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_API_KEY];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_SECRET_KEY];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:CONTACT_NAME];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:ACCOUNT_NAME];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_LOGGED_IN];
+    
+    //remove all the viewControllers from the array and push LoginViewController
+    NSMutableArray *viewControllers = [[[navigationController viewControllers] mutableCopy] autorelease];
+#if kDebug
+    NSLog(@"%@", viewControllers);
+#endif
+    [viewControllers removeAllObjects];
+    navigationController.viewControllers = viewControllers;
+    
+    DCLoginViewController *loginViewController = [[[DCLoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
+    [navigationController pushViewController:loginViewController animated:NO];
+
 }
 
 @end

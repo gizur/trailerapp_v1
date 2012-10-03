@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DCParentViewController.h"
 
 @protocol DCAboutViewControllerDelegate <NSObject>
 
@@ -15,7 +16,7 @@
 
 @end
 
-@interface DCAboutViewController : UIViewController
+@interface DCAboutViewController : DCParentViewController
 @property (nonatomic, assign) id<DCAboutViewControllerDelegate> delegate;
 
 @end

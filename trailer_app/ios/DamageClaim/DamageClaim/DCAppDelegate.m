@@ -60,8 +60,27 @@
 }
 
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_NAME];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:PASSWORD];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_API_KEY];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_SECRET_KEY];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:CONTACT_NAME];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:ACCOUNT_NAME];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_LOGGED_IN];
+    
+    //remove all the viewControllers from the array and push LoginViewController
+    NSMutableArray *viewControllers = [[[self.navigationController viewControllers] mutableCopy] autorelease];
+#if kDebug
+    NSLog(@"%@", viewControllers);
+#endif
+    [viewControllers removeAllObjects];
+    self.navigationController.viewControllers = viewControllers;
+
+    DCLoginViewController *loginViewController = [[[DCLoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
+    [self.navigationController pushViewController:loginViewController animated:NO];
+    
     NSMutableString *parameterString = [[[url query] mutableCopy] autorelease];
-    parameterString = [[[parameterString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] mutableCopy] autorelease];    
+    parameterString = [[[parameterString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] mutableCopy] autorelease];
     //remove the double quotes
     parameterString = [[[parameterString stringByReplacingOccurrencesOfString:@"'" withString:@""] mutableCopy] autorelease];
 #if kDebug
@@ -86,6 +105,13 @@
                         NSLog(@"%@", [parameter objectAtIndex:1]);
 #endif
                         [[NSUserDefaults standardUserDefaults] setValue:[parameter objectAtIndex:1] forKey:GIZURCLOUD_SECRET_KEY];
+                    }
+                } else if ([[[parameter objectAtIndex:0] lowercaseString] isEqualToString:[GIZURCLOUD_API_URL lowercaseString]]) {
+                    if ([parameter count] > 1) {
+#if kDebug
+                        NSLog(@"%@", [parameter objectAtIndex:1]);
+#endif
+                        [[NSUserDefaults standardUserDefaults] setValue:[parameter objectAtIndex:1] forKey:GIZURCLOUD_API_URL];
                     }
                 }
             }

@@ -1,0 +1,84 @@
+/* 
+  Localizable.strings
+  DamageClaim
+
+  Created by Dev on 13/08/12.
+  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+*/
+
+"LOADING_MESSAGE" = "Laddar...";
+"SAVING_MESSAGE" = "Sparar...";
+"LOGIN" = "Logga in";
+"USERNAME" = "E-mail...";
+"PASSWORD" = "Lösen...";
+"SURVEY_SECTION_ONE_TITLE" = "Kontrollbesiktning";
+"SURVEY_SECTION_TWO_TITLE" = "Skivor och spännband";
+"TAB_BAR_ITEM_SURVEY" = "Kontrollbesiktning";
+"TAB_BAR_ITEM_DAMAGE" = "Skador";
+"TRAILER_TYPE" = "Typ av trailer";
+"OWN" = "Egen";
+"RENTED" = "Hyrtrailer";
+"ID" = "ID:";
+"PLACE" = "Plats:";
+"SEALED" = "Plomberad";
+"NO" = "Nej";
+"YES" = "Ja";
+"PLATES" = "Skivor:";
+"STRAPS" = "Spännband:";
+"SUBMIT" = "Skicka";
+"DONE" = "Klar";
+
+
+"TRAILER_DETAILS" = "Trailer Details";
+
+
+"DAMAGE_DETAILS" = "Skadeuppgifter";
+"DAMAGE_IMAGES" = "Foton";
+"DAMAGE_TYPE" = "Typ:";
+"DAMAGE_POSITION" = "Position:";
+"ADD_PHOTO" = "Välj";
+"ADD_PHOTO_CAMERA" = "Kamera";
+"ADD_PHOTO_LIBRARY" = "Kamerarulle";
+"ADD_PHOTO_ALBUM" = "Sparade foton";
+"CANCEL" = "Avbryta";
+"DISMISS" = "Avskeda";
+"REPORT_DAMAGE" = "Skador";
+"ADD_NEW_IMAGE" = "Lägg till en bild";
+"REPORT_NEW_DAMAGE" = "Rapportera ny skada";
+"REPORTED_DAMAGES" = "Rapporterade skador";
+"LOGOUT" = "Logga ut";
+
+
+
+"DAMAGE_DETAILS" = "Skadeuppgifter";
+
+"ADD_NEW_DAMAGE_DETAIL" = "Add New Damage Detail";
+"PREVIOUSLY_REPORTED_DAMAGES" = "Previously Reported Damages";
+
+
+"REPORTING_DAMAGE" = "Skada rapporteras";
+"DAMAGE_TYPE_ALREADY_ADDED" = "Bilder för denna del av trailern finns redan. De nya bilderna läggs till de befintliga.";
+"EDIT" = "Ändra";
+"DONE" = "Klar";
+"INTERNAL_SERVER_ERROR" = "Problem med tjänsten, kontakta support.";
+"NETWORK_ERROR" = "Kan inte kontakta servern. Kontrollera nätverket och försök igen.";
+"SELECT_DAMAGE_TYPE" = "Välj en typ av skada.";
+"SUBMIT_DAMAGE_ERROR" = "Kunde inte skicka skaderapporten, prova att skicka igen.";
+"SUBMITTING" = "Skickar...";
+"NO_API_KEY_ERROR" = "Fel vid inloggning! Säkerställ att e-mail och lösen är rätt. Du har väl klickat på länken i det mail/SMS: som konfigurerar handenheten!";
+"EMPTY_USERNAME_PASSWORD" = "E-mail eller lösen har inte angivits.";
+"INVALID_LOGIN" = "Kunde inte verifiera användaren. Du har väl klickat på länken i det mail/SMS: som konfigurerar handenheten! Kontakta support om du redan gjort detta.";
+"SURVEY_TICKET_TITLE" = "Kontrollbesiktning gjord av";
+"DAMAGE_TICKET_TITLE" = "Skaderapport gjord av";
+"IMAGE_LOADING_ERROR" = "Kunde inte ladda foto. Försök igen.";
+
+
+"TRAILER_ID_NULL_ERROR" = "Please choose a trailer-id first.";
+"SURVEY" = "Survey";
+"DAMAGES" = "Skador";
+
+"CLOSE" = "Close";
+"DRIVER_CAUSED_DAMAGE" = "Caused By:";
+"DRIVER" = "Driver";
+"OTHER" = "Other";
+"ADD" = "Add";

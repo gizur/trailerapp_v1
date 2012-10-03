@@ -9,8 +9,9 @@
 #import <UIKit/UIKit.h>
 #import "HTTPService.h"
 #import "DCAboutViewController.h"
+#import "DCParentViewController.h"
 
-@interface DCLoginViewController : UIViewController<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, HTTPServiceDelegate, DCAboutViewControllerDelegate>
+@interface DCLoginViewController : DCParentViewController<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, HTTPServiceDelegate, DCAboutViewControllerDelegate, UIAlertViewDelegate>
 
 
 @end
