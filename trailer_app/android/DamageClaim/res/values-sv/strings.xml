@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <resources>
 
     <string name="addnewimage">Lägg till en bild</string>
@@ -67,6 +69,8 @@
     <string name="sdcard">Problem. Sätt i ett SD kort och försök igen.</string>
     <string name="damagessubmitted">Rapporten har sparats</string>
     <string name="noimages">Det finns inga bilder för skadan</string>
+    <string name="changepassword">Ändra\nlösenord</string>
+    <string name="changepassword1">Ändra lösenord</string>
 
     <!-- Drawable Values -->
 

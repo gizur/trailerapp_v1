@@ -12,10 +12,11 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -40,6 +41,7 @@ import com.gslab.R.layout;
 import com.gslab.R.string;
 import com.gslab.adapters.DamageListAdapter;
 import com.gslab.core.CoreComponent;
+import com.gslab.core.DamageClaimApp;
 import com.gslab.helpers.DamageInfo;
 import com.gslab.interfaces.Constants;
 import com.gslab.interfaces.NetworkListener;
@@ -62,6 +64,8 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 	private TextView reporting_damage_textview;
 
+	private Activity activity;
+
 	private int selectedID, reporting_entry;
 
 	private JSONObject object;
@@ -69,15 +73,15 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 	private Thread thread;
 
-	private String response, error;
-
-	private Context context;
+	private String response;
 
 	private boolean which_request;
 
 	private ScrollView scrollview;
 
-	private int failures = 0;
+	private int failures = 0, picklist1 = 0, picklist2 = 0;
+
+	private ProgressDialog dialog;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -87,7 +91,9 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 		which_request = true;
 
-		context = getApplicationContext();
+		dialog = new ProgressDialog(ReportDamage.this);
+
+		getApplicationContext();
 
 		report_new_damage = (Button) findViewById(id.report_damage_button_report_new_damage);
 		report_new_damage.setOnClickListener(this);
@@ -112,7 +118,8 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
 
 		} else {
 			ProgressDialogHelper.showProgressDialog(this, "",
@@ -145,6 +152,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
+				handler.sendEmptyMessage(Constants.TOAST);
 			}
 
 		} else
@@ -167,16 +175,14 @@ public class ReportDamage extends Activity implements OnClickListener,
 				break;
 
 			case Constants.TOAST:
-			
+
 				errordialog();
 				break;
-
 			}
 		}
 	};
-	
-	private void errordialog()
-	{
+
+	private void errordialog() {
 		Utility.showErrorDialog(this);
 	}
 
@@ -314,6 +320,80 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 	}
 
+	private String getReportDamageValueYes() {
+
+		if (DamageClaimApp.report_damage_value_yes != null) {
+			return DamageClaimApp.report_damage_value_yes;
+		}
+
+		picklist2 = 1;
+		HTTPRequest request = createRequest();
+		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
+				request);
+		Utility.waitForThread();
+		picklist2 = 0;
+		if (this.response != null) {
+			try {
+				JSONObject obj = new JSONObject(response);
+				JSONArray arr = obj.getJSONArray("result");
+				for (int i = 0; i < arr.length(); i++) {
+					if (arr.getJSONObject(i).getString("label")
+							.equalsIgnoreCase("yes")) {
+						Log.i(getClass().getSimpleName(), arr.getJSONObject(i)
+								.getString("value"));
+						DamageClaimApp.report_damage_value_yes = new String(arr
+								.getJSONObject(i).getString("value"));
+						return arr.getJSONObject(i).getString("value");
+					}
+				}
+				handler.sendEmptyMessage(Constants.TOAST);
+			} catch (Exception e) {
+				handler.sendEmptyMessage(Constants.TOAST);
+				Log.i(getClass().getSimpleName(),
+						"getclosedticketstatusvalue... exception");
+			}
+		}
+
+		return null;
+	}
+
+	private String getOpenTicketStatusValue() {
+
+		if (DamageClaimApp.open_ticket_status_value != null) {
+			return DamageClaimApp.open_ticket_status_value;
+		}
+
+		picklist1 = 1;
+		HTTPRequest request = createRequest();
+
+		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
+				request);
+		Utility.waitForThread();
+		picklist1 = 0;
+		if (this.response != null) {
+			try {
+				JSONObject obj = new JSONObject(response);
+				JSONArray arr = obj.getJSONArray("result");
+				for (int i = 0; i < arr.length(); i++) {
+					if (arr.getJSONObject(i).getString("label")
+							.equalsIgnoreCase("open")) {
+						Log.i(getClass().getSimpleName(), arr.getJSONObject(i)
+								.getString("value"));
+						DamageClaimApp.open_ticket_status_value = new String(
+								arr.getJSONObject(i).getString("value"));
+						return arr.getJSONObject(i).getString("value");
+					}
+				}
+				handler.sendEmptyMessage(Constants.TOAST);
+			} catch (Exception e) {
+				handler.sendEmptyMessage(Constants.TOAST);
+				Log.i(getClass().getSimpleName(), "damage report... exception");
+			}
+		}
+
+		return null;
+	}
+
 	public void onClick(View v) {
 
 		if (v == report_new_damage) {
@@ -329,92 +409,150 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 		if (v == submit) {
 
-			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
-				Log.i("got it", "the network info");
-				ToastUI.showToast(getApplicationContext(),
-						getString(string.networkunavailable));
-				return;
-			}
-			ProgressDialogHelper.showProgressDialog(this, "",
-					getString(string.loading));
-			which_request = false;
-			
+			reportdamages();
 
-			failures = 0;
+			// getReportedDamagesList();
+		}
+	}
 
-			CoreComponent.SENDING_IMAGES = true;
-			for (int i = 0; i < reporting_damage_list.size(); i++) {
+	@SuppressWarnings("unchecked")
+	private void reportdamages() {
+		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+			Log.i("got it", "the network info");
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
+			return;
+		}
+
+		which_request = false;
+
+		failures = 0;
+
+		activity = this;
+		if (null != dialog && dialog.isShowing()) {
+			dialog.dismiss();
+		}
+		dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		dialog.setMax(reporting_damage_list.size());
+		CoreComponent.SENDING_IMAGES = true;
+
+		startAsyncTask();
+
+	}
+
+	@SuppressWarnings("unchecked")
+	private void startAsyncTask() {
+		ReportOperation op = new ReportOperation();
+		Log.i("size", reporting_damage_list.size() + "");
+		op.execute(reporting_damage_list);
+	}
+
+	private void checkForErrors() {
+
+		Log.i(getClass().getSimpleName(), "after asynctask size = "
+				+ reporting_damage_list.size());
+		checkVisibility();
+		setReportingDamageListAdapter();
+		if (failures == 0) {
+			reporting_damage_list.clear();
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.damagessubmitted));
+			CoreComponent.trailerid = null;
+			finish();
+		} else {
+			final Activity activity = this;
+			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+			builder.setMessage(activity.getString(string.reportdamageproblem))
+					.setCancelable(false)
+					.setPositiveButton(activity.getString(string.sealed_yes),
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.cancel();
+									reportdamages();
+
+								}
+							})
+					.setNegativeButton(activity.getString(string.sealed_no),
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.cancel();
+								}
+							});
+			AlertDialog alert = builder.create();
+			alert.show();
+		}
+
+		CoreComponent.SENDING_IMAGES = false;
+		which_request = true;
+
+	}
+
+	class ReportOperation extends
+			AsyncTask<ArrayList<DamageInfo>, String, String> {
+
+		@Override
+		protected void onPreExecute() {
+			Log.i("Asynchtask", "preexecute");
+			dialog.show();
+		}
+
+		int i;
+
+		@Override
+		protected String doInBackground(ArrayList<DamageInfo>... info) {
+			Log.i("Asynchtask", "doinbackground---" + info[0].size());
+			ArrayList<DamageInfo> list = info[0];
+			for (i = 0; i < list.size(); i++) {
 
 				try {
+
 					HTTPRequest request = createRequest();
-					CoreComponent.mpEntity = CoreComponent.getMpEntity();
+
 					Log.i("trailer id", CoreComponent.trailerid);
-					CoreComponent.mpEntity.addPart("trailerid", new StringBody(
-							CoreComponent.trailerid));
-
-					CoreComponent.mpEntity.addPart("ticketstatus",
-							new StringBody("Open"));
-					CoreComponent.mpEntity.addPart("reportdamage",
-							new StringBody("Yes"));
-
-					CoreComponent.mpEntity.addPart("ticket_title",
-							new StringBody(CoreComponent.getUserinfo()
-									.getContactname()));
-
-					CoreComponent.mpEntity.addPart("reportdamage",
-							new StringBody("yes"));
-
-					CoreComponent.mpEntity.addPart(
-							"damagetype",
-							new StringBody(reporting_damage_list.get(
-									0 + failures).getWhatIsDamaged()));
-
-					CoreComponent.mpEntity.addPart(
-							"damageposition",
-							new StringBody(reporting_damage_list.get(
-									0 + failures).getLocationOfDamage()));
-
-					CoreComponent.mpEntity.addPart(
-							"drivercauseddamage",
-							new StringBody(reporting_damage_list.get(
-									0 + failures).getDriver_caused_damage()));
 
 					CoreComponent.processRequestForImages(Constants.POST,
-							Constants.HELPDESK, this, request,
-							reporting_damage_list.get(0 + failures)
-									.getImagePaths(), this);
+							Constants.HELPDESK, (NetworkListener) activity,
+							request, list.get(0 + failures).getImagePaths(),
+							activity);
 
+					publishProgress("");
 					Utility.waitForThread();
 
-					if (this.response == null) {
+					if (response == null) {
 						Log.i("Failure", "in loop");
 						failures++;
 						continue;
 					}
-					reporting_damage_list.remove(0);
+					list.remove(0);
 
-					setReportingDamageListAdapter();
 				} catch (Exception e) {
 					e.printStackTrace();
 					Log.i(getClass().getSimpleName(), e.getClass()
 							.getSimpleName());
 				}
 			}
-			if (failures == 0) {
-				reporting_damage_list.clear();
-				ToastUI.showToast(getApplicationContext(),
-						getString(string.damagessubmitted));
-				CoreComponent.trailerid = null;
-				finish();
-			} else
-				ToastUI.showToast(getApplicationContext(),
-						getString(string.errorreporting));
-
-			checkVisibility();
-			CoreComponent.SENDING_IMAGES = false;
-			which_request = true;
-//			getReportedDamagesList();
+			return null;
 		}
+
+		@Override
+		protected void onProgressUpdate(String... values) {
+			Log.i("Asynchtask", "progress");
+			dialog.setProgress(i + 1);
+
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			Log.i("Asynchtask", "postexecute");
+			dialog.dismiss();
+
+			checkForErrors();
+
+		}
+
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -466,8 +604,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-
-	//	menu.add(Menu.NONE, 2, Menu.NONE, getString(string.resetpassword));
+		menu.add(Menu.NONE, 2, Menu.NONE, getString(string.changepassword));
 		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE,
 				getString(string.logout));
 
@@ -493,9 +630,11 @@ public class ReportDamage extends Activity implements OnClickListener,
 				CoreComponent.logout(this);
 			}
 			break;
-		case 2 : Intent intent = new Intent(getApplicationContext(), PasswordReset.class);
-		startActivity(intent);
-		break;
+		case 2:
+			Intent intent = new Intent(getApplicationContext(),
+					PasswordReset.class);
+			startActivity(intent);
+			break;
 		}
 
 		return true;
@@ -529,13 +668,23 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 	public void onError(String status) {
 		this.response = null;
+		if (!CoreComponent.SENDING_IMAGES) {
+			handler.sendEmptyMessage(Constants.TOAST);
+		}
+
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		error = status;
-		handler.sendEmptyMessage(Constants.TOAST);
 
 	}
 
 	public HTTPRequest createRequest() {
+
+		if (picklist1 == 1) {
+			return CoreComponent.getRequest(Constants.TICKETSTATUS);
+		}
+
+		if (picklist2 == 1) {
+			return CoreComponent.getRequest(Constants.REPORTDAMAGE);
+		}
 
 		if (CoreComponent.LOGOUT_CALL) {
 			return CoreComponent.getRequest(Constants.LOGOUT);
@@ -549,28 +698,20 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 				HTTPRequest request = CoreComponent
 						.getRequest(Constants.HELPDESK_URL);
-				request.addParam("ticket_title",
-						getString(string.damagereportby)
-								+ CoreComponent.getUserinfo().getContactname());
-				request.addParam("ticketstatus", "open");
-				request.addParam("reportdamage", "yes");
-				CoreComponent.SENDING_IMAGES = true;
 
 				CoreComponent.mpEntity = CoreComponent.getMpEntity();
-				Log.i("trailer id", CoreComponent.trailerid);
+
 				CoreComponent.mpEntity.addPart("trailerid", new StringBody(
 						CoreComponent.trailerid));
 
 				CoreComponent.mpEntity.addPart("ticketstatus", new StringBody(
-						"Open"));
-				CoreComponent.mpEntity.addPart("reportdamage", new StringBody(
-						"Yes"));
+						getOpenTicketStatusValue()));
 
 				CoreComponent.mpEntity.addPart("ticket_title", new StringBody(
 						CoreComponent.getUserinfo().getContactname()));
 
 				CoreComponent.mpEntity.addPart("reportdamage", new StringBody(
-						"yes"));
+						getReportDamageValueYes()));
 
 				CoreComponent.mpEntity.addPart("damagetype", new StringBody(
 						reporting_damage_list.get(0 + failures)
@@ -588,7 +729,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+
 		}
 		return null;
 	}

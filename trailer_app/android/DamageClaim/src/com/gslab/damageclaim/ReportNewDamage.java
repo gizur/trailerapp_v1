@@ -3,6 +3,7 @@ package com.gslab.damageclaim;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,6 +39,7 @@ import com.gslab.R.layout;
 import com.gslab.R.string;
 import com.gslab.adapters.ListImageAdapter;
 import com.gslab.core.CoreComponent;
+import com.gslab.core.DamageClaimApp;
 import com.gslab.helpers.DamageInfo;
 import com.gslab.interfaces.Constants;
 import com.gslab.interfaces.NetworkListener;
@@ -157,11 +159,10 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		}
 	};
 
-	private void errordialog()
-	{
+	private void errordialog() {
 		Utility.showErrorDialog(this);
 	}
-	
+
 	private void loadPreviousData() {
 		type.setText(getString(string.reportnewdamage_textview_type) + " "
 				+ previous_data.getWhatIsDamaged());
@@ -191,6 +192,22 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 	@SuppressWarnings("unchecked")
 	private void getTypeValues() // To be fetched from URL
 	{
+		values.clear();
+
+		if (DamageClaimApp.typevalues != null) {
+			// values = (ArrayList<String>) DamageClaimApp.typevalues.clone();
+			Set<String> set = DamageClaimApp.typevalues.keySet();
+			Object arr[] = new String[set.size()];
+			arr = set.toArray();
+			for (int i = 0; i < arr.length; i++) {
+				values.add(arr[i].toString());
+				Log.i(getClass().getSimpleName(), values.get(i));
+			}
+			hashmap = (HashMap<String, ArrayList<String>>) DamageClaimApp.hashmap
+					.clone();
+			return;
+		}
+
 		values = new ArrayList<String>();
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
@@ -237,6 +254,10 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			DamageClaimApp.hashmap = (HashMap<String, ArrayList<String>>) hashmap
+					.clone();
+			DamageClaimApp.typevalues = (HashMap<String, String>) typevalues
+					.clone();
 		}
 		typeofcall = false;
 
@@ -294,8 +315,7 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 					intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
 					startActivityForResult(intent, Constants.CAMERA);
 				} catch (UnsupportedOperationException e) {
-					ToastUI.showToast(context,
-							getString(string.sdcard));
+					ToastUI.showToast(context, getString(string.sdcard));
 				} catch (Exception e) {
 					ToastUI.showToast(context, getString(string.problem));
 				}
@@ -383,7 +403,7 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		if (v == type) {
 			selection = Constants.TYPE;
 			getTypeValues();
-			if (this.response != null)
+			if (this.response != null || values != null)
 				new ListViewDialog(this, layout.listviewdialog,
 						getString(string.reportnewdamage_select_type), values,
 						Constants.REPORT_NEW_DAMAGE);
@@ -394,12 +414,13 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 					.toString()
 					.equalsIgnoreCase(
 							getString(string.reportnewdamage_textview_type))) {
-				ToastUI.showToast(getApplicationContext(), getString(string.selecttype));
+				ToastUI.showToast(getApplicationContext(),
+						getString(string.selecttype));
 				return;
 			}
 			selection = Constants.POSITION;
 			getPositionValues();
-			if (this.response != null)
+			if (this.response != null || values != null)
 				new ListViewDialog(this, layout.listviewdialog,
 						getString(string.reportnewdamage_select_position),
 						values, Constants.REPORT_NEW_DAMAGE);
@@ -422,7 +443,7 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		if (v == drivercauseddamage) {
 			selection = Constants.CAUSED_DAMAGE;
 			getDamageCausedValues();
-			if (this.response != null)
+			if (this.response != null || values != null)
 				new ListViewDialog(this, layout.listviewdialog,
 						getString(string.damage_caused_by), values,
 						Constants.REPORT_NEW_DAMAGE);
@@ -431,6 +452,12 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 	}
 
 	private void getDamageCausedValues() {
+
+		if (DamageClaimApp.damage_caused_by != null) {
+			values = (ArrayList<String>) DamageClaimApp.damage_caused_by
+					.clone();
+			return;
+		}
 
 		values = new ArrayList<String>();
 
@@ -468,6 +495,8 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			DamageClaimApp.damage_caused_by = (ArrayList<String>) values
+					.clone();
 			typeofcall = true;
 		}
 		ProgressDialogHelper.dismissProgressDialog();
@@ -643,8 +672,7 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		
-		//menu.add(Menu.NONE, 2, Menu.NONE, getString(string.resetpassword));
+		menu.add(Menu.NONE, 2, Menu.NONE, getString(string.changepassword));
 		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE,
 				getString(string.logout));
 
@@ -670,9 +698,11 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 				CoreComponent.logout(this);
 			}
 			break;
-		case 2 : Intent intent = new Intent(getApplicationContext(), PasswordReset.class);
-		startActivity(intent);
-		break;
+		case 2:
+			Intent intent = new Intent(getApplicationContext(),
+					PasswordReset.class);
+			startActivity(intent);
+			break;
 		}
 
 		return true;

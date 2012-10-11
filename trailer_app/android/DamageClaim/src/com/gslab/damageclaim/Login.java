@@ -22,6 +22,7 @@ import com.gslab.R;
 import com.gslab.R.id;
 import com.gslab.R.string;
 import com.gslab.core.CoreComponent;
+import com.gslab.core.DamageClaimApp;
 import com.gslab.helpers.UserInfo;
 import com.gslab.interfaces.Constants;
 import com.gslab.interfaces.NetworkListener;
@@ -43,6 +44,7 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 	private ImageView imageview;
 	private boolean login_req = true;
 	private String response;
+	private int reset = 0;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -107,7 +109,8 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 				break;
 
 			case Constants.TOAST:
-				//ToastUI.showToast(context, context.getString(string.problem));
+				// ToastUI.showToast(context,
+				// context.getString(string.problem));
 				showErrorDialog();
 				break;
 
@@ -118,27 +121,43 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 		}
 
 	};
-	
-	private void showErrorDialog()
-	{
+
+	private void showErrorDialog() {
 		final Activity act = this;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(getString(string.invalidlogin))
 				.setCancelable(false)
 				.setPositiveButton(getString(string.resetpassword),
 						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,
-									int id) {
-								
-//								Intent intent = new Intent(act.getApplicationContext(), PasswordReset.class);
-//								startActivity(intent);
-								
+							public void onClick(DialogInterface dialog, int id) {
+								reset = 1;
+
+								dialog.cancel();
+								ProgressDialogHelper.showProgressDialog(act,
+										"", getString(string.loading));
+								HTTPRequest request = createRequest();
+								CoreComponent.setUsername(username.getText()
+										.toString());
+								CoreComponent.setPassword("");
+								CoreComponent.processRequest(Constants.PUT,
+										Constants.AUTHENTICATE,
+										(NetworkListener) act, request);
+								Utility.waitForThread();
+								if (response != null) {
+									ToastUI.showToast(
+											act.getApplicationContext(),
+											"Password reset successful");
+								} else {
+									ToastUI.showToast(
+											act.getApplicationContext(),
+											"Error resetting the password");
+								}
+								reset = 0;
 							}
 						})
 				.setNegativeButton(getString(string.cancel),
 						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,
-									int id) {
+							public void onClick(DialogInterface dialog, int id) {
 								dialog.cancel();
 							}
 						});
@@ -194,17 +213,20 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 		if (v == imageview) {
 			login_req = false;
 
-			ProgressDialogHelper.showProgressDialog(this,
-					"", getString(string.loading));
+			ProgressDialogHelper.showProgressDialog(this, "",
+					getString(string.loading));
 
-			CoreComponent.processRequest(Constants.GET, Constants.ABOUT, this,
-					createRequest());
-			Utility.waitForThread();
-			
-			//ProgressDialogHelper.dismissProgressDialog();
+			if (DamageClaimApp.about_Response == null) {
+				CoreComponent.processRequest(Constants.GET, Constants.ABOUT,
+						this, createRequest());
+				Utility.waitForThread();
+				DamageClaimApp.about_Response = new String(response);
+			}
+
+			// ProgressDialogHelper.dismissProgressDialog();
 
 			Intent intent = new Intent(getApplicationContext(), About.class);
-			intent.putExtra("about", response);
+			intent.putExtra("about", DamageClaimApp.about_Response);
 			startActivity(intent);
 
 			login_req = true;
@@ -214,6 +236,12 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 	}
 
 	public void onSuccessFinish(String response) {
+
+		if (reset == 1) {
+			this.response = response;
+			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
+			return;
+		}
 
 		if (login_req) {
 			CoreComponent.setUserinfo(new Gson().fromJson(response,
@@ -230,31 +258,35 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 
 			Intent intent = new Intent(getApplicationContext(), HomePage.class);
 			startActivity(intent);
-			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
+
 			finish();
-		} else{
+		} else {
 			this.response = response;
-			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 		}
 
-		
+		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 
 	}
 
 	public void onError(String status) {
-		if (login_req) {
+
+		if (reset == 1) {
+			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
+			this.response = null;
+		}
+
+		else {
 			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 			status = error;
 			handler.sendEmptyMessage(Constants.TOAST);
+			this.response = null;
 		}
-		else{
-		this.response = status;
-		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		}
-		
+
 	}
 
 	public HTTPRequest createRequest() {
+		if (reset == 1)
+			return CoreComponent.getRequest(Constants.RESET_PWD);
 		if (login_req)
 			return CoreComponent.getRequest(Constants.LOGIN);
 		else

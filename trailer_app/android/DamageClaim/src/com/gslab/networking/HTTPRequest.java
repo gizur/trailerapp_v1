@@ -115,24 +115,24 @@ public class HTTPRequest {
 			executeRequest(request, url);
 			break;
 		}
-		
+
 		case PUT: {
 			HttpPut request = new HttpPut(url);
-			for(NameValuePair h : headers) {
+			for (NameValuePair h : headers) {
 				request.addHeader(h.getName(), h.getValue());
 				Log.i("header info : ", h.getName() + " : " + h.getValue());
 			}
-			
-			if(!params.isEmpty())
+
+			if (!params.isEmpty())
 				request.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-			if(body != null) {
+			if (body != null) {
 				StringEntity entity = new StringEntity(body, HTTP.UTF_8);
 				entity.setContentType("application/json");
 				request.setEntity(entity);
 			}
 			executeRequest(request, url);
 		}
-		
+
 		}
 	}
 

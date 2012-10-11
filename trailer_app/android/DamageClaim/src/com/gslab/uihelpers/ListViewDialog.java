@@ -45,8 +45,7 @@ public class ListViewDialog implements OnItemClickListener {
 			d.setTitle(title);
 			d.show();
 		} catch (Exception e) {
-			Toast.makeText(activity, "Exception = " + e.toString(),
-					Toast.LENGTH_LONG).show();
+			e.printStackTrace();
 		}
 	}
 

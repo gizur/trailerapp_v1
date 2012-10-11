@@ -104,8 +104,10 @@ public final class R {
         public static final int app_name=0x7f050001;
         public static final int camera=0x7f05003a;
         public static final int cancel=0x7f050044;
+        public static final int changepassword=0x7f05004b;
+        public static final int changepassword1=0x7f05004c;
         public static final int close=0x7f050046;
-        public static final int confirm_new_password=0x7f05004d;
+        public static final int confirm_new_password=0x7f050050;
         public static final int confirmnewpassword=0x7f050040;
         public static final int damage_caused_by=0x7f050031;
         public static final int damaged_full_image=0x7f050020;
@@ -138,10 +140,10 @@ public final class R {
         public static final int logout=0x7f050033;
         public static final int manifest_activity_title_damage_claim_image=0x7f050021;
         public static final int networkunavailable=0x7f050034;
-        public static final int new_password=0x7f05004c;
+        public static final int new_password=0x7f05004f;
         public static final int newpassword=0x7f05003f;
         public static final int noimages=0x7f05004a;
-        public static final int old_password=0x7f05004b;
+        public static final int old_password=0x7f05004e;
         public static final int oldpassword=0x7f05003e;
         public static final int other=0x7f050038;
         public static final int problem=0x7f050039;
@@ -153,6 +155,7 @@ public final class R {
         public static final int report_new_damage_textview_damagedetails=0x7f050017;
         public static final int report_new_damage_textview_damageimages=0x7f05001c;
         public static final int reportdamage_textview_empty=0x7f050028;
+        public static final int reportdamageproblem=0x7f05004d;
         public static final int reportnewdamage_button_addnewimage=0x7f05001d;
         public static final int reportnewdamage_button_done=0x7f05001f;
         public static final int reportnewdamage_select_position=0x7f05001b;

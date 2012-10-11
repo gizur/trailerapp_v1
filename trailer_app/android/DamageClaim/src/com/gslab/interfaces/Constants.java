@@ -39,6 +39,9 @@ public interface Constants {
 	public static final int DOCUMENT_ATTACHMENT = 56;
 	public static final int ABOUT_URL = 57;
 	public static final int CHANGE_PWD = 58;
+	public static final int TICKETSTATUS = 59;
+	public static final int REPORTDAMAGE = 60;
+	public static final int RESET_PWD = 49;
 
 	public static final int TOAST = 72;
 

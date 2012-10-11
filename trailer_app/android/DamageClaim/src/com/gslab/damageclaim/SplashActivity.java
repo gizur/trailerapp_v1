@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.gslab.R;
+import com.gslab.core.DamageClaimApp;
 import com.gslab.interfaces.Constants;
 import com.gslab.utils.NetworkCallRequirements;
 import com.gslab.utils.URLList;
@@ -20,6 +21,25 @@ public class SplashActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.splash);
+		
+		DamageClaimApp.about_Response = null;
+		DamageClaimApp.sealed_labels = null;
+		DamageClaimApp.sealed_values = null;
+		DamageClaimApp.report_damage_value_no = null;
+		DamageClaimApp.report_damage_value_yes = null;
+		DamageClaimApp.id_values = null;
+		DamageClaimApp.id_names = null;
+		DamageClaimApp.closed_ticket_status_value = null;
+		DamageClaimApp.open_ticket_status_value = null;
+
+		DamageClaimApp.typevalues = null;
+		DamageClaimApp.hashmap = null;
+
+		DamageClaimApp.damage_caused_by = null;
+		
+		DamageClaimApp.places_values = null;
+		DamageClaimApp.straps_values = null;
+		DamageClaimApp.plates_values = null;
 
 		new Handler().postDelayed(new Runnable() {
 			public void run() {
@@ -72,6 +92,8 @@ public class SplashActivity extends Activity {
 					Log.i(getClass().getSimpleName(), "Parent value set : --"
 							+ URLList.getURL(Constants.PARENT) + "--");
 				}
+				else
+					URLList.setPARENT("http://phpapplications-env-sixmtjkbzs.elasticbeanstalk.com/api/index.php/api");
 			}
 		} catch (Exception ex) {
 			Log.i(" URL exception ", ex.getMessage() + ", "

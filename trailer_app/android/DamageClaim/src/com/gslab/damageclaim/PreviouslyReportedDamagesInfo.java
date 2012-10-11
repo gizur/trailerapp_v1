@@ -143,9 +143,8 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 		}
 
 	};
-	
-	private void errordialog()
-	{
+
+	private void errordialog() {
 		Utility.showErrorDialog(this);
 	}
 
@@ -159,7 +158,8 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
-			ToastUI.showToast(getApplicationContext(), getString(string.networkunavailable));
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
 			return;
 		}
 
@@ -265,8 +265,7 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		
-		//menu.add(Menu.NONE, 2, Menu.NONE, getString(string.resetpassword));
+		menu.add(Menu.NONE, 2, Menu.NONE, getString(string.changepassword));
 		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE,
 				getString(string.logout));
 
@@ -334,10 +333,12 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 				CoreComponent.logout(this);
 			}
 			break;
-			
-		case 2 : Intent intent = new Intent(getApplicationContext(), PasswordReset.class);
-		startActivity(intent);
-		break;
+
+		case 2:
+			Intent intent = new Intent(getApplicationContext(),
+					PasswordReset.class);
+			startActivity(intent);
+			break;
 		}
 
 		return true;

@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,12 +18,12 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.gslab.R;
 import com.gslab.R.layout;
 import com.gslab.R.string;
 import com.gslab.core.CoreComponent;
+import com.gslab.core.DamageClaimApp;
 import com.gslab.interfaces.Constants;
 import com.gslab.interfaces.NetworkListener;
 import com.gslab.networking.HTTPRequest;
@@ -47,21 +46,19 @@ public class HomePage extends Activity implements OnClickListener,
 
 	private int selection;
 
-	private String response, error;
+	private String response;
 
 	private JSONObject object;
 	private JSONArray array;
 
 	private Thread thread;
 
-	private Context context;
-
 	public void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.homepage);
 
-		context = getApplicationContext();
+		getApplicationContext();
 
 		values = new ArrayList<String>();
 		sealed_labels = new ArrayList<String>();
@@ -122,46 +119,120 @@ public class HomePage extends Activity implements OnClickListener,
 
 		}
 	};
-	
-	private void errordialog()
-	{
+
+	private void errordialog() {
 		Utility.showErrorDialog(this);
 	}
 
 	private void setSealedValue() {
 		sealed.setText(getString(string.homepage_textview_sealed) + " "
-				+ values.get(sealed_labels.indexOf(getString(string.sealed_no))));
+				+ values.get(sealed_labels.indexOf("no")));
 	}
 
+	@SuppressWarnings("unchecked")
 	private void getPlateValues() {
-		values.clear();
-		values.add("1");
-		values.add("2");
-		values.add("3");
-		values.add("4");
+
+
+		if (DamageClaimApp.plates_values != null) {
+			values = (ArrayList<String>) DamageClaimApp.plates_values.clone();
+			return;
+		}
+
+		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+			Log.i("got it", "the network info");
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
+			return;
+		}
+		
+		values = new ArrayList<String>();
+
+		ProgressDialogHelper.showProgressDialog(this, "",
+				getString(string.loading));
+
+		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
+				createRequest());
+		Utility.waitForThread();
+		
+		if(this.response == null){
+			values = null;
+			return;
+		}
+
+		try {
+			object = new JSONObject(this.response);
+			array = object.getJSONArray("result");
+			for (int i = 0; i < array.length(); i++) {
+				values.add(array.getJSONObject(i).getString("value"));
+			}
+		} catch (Exception e) {
+
+			e.printStackTrace();
+		}
+		DamageClaimApp.plates_values = (ArrayList<String>) values.clone();
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void getStrapsValues() {
-		values.clear();
-		values.add("1");
-		values.add("2");
-		values.add("3");
-		values.add("4");
+		values = new ArrayList<String>();
+
+		if (DamageClaimApp.straps_values != null) {
+			values = (ArrayList<String>) DamageClaimApp.straps_values.clone();
+			return;
+		}
+
+		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+			Log.i("got it", "the network info");
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
+			return;
+		}
+
+		ProgressDialogHelper.showProgressDialog(this, "",
+				getString(string.loading));
+
+		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
+				createRequest());
+		Utility.waitForThread();
+		
+		if(this.response == null){
+			values = null;
+			return;
+		}
+
+		try {
+			object = new JSONObject(this.response);
+			array = object.getJSONArray("result");
+
+			for (int i = 0; i < array.length(); i++) {
+				values.add(array.getJSONObject(i).getString("value"));
+			}
+		} catch (Exception e) {
+
+			e.printStackTrace();
+		}
+		DamageClaimApp.straps_values = (ArrayList<String>) values.clone();
 	}
 
 	private void getTrailerTypeValues() {
-		values.clear();
+		values = new ArrayList<String>();
 		values.add(getString(string.trailer_type_own));
 		values.add(getString(string.trailer_type_rented));
 	}
 
+	@SuppressWarnings("unchecked")
 	private void getIDValues() // To be fetched from URL
 	{
+		values = new ArrayList<String>();
+		if (DamageClaimApp.id_names != null && DamageClaimApp.id_values != null) {
+			values = (ArrayList<String>) DamageClaimApp.id_names.clone();
+			ids = (ArrayList<String>) DamageClaimApp.id_values.clone();
+			return;
+		}
 
-		values.clear();
 		ids = new ArrayList<String>();
-		
+
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
 			ToastUI.showToast(getApplicationContext(),
@@ -175,38 +246,93 @@ public class HomePage extends Activity implements OnClickListener,
 		CoreComponent.processRequest(Constants.GET, Constants.ASSETS, this,
 				createRequest());
 		Utility.waitForThread();
+		
+		if(this.response == null){
+			values = null;
+			return;
+		}
+		
 		if (this.response != null) {
 			try {
 				object = new JSONObject(response);
 				array = object.getJSONArray("result");
 				for (int i = 0; i < array.length(); i++) {
 					if (array.getJSONObject(i).getString("assetstatus")
-							.equalsIgnoreCase("In Service")){
-						values.add(array.getJSONObject(i).getString("assetname"));
+							.equalsIgnoreCase("In Service")) {
+						values.add(array.getJSONObject(i)
+								.getString("assetname"));
 						ids.add(array.getJSONObject(i).getString("id"));
 					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			DamageClaimApp.id_names = (ArrayList<String>) values.clone();
+			DamageClaimApp.id_values = (ArrayList<String>) ids.clone();
+
 		}
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void getPlaceValues() // To be fetched from URL
 	{
-		values.clear();
-		values.add("Place 1");
-		values.add("Place 2");
-		values.add("Place 3");
-		values.add("Place 4");
+
+		values = new ArrayList<String>();
+
+		if (DamageClaimApp.places_values != null) {
+			values = (ArrayList<String>) DamageClaimApp.places_values.clone();
+			return;
+		}
+
+		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
+			Log.i("got it", "the network info");
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.networkunavailable));
+			return;
+		}
+
+		ProgressDialogHelper.showProgressDialog(this, "",
+				getString(string.loading));
+
+		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
+				createRequest());
+		Utility.waitForThread();
+		
+		if(this.response == null){
+			values = null;
+			return;
+		}
+
+		try {
+			object = new JSONObject(this.response);
+			array = object.getJSONArray("result");
+
+			for (int i = 0; i < array.length(); i++) {
+				values.add(array.getJSONObject(i).getString("value"));
+			}
+		} catch (Exception e) {
+			Log.i(getClass().getSimpleName(), "---------------------------------------");
+			e.printStackTrace();
+		}
+
+		DamageClaimApp.places_values = (ArrayList<String>) values.clone();
+
 	}
 
-	private void getSealedValues() {
-		values.clear();
+	@SuppressWarnings("unchecked")
+	private void getSealedValues() { // Requirement - 1 . sealed_lables, 2.
+										// sealed_values
+		values = new ArrayList<String>();
 		sealed_labels.clear();
-		// values.add(getString(string.sealed_yes));
-		// values.add(getString(string.sealed_no));
+
+		if (DamageClaimApp.sealed_labels != null
+				&& DamageClaimApp.sealed_values != null) {
+			values = (ArrayList<String>) DamageClaimApp.sealed_values.clone();
+			sealed_labels = (ArrayList<String>) DamageClaimApp.sealed_labels
+					.clone();
+			return;
+		}
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
@@ -220,16 +346,21 @@ public class HomePage extends Activity implements OnClickListener,
 		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
 				createRequest());
 		Utility.waitForThread();
+		
+		if(this.response == null){
+			values = null;
+			return;
+		}
 		if (this.response != null) {
 			try {
 				object = new JSONObject(response);
 				array = object.getJSONArray("result");
 				for (int i = 0; i < array.length(); i++) {
 					if (array.getJSONObject(i).getString("label")
-							.equalsIgnoreCase(getString(string.sealed_yes)))
+							.equalsIgnoreCase("yes"))
 						values.add(getString(string.sealed_yes));
 					if (array.getJSONObject(i).getString("label")
-							.equalsIgnoreCase(getString(string.sealed_no)))
+							.equalsIgnoreCase("no"))
 						values.add(getString(string.sealed_no));
 					sealed_labels
 							.add(array.getJSONObject(i).getString("label"));
@@ -240,6 +371,9 @@ public class HomePage extends Activity implements OnClickListener,
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			DamageClaimApp.sealed_labels = (ArrayList<String>) sealed_labels
+					.clone();
+			DamageClaimApp.sealed_values = (ArrayList<String>) values.clone();
 		}
 
 	}
@@ -286,10 +420,6 @@ public class HomePage extends Activity implements OnClickListener,
 			straps.setText(getString(string.homepage_textview_straps) + " "
 					+ values.get((int) id));
 			break;
-
-		default:
-			Toast.makeText(this, getString(string.toast_no_list_item_selected),
-					Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -340,7 +470,7 @@ public class HomePage extends Activity implements OnClickListener,
 		if (v == id) {
 			selection = Constants.ID;
 			getIDValues();
-			if (this.response != null)
+			if (this.response != null || values != null)
 				new ListViewDialog(this, layout.listviewdialog,
 						getString(string.homepage_textview_ID), values,
 						Constants.HOMEPAGE);
@@ -349,7 +479,7 @@ public class HomePage extends Activity implements OnClickListener,
 		if (v == place) {
 			selection = Constants.PLACE;
 			getPlaceValues();
-
+			if (this.response != null || values != null)
 			new ListViewDialog(this, layout.listviewdialog,
 					getString(string.homepage_textview_place), values,
 					Constants.HOMEPAGE);
@@ -358,7 +488,8 @@ public class HomePage extends Activity implements OnClickListener,
 		if (v == sealed) {
 			selection = Constants.SEALED;
 			getSealedValues();
-			if (this.response != null)
+			
+			if (this.response != null || values != null)
 				new ListViewDialog(this, layout.listviewdialog,
 						getString(string.homepage_textview_sealed), values,
 						Constants.HOMEPAGE);
@@ -367,6 +498,7 @@ public class HomePage extends Activity implements OnClickListener,
 		if (v == plates) {
 			selection = Constants.PLATES;
 			getPlateValues();
+			if (this.response != null || values != null)
 			new ListViewDialog(this, layout.listviewdialog,
 					getString(string.homepage_textview_plates), values,
 					Constants.HOMEPAGE);
@@ -375,6 +507,7 @@ public class HomePage extends Activity implements OnClickListener,
 		if (v == straps) {
 			selection = Constants.STRAPS;
 			getStrapsValues();
+			if (this.response != null || values != null)
 			new ListViewDialog(this, layout.listviewdialog,
 					getString(string.homepage_textview_straps), values,
 					Constants.HOMEPAGE);
@@ -413,14 +546,14 @@ public class HomePage extends Activity implements OnClickListener,
 					.getRequest(Constants.HELPDESK_URL);
 			request.addParam("ticket_title", getString(string.surveyticketby)
 					+ CoreComponent.getUserinfo().getContactname());
-			request.addParam("ticketstatus", "closed");
-			request.addParam("trailerid", id.getText().toString());
-			request.addParam("reportdamage", "no");
+			request.addParam("ticketstatus", getClosedTicketStatusValue());
+			request.addParam("trailerid", CoreComponent.trailerid);
+			request.addParam("reportdamage", getReportDamageValueNo());
 			CoreComponent.processRequest(Constants.POST, Constants.HELPDESK,
 					this, request);
 
-			Utility.waitForThread();		
-			
+			Utility.waitForThread();
+
 			if (this.response != null) {
 				ToastUI.showToast(getApplicationContext(),
 						getString(string.submit_survey));
@@ -430,8 +563,51 @@ public class HomePage extends Activity implements OnClickListener,
 		}
 
 	}
-	
-	
+
+	private String getReportDamageValueNo() {
+
+		if (DamageClaimApp.report_damage_value_no != null) {
+			return DamageClaimApp.report_damage_value_no;
+		}
+
+		int temp = selection;
+		selection = Constants.REPORTDAMAGE;
+		HTTPRequest request = createRequest();
+		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
+				request);
+		Utility.waitForThread();
+		if (this.response != null) {
+			try {
+				JSONObject obj = new JSONObject(response);
+				JSONArray arr = obj.getJSONArray("result");
+				for (int i = 0; i < arr.length(); i++) {
+
+					if (arr.getJSONObject(i).getString("label")
+							.equalsIgnoreCase("yes")) {
+						DamageClaimApp.report_damage_value_yes = new String(arr
+								.getJSONObject(i).getString("value"));
+					}
+
+					if (arr.getJSONObject(i).getString("label")
+							.equalsIgnoreCase("no")) {
+						Log.i(getClass().getSimpleName(), arr.getJSONObject(i)
+								.getString("value"));
+						DamageClaimApp.report_damage_value_no = new String(arr
+								.getJSONObject(i).getString("value"));
+						selection = temp;
+						return arr.getJSONObject(i).getString("value");
+					}
+				}
+				handler.sendEmptyMessage(Constants.TOAST);
+			} catch (Exception e) {
+				handler.sendEmptyMessage(Constants.TOAST);
+				Log.i(getClass().getSimpleName(),
+						"getclosedticketstatusvalue... exception");
+			}
+		}
+		selection = temp;
+		return null;
+	}
 
 	@Override
 	protected void onResume() {
@@ -443,8 +619,8 @@ public class HomePage extends Activity implements OnClickListener,
 
 		menu.add(Menu.NONE, 1, Menu.NONE,
 				getString(string.homepage_button_reset));
-		
-	//	menu.add(Menu.NONE, 2, Menu.NONE, getString(string.resetpassword));
+
+		menu.add(Menu.NONE, 2, Menu.NONE, getString(string.changepassword));
 		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE,
 				getString(string.logout));
 		return super.onCreateOptionsMenu(menu);
@@ -476,9 +652,11 @@ public class HomePage extends Activity implements OnClickListener,
 				CoreComponent.logout(this);
 			}
 			break;
-		case 2 : Intent intent = new Intent(getApplicationContext(), PasswordReset.class);
-		startActivity(intent);
-		break;
+		case 2:
+			Intent intent = new Intent(getApplicationContext(),
+					PasswordReset.class);
+			startActivity(intent);
+			break;
 		}
 
 		return true;
@@ -494,18 +672,61 @@ public class HomePage extends Activity implements OnClickListener,
 	public void onError(String status) {
 		this.response = null;
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		error = status;
 		handler.sendEmptyMessage(Constants.TOAST);
 
 	}
 
 	public void run() {
 		getSealedValues();
-		if (sealed_labels.contains(getString(string.sealed_no))) {
+		if (sealed_labels.contains("no")) {
 			handler.sendEmptyMessage(1);
 
 		}
 
+	}
+
+	private String getClosedTicketStatusValue() {
+
+		if (DamageClaimApp.closed_ticket_status_value != null) {
+			return DamageClaimApp.closed_ticket_status_value;
+		}
+
+		int temp = selection;
+		selection = Constants.TICKETSTATUS;
+		HTTPRequest request = createRequest();
+		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
+				request);
+		Utility.waitForThread();
+		if (this.response != null) {
+			try {
+				JSONObject obj = new JSONObject(response);
+				JSONArray arr = obj.getJSONArray("result");
+				for (int i = 0; i < arr.length(); i++) {
+
+					if (arr.getJSONObject(i).getString("label")
+							.equalsIgnoreCase("open")) {
+						DamageClaimApp.open_ticket_status_value = new String(
+								arr.getJSONObject(i).getString("value"));
+					}
+
+					if (arr.getJSONObject(i).getString("label")
+							.equalsIgnoreCase("closed")) {
+						Log.i(getClass().getSimpleName(), arr.getJSONObject(i)
+								.getString("value"));
+						DamageClaimApp.closed_ticket_status_value = new String(
+								arr.getJSONObject(i).getString("value"));
+						selection = temp;
+						return arr.getJSONObject(i).getString("value");
+					}
+				}
+				handler.sendEmptyMessage(Constants.TOAST);
+			} catch (Exception e) {
+				handler.sendEmptyMessage(Constants.TOAST);
+				Log.i(getClass().getSimpleName(), "damage report... exception");
+			}
+		}
+		selection = temp;
+		return null;
 	}
 
 	public HTTPRequest createRequest() {
@@ -530,9 +751,30 @@ public class HomePage extends Activity implements OnClickListener,
 			request = CoreComponent.getRequest(Constants.HELPDESK_URL);
 			request.addParam("ticket_title", getString(string.surveyticketby)
 					+ CoreComponent.getUserinfo().getContactname());
-			request.addParam("ticketstatus", "closed");
-			request.addParam("trailerid", id.getText().toString());
-			request.addParam("reportdamage", "no");
+			request.addParam("ticketstatus", getClosedTicketStatusValue());
+			request.addParam("trailerid", CoreComponent.trailerid);
+			request.addParam("reportdamage", getReportDamageValueNo());
+			break;
+
+		case Constants.TICKETSTATUS:
+			request = CoreComponent.getRequest(Constants.TICKETSTATUS);
+			break;
+
+		case Constants.REPORTDAMAGE:
+			request = CoreComponent.getRequest(Constants.REPORTDAMAGE);
+			break;
+
+		case Constants.PLATES:
+			request = CoreComponent.getRequest(Constants.PLATES);
+			break;
+
+		case Constants.STRAPS:
+			request = CoreComponent.getRequest(Constants.STRAPS);
+			break;
+
+		case Constants.PLACE:
+			request = CoreComponent.getRequest(Constants.PLACE);
+			break;
 		}
 		return request;
 

@@ -1,12 +1,13 @@
 package com.gslab.core;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -19,6 +20,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.text.Html;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -37,6 +39,7 @@ import com.gslab.utils.URLList;
 import com.gslab.utils.Utility;
 
 public class CoreComponent {
+
 
 	private static UserInfo userinfo = new UserInfo();
 	private static error err = new error();
@@ -141,7 +144,7 @@ public class CoreComponent {
 		if (!NetworkCallRequirements.isNetworkAvailable((Activity) listener)) {
 			Log.i("got it", "the network info");
 			ToastUI.showToast(((Activity) listener).getApplicationContext(),
-					"Network unavailable");
+					((Activity)listener).getString(string.networkunavailable));
 			listener.onError("Please check your network connection and retry");
 			return;
 		}
@@ -167,23 +170,23 @@ public class CoreComponent {
 						request.execute(RequestMethod.POST);
 					if (requestType.equalsIgnoreCase("get"))
 						request.execute(RequestMethod.GET);
-					if(requestType.equalsIgnoreCase("PUT"))
+					if (requestType.equalsIgnoreCase("PUT"))
 						request.execute(RequestMethod.PUT);
 
-					Log.i("Response string:", request.getResponseString()
-							+ "---");
+					responseString = request.getResponseString();
+					responseString = Html.fromHtml(responseString).toString();
+
+					Log.i("Response string:", responseString + "---");
 					Log.i("Response code:", request.getResponseCode() + "");
 
 					switch (request.getResponseCode()) {
 					case Constants.HTTP_STATUS_OK:
 						CoreComponent.setErr(null);
 						if (null != listener) {
-							listener.onSuccessFinish(request
-									.getResponseString());
+							listener.onSuccessFinish(responseString);
 						}
-						if (new JSONObject(request.getResponseString())
-								.getString("success").equalsIgnoreCase("false")
-								&& listener != null)
+						if (new JSONObject(responseString).getString("success")
+								.equalsIgnoreCase("false") && listener != null)
 							listener.onError("Some unexpected error has occurred");
 						break;
 
@@ -195,15 +198,13 @@ public class CoreComponent {
 									listener.createRequest());
 							Utility.waitForThread();
 						} else if (listener != null)
-							listener.onError(request.getResponseString());
+							listener.onError(responseString);
 						break;
 
 					default:
 						CoreComponent.setErr(new Gson().fromJson(
-								new JSONObject(request.getResponseString())
-										.getJSONObject("error").toString(),
-								error.class));
-						responseString = request.getResponseString();
+								new JSONObject(responseString).getJSONObject(
+										"error").toString(), error.class));
 						Log.i("Network Call Response", responseString);
 						if (listener != null)
 							listener.onError(CoreComponent.getErr()
@@ -211,12 +212,14 @@ public class CoreComponent {
 					}
 				} catch (Exception e) {
 					Log.i("Error message : ", request.getResponseCode() + "");
-					listener.onError(request.getResponseString());
-					if (listener != null)
+					Log.i("Response in exception", responseString);
+					if (listener != null){
+						listener.onError(responseString);
+					}
 						e.printStackTrace();
 				}
-				responseString = request.getResponseString();
-			//	DIFFERENCE = 0;
+
+				// DIFFERENCE = 0;
 			}
 		};
 		thread = new Thread(runnable);
@@ -248,7 +251,7 @@ public class CoreComponent {
 				Log.i("got some difference", DIFFERENCE + "");
 				return true;
 			}
-		} catch (JSONException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -272,20 +275,174 @@ public class CoreComponent {
 				cursor.moveToFirst();
 				String path = cursor.getString(column_index);
 
-				Bitmap bitmap = BitmapFactory.decodeFile(path);
+				
+				
+//				 File file = new File(path);
+//				 Log.i("File status", "" + file.exists());
+				
+				//
+				//
+				// //Decode image size
+				// final int IMAGE_MAX_SIZE=500;
+				// BitmapFactory.Options o = new BitmapFactory.Options();
+				// o.inJustDecodeBounds = true;
+				//
+				// FileInputStream fis = new FileInputStream(file);
+				// BitmapFactory.decodeStream(fis, null, o);
+				// fis.close();
+				//
+				// int scale = 1;
+				// if (o.outHeight > IMAGE_MAX_SIZE || o.outWidth >
+				// IMAGE_MAX_SIZE) {
+				// scale = (int)Math.pow(2, (int)
+				// Math.round(Math.log(IMAGE_MAX_SIZE / (double)
+				// Math.max(o.outHeight, o.outWidth)) / Math.log(0.5)));
+				// }
+				//
+				// //Decode with inSampleSize
+				// BitmapFactory.Options o2 = new BitmapFactory.Options();
+				// o2.inSampleSize = scale;
+				// fis = new FileInputStream(file);
+				// Bitmap bmp = BitmapFactory.decodeStream(fis, null, o2);
+				// fis.close();
+				//
+//
+//				Bitmap bitmap = BitmapFactory.decodeFile(path);
+//
+//				// you can change the format of you image compressed for what do
+//				// you want;
+//				// now it is set up to 640 x 480;
+//
+//				Bitmap bmpCompressed = Bitmap.createScaledBitmap(bitmap, 480,
+//						640, true);
 
-				// you can change the format of you image compressed for what do
-				// you want;
-				// now it is set up to 640 x 480;
+				
 
-				Bitmap bmpCompressed = Bitmap.createScaledBitmap(bitmap, 640,
-						480, true);
+				
+				
+				
+				/*--------------------------------------------------------------------------*/
+				 
+				 
+				 
+				 
+				
+				 
+				 
+//				 
+//				 Bitmap b = null;
+//				
+//				        //Decode image size
+//				        BitmapFactory.Options o = new BitmapFactory.Options();
+//				        o.inJustDecodeBounds = true;
+////				        o.inDither=false;                     //Disable Dithering mode
+////				        o.inPurgeable=true;                   //Tell to gc that whether it needs free memory, the Bitmap can be cleared
+////				        o.inInputShareable=true;              
+//
+//				        FileInputStream fis = new FileInputStream(file);
+//				        b = BitmapFactory.decodeStream(fis, null, o);
+//				        if(b == null)
+//				        	Log.i("First bitmap decode", "null");
+//				        fis.close();
+//
+//				        int scale = 1;
+//				        if (o.outHeight > 320 || o.outWidth > 240) {
+//				            scale = (int)Math.pow(2, (int) Math.round(Math.log(320 / 
+//				               (double) Math.max(o.outHeight, o.outWidth)) / Math.log(0.5)));
+//				        }
+//
+//				        //Decode with inSampleSize
+//				        BitmapFactory.Options o2 = new BitmapFactory.Options();
+//				        o2.inJustDecodeBounds = true;
+////				        o2.inDither = false;
+////				        o2.inPurgeable = true;
+////				        o2.inInputShareable = true;
+//				        o2.inSampleSize = scale;
+//				        fis = new FileInputStream(file);
+//				        b = BitmapFactory.decodeStream(fis, null, o2);
+//				        fis.close();
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 Bitmap b = null;
+			        try {
+			            File file = new File(path);
+			            
+			            //Decode image size
+			         final int IMAGE_MAX_SIZE=500;
+			            BitmapFactory.Options o = new BitmapFactory.Options();
+			            o.inJustDecodeBounds = true;
+			            
+			            FileInputStream fis = new FileInputStream(file);
+			            BitmapFactory.decodeStream(fis, null, o);
+			            
+			            fis.close();
+
+			            int scale = 1;
+			            if (o.outHeight > IMAGE_MAX_SIZE || o.outWidth > IMAGE_MAX_SIZE) {
+			                scale = (int)Math.pow(2, (int) Math.round(Math.log(IMAGE_MAX_SIZE / (double) Math.max(o.outHeight, o.outWidth)) / Math.log(0.5)));
+			            }
+
+			            //Decode with inSampleSize
+			            BitmapFactory.Options o2 = new BitmapFactory.Options();
+			            o2.inSampleSize = scale;
+			            fis = new FileInputStream(file);
+			            b = BitmapFactory.decodeStream(fis, null, o2);
+			            
+			            fis.close();
+			        } catch (Exception e) {
+			        }
+			        
+			        
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				    
+
+				 if(b == null) {
+					 Log.i("bitmap", "null");
+					 return;
+				 }
+				 
+			
+				 
+				 
+				 
+				 
+				
+				
+				
+				
+				
+				
+				/*------------------------------------------------------------------------------*/
+				
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
 				// CompressFormat set up to JPG, you can change to PNG or
 				// whatever you want;
 
-				bmpCompressed.compress(CompressFormat.JPEG, 100, bos);
+//				bmpCompressed.compress(CompressFormat.JPEG, 100, bos);
+				b.compress(CompressFormat.JPEG, 100, bos);
+
 				byte[] data = bos.toByteArray();
 
 				// sending a Image;
@@ -318,28 +475,27 @@ public class CoreComponent {
 
 		HTTPRequest request = getRequest(Constants.LOGOUT);
 
-		ProgressDialogHelper.showProgressDialog(activity, "", activity.getString(string.loading));
-		
+		ProgressDialogHelper.showProgressDialog(activity, "",
+				activity.getString(string.loading));
+
 		CoreComponent.processRequest(Constants.POST, Constants.AUTHENTICATE,
 				(NetworkListener) activity, request);
 
 		Utility.waitForThread();
 
 		ProgressDialogHelper.dismissProgressDialog();
-		
+
 		SharedPreferences preferences = PreferenceManager
 				.getDefaultSharedPreferences(activity.getApplicationContext());
 		SharedPreferences.Editor editor = preferences.edit();
 
 		editor.putBoolean("credentials", false);
-		NetworkCallRequirements.setGIZUR_API_KEY_VALUE("");
-		NetworkCallRequirements.setGIZUR_CLOUD_SECRET_KEY("");
 		editor.commit();
 		Intent intent = new Intent(activity.getApplicationContext(),
 				Login.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 		activity.startActivity(intent);
-		
+
 		activity.finish();
 
 		CoreComponent.LOGOUT_CALL = false;
