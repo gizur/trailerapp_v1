@@ -24,6 +24,8 @@
 
 #import "DCAboutViewController.h"
 
+#import "DCChangePasswordViewController.h"
+
 @interface DCLoginViewController ()
 @property (retain, nonatomic) IBOutlet UIView *parentView;
 @property (retain, nonatomic) IBOutlet UITableView *loginTableView;
@@ -40,6 +42,7 @@
 - (IBAction)login:(id)sender;
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier;
 -(BOOL) isEmpty:(NSString *)string;
+- (IBAction)resetPassword:(id)sender;
 
 @end
 
@@ -84,6 +87,7 @@
     UITextField *usernameTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]] viewWithTag:LOGIN_USERNAME_TEXTFIELD_TAG];
     if ([[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME]) {
         
+        self.loginModel.loginUsername = [[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME];
         usernameTextField.text = [[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME];
     } else {
         usernameTextField.text = @"";
@@ -91,6 +95,7 @@
     
     UITextField *passwordTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]] viewWithTag:LOGIN_PASSWORD_TEXTFIELD_TAG];
     if ([[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD]) {
+        self.loginModel.loginPassword = [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD];
         passwordTextField.text = [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD];
     } else {
         passwordTextField.text = @"";
@@ -99,10 +104,12 @@
 }
 -(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    [self.httpService cancelHTTPService];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    [DCSharedObject hideProgressDialogInView:self.view];
-    self.httpService = nil;
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
 }
 
 
@@ -208,6 +215,10 @@
     //store the username temporariy to share amongst the screen
     [[[DCSharedObject sharedPreferences] preferences] setValue:passwordTextField.text forKey:PASSWORD];
     
+    //remove the old username and password
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_NAME];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:PASSWORD];
+    
     if ([[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_KEY] &&
         [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_SECRET_KEY]) {
         
@@ -235,10 +246,31 @@
     return NO;
 }
 
+- (IBAction)resetPassword:(id)sender {
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:PASSWORD];
+    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:PASSWORD];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [self.loginTableView reloadData];
+    self.loginModel.loginPassword = nil;
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService
+                                  extraHeaders:nil
+                                          body:nil
+                                    identifier:AUTHENTICATE_RESET
+                                 requestMethod:kRequestMethodPUT
+                                         model:AUTHENTICATE
+                                      delegate:self
+                                viewController:self];
+}
+
 
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response string
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
         [DCSharedObject processLogout:self.navigationController clearData:NO];
         return;
     } else
@@ -301,6 +333,16 @@
         }
     }
     
+    if ([identifier isEqualToString:AUTHENTICATE_RESET]) {
+        NSDictionary *jsonDict = [responseString objectFromJSONString];
+        if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+            NSNumber *status = [jsonDict valueForKey:SUCCESS];
+            if ([status boolValue]) {
+                [self showAlertWithMessage:NSLocalizedString(@"PASSWORD_RESET_SUCCESSFUL", @"")];
+            }
+        }
+    }
+    
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
@@ -326,7 +368,6 @@
 }
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
     NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 #if kDebug
     NSLog(@"%@", responseString);
@@ -335,16 +376,30 @@
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {        
         [self parseResponse:responseString forIdentifier:identifier];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
         [DCSharedObject processLogout:self.navigationController clearData:NO];
         
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
-    
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
+
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
@@ -449,6 +504,7 @@
         textField.secureTextEntry = YES;
         textField.placeholder = NSLocalizedString(@"PASSWORD", nil);
         textField.tag = LOGIN_PASSWORD_TEXTFIELD_TAG;
+        textField.clearButtonMode = UITextFieldViewModeAlways;
         if (self.loginModel.loginPassword) {
             textField.text = self.loginModel.loginPassword;
         }

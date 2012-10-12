@@ -45,6 +45,9 @@
         UIAlertView *alertView;
         if ([alertMessage isEqualToString:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")]) {
             alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(alertMessage, @"") delegate:self cancelButtonTitle:NSLocalizedString(@"LOGOUT", @"") otherButtonTitles:NSLocalizedString(@"OK", @""), nil] autorelease];
+        } else if ([alertMessage isEqualToString:NSLocalizedString(@"SUBMIT_DAMAGE_ERROR", @"")]) {
+            alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(alertMessage, @"") delegate:self cancelButtonTitle:NSLocalizedString(@"NO", @"") otherButtonTitles:NSLocalizedString(@"YES", @""), nil] autorelease];
+          
         } else {
             alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(alertMessage, @"") delegate:self cancelButtonTitle:NSLocalizedString(@"OK", @"") otherButtonTitles:nil] autorelease];
         }

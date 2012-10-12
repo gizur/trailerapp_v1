@@ -113,6 +113,13 @@
 #endif
                         [[NSUserDefaults standardUserDefaults] setValue:[parameter objectAtIndex:1] forKey:GIZURCLOUD_API_URL];
                     }
+                } else if ([[[parameter objectAtIndex:0] lowercaseString] isEqualToString:[GIZURCLOUD_IMAGE_SIZE lowercaseString]]) {
+                    if ([parameter count] > 1) {
+#if kDebug
+                        NSLog(@"%@", [parameter objectAtIndex:1]);
+#endif
+                        [[NSUserDefaults standardUserDefaults] setValue:[parameter objectAtIndex:1] forKey:GIZURCLOUD_IMAGE_SIZE];
+                    }
                 }
             }
         }
@@ -138,7 +145,16 @@
 #if kDebug
     NSLog(@"DidEnterBackground");
 #endif
-
+    //remove all the cached data so that fresh data can be fetched from the server
+    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:ASSETS_LIST];
+    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:DAMAGE_REPORT_LOCATION_LIST];
+    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:SURVEY_PLATES_LIST];
+    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:SURVEY_STRAPS_LIST];
+    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:DAMAGE_TYPE_LIST];
+//    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:HELPDESK_TICKETSTATUS];
+//    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:HELPDESK_REPORTDAMAGE];
+//    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:HELPDESK_SEALED];
+//    [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:HELPDESK_DRIVERCAUSEDDAMAGE];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application

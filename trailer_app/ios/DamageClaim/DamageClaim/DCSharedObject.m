@@ -74,7 +74,8 @@ static DCSharedObject *sharedPreferences = nil;
 #pragma mark - Others
 
 +(void) showProgressDialogInView:(UIView *)view message:(NSString *)labelText {
-    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];;
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
+    hud.removeFromSuperViewOnHide = YES;
     hud.animationType = MBProgressHUDAnimationZoom;
     hud.labelText = labelText;
     
@@ -122,7 +123,7 @@ static DCSharedObject *sharedPreferences = nil;
 }
 
 //in case the body is name=value pairs with progress view optional
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView {
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(NSObject<HTTPServiceDelegate> *) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView {
     
     NSString *urlString = [DCSharedObject createURLStringFromIdentifier:identifier];
 #if kDebug
@@ -156,8 +157,19 @@ static DCSharedObject *sharedPreferences = nil;
         NSLog(@"%@", bodyString);
 #endif
         signature  = [DCSharedObject generateSignatureFromModel:model requestType:POST];
-    } else {
+    } else if ( [httpService serviceRequestMethod] == kRequestMethodGET){
         signature = [DCSharedObject generateSignatureFromModel:model requestType:GET];
+    } else if([httpService serviceRequestMethod] == kRequestMethodPUT) {
+        NSString *bodyString = nil;
+        if (bodyDictionaryOrNil) {
+            bodyString = [DCSharedObject keyValuePairFromDictionary:bodyDictionaryOrNil];
+        }
+        httpService.bodyString = bodyString;
+#if kDebug
+        NSLog(@"%@", bodyString);
+#endif
+
+        signature = [DCSharedObject generateSignatureFromModel:model requestType:PUT];
     }
 #if kDebug
     NSLog(@"%@", signature);
@@ -166,8 +178,13 @@ static DCSharedObject *sharedPreferences = nil;
     if (signature) {
         [[httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
         if (viewControllerOrNil && showProgressView) {
-            [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
-            [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            if (viewControllerOrNil.navigationController) {
+                [DCSharedObject hideProgressDialogInView:viewControllerOrNil.navigationController.view];
+                [DCSharedObject showProgressDialogInView:viewControllerOrNil.navigationController.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            } else {
+                [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
+                [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            }
         }
         
         [httpService startService];
@@ -184,7 +201,7 @@ static DCSharedObject *sharedPreferences = nil;
 }
 
 //in case the body is NSData with progress view optional
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView {
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(NSObject<HTTPServiceDelegate> *) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil showProgressView:(BOOL) showProgressView {
     NSString *urlString = [DCSharedObject createURLStringFromIdentifier:identifier];
 #if kDebug
     NSLog(@"%@", urlString);
@@ -217,8 +234,19 @@ static DCSharedObject *sharedPreferences = nil;
         NSLog(@"%@", bodyString);
 #endif
         signature  = [DCSharedObject generateSignatureFromModel:model requestType:POST];
-    } else {
+    } else if ( [httpService serviceRequestMethod] == kRequestMethodGET){
         signature = [DCSharedObject generateSignatureFromModel:model requestType:GET];
+    } else if([httpService serviceRequestMethod] == kRequestMethodPUT) {
+        NSString *bodyString = nil;
+        if (bodyOrNil) {
+            httpService.bodyData = bodyOrNil;
+        }
+        
+#if kDebug
+        NSLog(@"%@", bodyString);
+#endif
+
+        signature = [DCSharedObject generateSignatureFromModel:model requestType:PUT];
     }
 #if kDebug
     NSLog(@"%@", signature);
@@ -227,8 +255,13 @@ static DCSharedObject *sharedPreferences = nil;
     if (signature) {
         [[httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
         if (viewControllerOrNil && showProgressView) {
-            [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
-            [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            if (viewControllerOrNil.navigationController) {
+                [DCSharedObject hideProgressDialogInView:viewControllerOrNil.navigationController.view];
+                [DCSharedObject showProgressDialogInView:viewControllerOrNil.navigationController.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            } else {
+                [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
+                [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            }
         }
         
         [httpService startService];
@@ -243,13 +276,12 @@ static DCSharedObject *sharedPreferences = nil;
 }
 
 
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil {
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil bodyDictionary:(NSDictionary *)bodyDictionaryOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(NSObject<HTTPServiceDelegate> *) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil {
     
     NSString *urlString = [DCSharedObject createURLStringFromIdentifier:identifier];
 #if kDebug
-    NSLog(@"%@", urlString);
+    NSLog(@"urlString: %@", urlString);
 #endif
-    
     if (!httpService) {
         httpService = [[[HTTPService alloc] initWithURLString:urlString headers:[RequestHeaders commonHeaders] body:nil delegate:delegateOrNil requestMethod:requestMethod identifier:identifier] autorelease];
     } else {
@@ -260,7 +292,6 @@ static DCSharedObject *sharedPreferences = nil;
         [httpService setIdentifier:identifier];
         
     }
-    
     
     for (NSString *key in headersDictionaryOrNil) {
         [[httpService headersDictionary] setValue:[headersDictionaryOrNil valueForKey:key] forKey:key];
@@ -277,21 +308,32 @@ static DCSharedObject *sharedPreferences = nil;
         NSLog(@"%@", bodyString);
 #endif
         signature  = [DCSharedObject generateSignatureFromModel:model requestType:POST];
-    } else {
+    } else if ( [httpService serviceRequestMethod] == kRequestMethodGET){
         signature = [DCSharedObject generateSignatureFromModel:model requestType:GET];
+    } else if([httpService serviceRequestMethod] == kRequestMethodPUT) {
+        NSString *bodyString = nil;
+        if (bodyDictionaryOrNil) {
+            bodyString = [DCSharedObject keyValuePairFromDictionary:bodyDictionaryOrNil];
+        }
+        httpService.bodyString = bodyString;
+#if kDebug
+        NSLog(@"%@", bodyString);
+#endif
+        signature  = [DCSharedObject generateSignatureFromModel:model requestType:PUT];
     }
 #if kDebug
     NSLog(@"%@", signature);
 #endif
-    
     if (signature) {
         [[httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
         if (viewControllerOrNil) {
-//            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:viewControllerOrNil.view animated:YES];
-//            hud.animationType = MBProgressHUDAnimationFade;
-//            hud.labelText = NSLocalizedString(@"LOADING_MESSAGE", @"");
-            [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
-            [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            if (viewControllerOrNil.navigationController) {
+                [DCSharedObject hideProgressDialogInView:viewControllerOrNil.navigationController.view];
+                [DCSharedObject showProgressDialogInView:viewControllerOrNil.navigationController.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            } else {
+                [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
+                [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            }
         }
         
         [httpService startService];
@@ -305,11 +347,11 @@ static DCSharedObject *sharedPreferences = nil;
     }
 }
 
-+(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(id<HTTPServiceDelegate>) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil {
++(void) makeURLCALLWithHTTPService:(HTTPService *)httpService extraHeaders:(NSDictionary *)headersDictionaryOrNil body:(NSData *)bodyOrNil identifier:(NSString *)identifier requestMethod:(RequestMethod)requestMethod model:(NSString *)model delegate:(NSObject<HTTPServiceDelegate> *) delegateOrNil viewController:(DCParentViewController *) viewControllerOrNil {
     
     NSString *urlString = [DCSharedObject createURLStringFromIdentifier:identifier];
 #if kDebug
-    NSLog(@"%@", urlString);
+    NSLog(@"urlString: %@", urlString);
 #endif
     
     if (!httpService) {
@@ -339,8 +381,18 @@ static DCSharedObject *sharedPreferences = nil;
         NSLog(@"%@", bodyString);
 #endif
         signature  = [DCSharedObject generateSignatureFromModel:model requestType:POST];
-    } else {
+    } else if ( [httpService serviceRequestMethod] == kRequestMethodGET){
         signature = [DCSharedObject generateSignatureFromModel:model requestType:GET];
+    } else if([httpService serviceRequestMethod] == kRequestMethodPUT) {
+        NSString *bodyString = nil;
+        if (bodyOrNil) {
+            httpService.bodyData = bodyOrNil;
+        }
+        
+#if kDebug
+        NSLog(@"%@", bodyString);
+#endif
+        signature = [DCSharedObject generateSignatureFromModel:model requestType:PUT];
     }
 #if kDebug
     NSLog(@"%@", signature);
@@ -349,11 +401,16 @@ static DCSharedObject *sharedPreferences = nil;
     if (signature) {
         [[httpService headersDictionary] setValue:signature forKey:X_SIGNATURE];
         if (viewControllerOrNil) {
-//            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:viewControllerOrNil.view animated:YES];
-//            hud.animationType = MBProgressHUDAnimationFade;
-//            hud.labelText = NSLocalizedString(@"LOADING_MESSAGE", @"");
-            [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
-            [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            if (viewControllerOrNil.navigationController) {
+#if kDebug
+                NSLog(@"%@", viewControllerOrNil.navigationController);
+#endif
+                [DCSharedObject hideProgressDialogInView:viewControllerOrNil.navigationController.view];
+                [DCSharedObject showProgressDialogInView:viewControllerOrNil.navigationController.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            } else {
+                [DCSharedObject hideProgressDialogInView:viewControllerOrNil.view];
+                [DCSharedObject showProgressDialogInView:viewControllerOrNil.view message:NSLocalizedString(@"LOADING_MESSAGE", @"")];
+            }
         }
         
         [httpService startService];
@@ -525,8 +582,9 @@ static DCSharedObject *sharedPreferences = nil;
         [[NSUserDefaults standardUserDefaults] removeObjectForKey:GIZURCLOUD_SECRET_KEY];
         [[NSUserDefaults standardUserDefaults] removeObjectForKey:CONTACT_NAME];
         [[NSUserDefaults standardUserDefaults] removeObjectForKey:ACCOUNT_NAME];
-        [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_LOGGED_IN];
+        
     }
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_LOGGED_IN];
     //remove all the viewControllers from the array and push LoginViewController
     NSMutableArray *viewControllers = [[[navigationController viewControllers] mutableCopy] autorelease];
 #if kDebug

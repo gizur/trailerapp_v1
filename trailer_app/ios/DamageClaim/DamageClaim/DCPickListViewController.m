@@ -98,15 +98,22 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     [self customizeNavigationBar];
+}
+
+-(void) viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
     [self makeURLCall];
 }
 
 -(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    [self.httpService cancelHTTPService];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    [DCSharedObject hideProgressDialogInView:self.view];
-    self.httpService = nil;
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
 }
 
 
@@ -142,6 +149,11 @@
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
         [DCSharedObject processLogout:self.navigationController clearData:NO];
         return;
     } else
@@ -150,31 +162,34 @@
         if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
             NSNumber *status = [jsonDict valueForKey:SUCCESS];
             if ([status boolValue]) {
-                
+                //since status is common in all the responses, its not written for every json string separately
                 if ([identifier isEqualToString:ASSETS]) {
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSArray *assetsArray = [jsonDict valueForKey:@"result"];
                         for (NSDictionary *assetDict in assetsArray) {
                             
-                            NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
-                            
-                            NSString *trailerId, *trailerName;
-                            if ((NSNull *)[assetDict valueForKey:@"id"] != [NSNull null]) {
-                                trailerId = [assetDict valueForKey:@"id"];
-                                [dictionary setValue:trailerId forKey:VALUE];
-                                
+                            if ((NSNull *)[assetDict valueForKey:@"assetstatus"] != [NSNull null]) {
+                                if ([[[assetDict valueForKey:@"assetstatus"] lowercaseString] isEqualToString:@"in service"]) {
+                                    NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                                    
+                                    NSString *trailerId, *trailerName;
+                                    if ((NSNull *)[assetDict valueForKey:@"id"] != [NSNull null]) {
+                                        trailerId = [assetDict valueForKey:@"id"];
+                                        [dictionary setValue:trailerId forKey:VALUE];
+                                        
+                                    }
+                                    if ((NSNull *)[assetDict valueForKey:@"assetname"] != [NSNull null]) {
+                                        trailerName = [assetDict valueForKey:@"assetname"];
+                                        [dictionary setValue:trailerName forKey:LABEL];
+                                        
+                                    }
+                                    
+                                    if (!self.modelArray) {
+                                        self.modelArray = [[[NSMutableArray alloc] init] autorelease];
+                                    }
+                                    [self.modelArray addObject:dictionary];
+                                }
                             }
-                            if ((NSNull *)[assetDict valueForKey:@"assetname"] != [NSNull null]) {
-                                trailerName = [assetDict valueForKey:@"assetname"];
-                                [dictionary setValue:trailerName forKey:LABEL];
-                                
-                            }
-                            
-                            if (!self.modelArray) {
-                                self.modelArray = [[[NSMutableArray alloc] init] autorelease];
-                            }
-                            [self.modelArray addObject:dictionary];
-                            
 //                            if (!self.labelArray) {
 //                                self.labelArray = [[[NSMutableArray alloc] init] autorelease];
 //                            }
@@ -185,6 +200,7 @@
 //                            }
 //                            [self.valueArray addObject:trailerId];
                         }
+                        [[[DCSharedObject sharedPreferences] preferences] setValue:self.modelArray forKey:ASSETS_LIST];
                     }
                 }
                 
@@ -274,6 +290,8 @@
                                 }
                             }
                         }
+                        
+                        [[[DCSharedObject sharedPreferences] preferences] setValue:self.modelArray forKey:DAMAGE_TYPE_LIST];
 #if kDebug
                 NSLog(@"%@", [[[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_VALUE_DICTIONARY] description]);
 #endif
@@ -307,6 +325,102 @@
                             }
                             [self.modelArray addObject:dictionary];
                         }
+                    }
+                }
+                
+                if ([identifier isEqualToString:HELPDESK_DAMAGEREPORTLOCATION]) {
+                    if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                        NSArray *damageReportLocationArray = [jsonDict valueForKey:@"result"];
+                        for (NSDictionary *damageReportLocationDict in damageReportLocationArray) {
+                            NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                            if ((NSNull *)[damageReportLocationDict valueForKey:@"label"] != [NSNull null]) {
+                                NSString *label = [damageReportLocationDict valueForKey:@"label"];
+                                if (!self.labelArray) {
+                                    self.labelArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [self.labelArray addObject:label];
+                                [dictionary setValue:label forKey:LABEL];
+                            }
+                            if ((NSNull *)[damageReportLocationDict valueForKey:@"value"] != [NSNull null]) {
+                                NSString *value = [damageReportLocationDict valueForKey:@"value"];
+                                if (!self.valueArray) {
+                                    self.valueArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [dictionary setValue:value forKey:VALUE];
+                                [self.valueArray addObject:value];
+                            }
+                            
+                            if (!self.modelArray) {
+                                self.modelArray = [[[NSMutableArray alloc] init] autorelease];
+                            }
+                            [self.modelArray addObject:dictionary];
+                        }
+                        
+                        [[[DCSharedObject sharedPreferences] preferences] setValue:self.modelArray forKey:DAMAGE_REPORT_LOCATION_LIST];
+                    }
+                }
+                
+                if ([identifier isEqualToString:HELPDESK_PLATES]) {
+                    if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                        NSArray *surveyPlatesArray = [jsonDict valueForKey:@"result"];
+                        for (NSDictionary *surveyPlatesDict in surveyPlatesArray) {
+                            NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                            if ((NSNull *)[surveyPlatesDict valueForKey:@"label"] != [NSNull null]) {
+                                NSString *label = [surveyPlatesDict valueForKey:@"label"];
+                                if (!self.labelArray) {
+                                    self.labelArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [self.labelArray addObject:label];
+                                [dictionary setValue:label forKey:LABEL];
+                            }
+                            if ((NSNull *)[surveyPlatesDict valueForKey:@"value"] != [NSNull null]) {
+                                NSString *value = [surveyPlatesDict valueForKey:@"value"];
+                                if (!self.valueArray) {
+                                    self.valueArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [dictionary setValue:value forKey:VALUE];
+                                [self.valueArray addObject:value];
+                            }
+                            
+                            if (!self.modelArray) {
+                                self.modelArray = [[[NSMutableArray alloc] init] autorelease];
+                            }
+                            [self.modelArray addObject:dictionary];
+                        }
+                        
+                        [[[DCSharedObject sharedPreferences] preferences] setValue:self.modelArray forKey:SURVEY_PLATES_LIST];
+                    }
+                }
+                
+                if ([identifier isEqualToString:HELPDESK_STRAPS]) {
+                    if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                        NSArray *surveyStrapsArray = [jsonDict valueForKey:@"result"];
+                        for (NSDictionary *surveyStrapsDict in surveyStrapsArray) {
+                            NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                            if ((NSNull *)[surveyStrapsDict valueForKey:@"label"] != [NSNull null]) {
+                                NSString *label = [surveyStrapsDict valueForKey:@"label"];
+                                if (!self.labelArray) {
+                                    self.labelArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [self.labelArray addObject:label];
+                                [dictionary setValue:label forKey:LABEL];
+                            }
+                            if ((NSNull *)[surveyStrapsDict valueForKey:@"value"] != [NSNull null]) {
+                                NSString *value = [surveyStrapsDict valueForKey:@"value"];
+                                if (!self.valueArray) {
+                                    self.valueArray = [[[NSMutableArray alloc] init] autorelease];
+                                }
+                                [dictionary setValue:value forKey:VALUE];
+                                [self.valueArray addObject:value];
+                            }
+                            
+                            if (!self.modelArray) {
+                                self.modelArray = [[[NSMutableArray alloc] init] autorelease];
+                            }
+                            [self.modelArray addObject:dictionary];
+                        }
+                        
+                        [[[DCSharedObject sharedPreferences] preferences] setValue:self.modelArray forKey:SURVEY_STRAPS_LIST];
                     }
                 }
                 
@@ -384,20 +498,52 @@
 -(void) makeURLCall {
     switch (self.type) {
         case DCPickListItemSurveyTrailerId:
-            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
+            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_LIST]) {
+                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
+            } else {
+                self.modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_LIST];
+                [self.pickListTableView reloadData];
+            }
+            
             break;
         case DCPickListItemTypeDamagePosition:
             //If somehow, the applicable list of damage positions could not be fetched from the server, make a URL call to fetch all the 
             //positions from the server and let the user choose the appropriate position
             if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_LABEL_DICTIONARY]) {
                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGEPOSITION requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
-
             }
             break;
         case DCPickListItemTypeDamageType:
-            
-            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGETYPE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
-            
+            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_TYPE_LIST]) {
+                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGETYPE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+            } else {
+                self.modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_TYPE_LIST];
+                [self.pickListTableView reloadData];
+            }
+            break;
+        case DCPickListItemSurveyPlace:
+            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_REPORT_LOCATION_LIST]) {
+                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGEREPORTLOCATION requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+            } else {
+                self.modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_REPORT_LOCATION_LIST];
+                [self.pickListTableView reloadData];
+            }
+            break;
+        case DCPickListItemSurveyPlates:
+            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLATES_LIST]) {
+                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_PLATES requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+            } else {
+                self.modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLATES_LIST];
+                [self.pickListTableView reloadData];
+            }
+            break;
+        case DCPickListItemSurveyStraps:
+            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_STRAPS_LIST]) {
+                [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_STRAPS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+            } else {
+                self.modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_STRAPS_LIST];
+                [self.pickListTableView reloadData];
+            }
             break;
         default:
             break;
@@ -420,25 +566,37 @@
 }
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    
     NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 #if kDebug
     NSLog(@"%@", responseString);
 #endif
-    
-
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
         [DCSharedObject processLogout:self.navigationController clearData:NO];
         
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
-    [DCSharedObject hideProgressDialogInView:self.view];
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {

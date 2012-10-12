@@ -15,29 +15,29 @@
  
 - (id)init
 {
-
     return [self initWithURLString:nil headers:nil body:nil delegate:nil requestMethod:kRequestMethodNone];
 }
 
 - (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
-               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod {
+               delegate : (NSObject<HTTPServiceDelegate> *)serviceDelegate requestMethod : (RequestMethod)requestMethod {
     if (self=[super init]) {
         serviceURLString = urlString ;[serviceURLString retain] ;
         headersDictionary=[headers mutableCopy] ;//[headersDictionary retain] ;
         bodyString = body ;[bodyString retain];
-        delegate=serviceDelegate ;
+        delegate=serviceDelegate; [delegate retain];
         serviceRequestMethod = requestMethod;
+        identifier = @"";
     }
     return self ;
 }
 
 - (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
-               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod identifier:(NSString *)iden{
+               delegate : (NSObject<HTTPServiceDelegate> *)serviceDelegate requestMethod : (RequestMethod)requestMethod identifier:(NSString *)iden{
     if (self=[super init]) {
         serviceURLString = urlString ;[serviceURLString retain] ;
         headersDictionary = [headers mutableCopy] ;//[headersDictionary retain] ;
         bodyString = body; [bodyString retain];
-        delegate=serviceDelegate;
+        delegate=serviceDelegate; [serviceDelegate retain];
         serviceRequestMethod = requestMethod;
         identifier = iden; [identifier retain];
     }
@@ -51,6 +51,12 @@
     
     if (self.serviceRequestMethod == kRequestMethodPOST) { //set up request type 
        [self.request setHTTPMethod:@"POST"];
+    } else if (self.serviceRequestMethod == kRequestMethodGET) {
+        [self.request setHTTPMethod:@"GET"];
+    } else if (self.serviceRequestMethod == kRequestMethodPUT) {
+        [self.request setHTTPMethod:@"PUT"];
+    } else {
+        [self.request setHTTPMethod:@"DELETE"];
     }
     
     if (self.headersDictionary!=nil) { //setup headers
@@ -150,7 +156,7 @@
 #pragma mark -
 - (void)dealloc {
     [receivedData release];
-    //delegate = nil;
+    [delegate release];
     [connection release];
     [serviceURLString release];
     [headersDictionary release];

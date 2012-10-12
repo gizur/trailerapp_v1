@@ -56,7 +56,7 @@
 "INTERNAL_SERVER_ERROR" = "There is some problem with the server. Please report this to developers.";
 "NETWORK_ERROR" = "Network Error. Please check if your network is available and try again later!";
 "SELECT_DAMAGE_TYPE" = "Please select a damage type.";
-"SUBMIT_DAMAGE_ERROR" = "Could not submit some of the damage claims. Please try again.";
+
 "SUBMITTING" = "Submitting...";
 "NO_API_KEY_ERROR" = "Error logging in! Please open the link you've received via text/mail to register properly.";
 "EMPTY_USERNAME_PASSWORD" = "Either the username or password is empty.";
@@ -78,6 +78,14 @@
 
 "RESET_PASSWORD" = "Reset password";
 "CHANGE_PASSWORD" = "Change password";
-"ENTER_OLD_PASSWORD" = "Enter old password";
-"ENTER_NEW_PASSWORD" = "Enter new password";
-"CONFIRM_NEW_PASSWORD" = "Confirm new password";
+"ENTER_OLD_PASSWORD" = "Enter old password...";
+"ENTER_NEW_PASSWORD" = "Enter new password...";
+"CONFIRM_NEW_PASSWORD" = "Confirm new password...";
+
+"EMPTY_FIELDS" = "Some fields are empty";
+"WRONG_OLD_PASSWORD" = "The old password is wrong";
+"NEW_PASSWORD_MISMATCH" = "New password fields do not match. Please re-enter the new password properly.";
+"PASSWORD_CHANGE_SUCCESSFUL" = "Your password is changed. Please login again";
+"PASSWORD_RESET_SUCCESSFUL" = "Your new password will be be sent to your email address shortly. Please login with your new password.";
+
+"SUBMIT_DAMAGE_ERROR" = "Could not submit some of the damage claims. Do you want to try again?";

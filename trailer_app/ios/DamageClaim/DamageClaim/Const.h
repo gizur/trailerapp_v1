@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define kDebug TRUE
+#define kDebug FALSE
 
 #define kLocalServer FALSE
 
@@ -73,7 +73,7 @@ enum LOGIN_CELL_TEXT_FIELD_TAGS{
 enum RESET_CELL_TEXT_FIELD_TAGS{
     RESET_OLD_PASSWORD_TAG = -1,
     RESET_NEW_PASSWORD_TAG = -2,
-    RESET_CONFIRM_NEW_PASSWORD_TAG = -2
+    RESET_CONFIRM_NEW_PASSWORD_TAG = -3
 };
 
 
@@ -130,6 +130,7 @@ enum DCPickListItemTypes {
 #define LOADING_IMAGE_SIZE 40
 #define GET @"GET"
 #define POST @"POST"
+#define PUT @"PUT"
 
 #define USER_NAME @"USER_NAME"
 #define PASSWORD @"PASSWORD"
@@ -142,10 +143,14 @@ enum DCPickListItemTypes {
 #define GIZURCLOUD_SECRET_KEY @"GIZURCLOUD_SECRET_KEY"
 #define GIZURCLOUD_API_KEY @"GIZURCLOUD_API_KEY"
 #define GIZURCLOUD_API_URL @"GIZURCLOUD_API_URL"
+#define GIZURCLOUD_IMAGE_SIZE @"GIZURCLOUD_IMAGE_SIZE"
 
 #define ASSETS_LIST @"ASSETS_LIST"
 #define DAMAGE_TYPE_LIST @"DAMAGE_TYPE_LIST"
 #define DAMAGE_POSITION_LIST @"DAMAGE_POSITION_LIST"
+#define DAMAGE_REPORT_LOCATION_LIST @"DAMAGE_REPORT_LOCATION_LIST"
+#define SURVEY_PLATES_LIST @"SURVEY_PLATES_LIST"
+#define SURVEY_STRAPS_LIST @"SURVEY_STRAPS_LIST"
 
 #define TIME_NOT_IN_SYNC @"TIME_NOT_IN_SYNC"
 
@@ -177,6 +182,8 @@ enum DCPickListItemTypes {
 //URLS identifiers
 #define AUTHENTICATE_LOGIN @"Authenticate/login"
 #define AUTHENTICATE_LOGOUT @"Authenticate/logout"
+#define AUTHENTICATE_RESET @"Authenticate/reset"
+#define AUTHENTICATE_CHANGEPW @"Authenticate/changepw"
 #define HELPDESK @"HelpDesk"
 #define HELPDESK_ID @"HelpDesk/%@"
 #define HELPDESK_DAMAGETYPE @"HelpDesk/damagetype"
@@ -188,6 +195,9 @@ enum DCPickListItemTypes {
 #define HELPDESK_REPORTDAMAGE @"HelpDesk/reportdamage"
 #define HELPDESK_SEALED @"HelpDesk/sealed"
 #define HELPDESK_TICKETTITLE @"HelpDesk/ticket_title"
+#define HELPDESK_DAMAGEREPORTLOCATION @"HelpDesk/damagereportlocation"
+#define HELPDESK_PLATES @"HelpDesk/plates"
+#define HELPDESK_STRAPS @"HelpDesk/straps"
 #define DOCUMENTATTACHMENTS_ID @"DocumentAttachments/%@"
 #define ABOUT @"About"
 

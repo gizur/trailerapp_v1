@@ -27,6 +27,8 @@
 
 #import "JSONKit.h"
 
+#import "DCChangePasswordViewController.h"
+
 
 #define SURVEY_SECTION_ONE_ROWS 4
 #define SURVEY_SECTION_TWO_ROWS 2
@@ -42,6 +44,7 @@
 @property (retain, nonatomic) IBOutlet UIBarButtonItem *submitToolBarButton;
 @property (retain, nonatomic) HTTPService *httpService;
 @property (nonatomic) NSInteger httpStatusCode;
+@property (nonatomic, getter = isPickListLoaded) BOOL pickListLoaded;
 
 -(void) customizeNavigationBar;
 -(IBAction) submitSurveyReport;
@@ -54,6 +57,7 @@
 -(void) toggleActionButtons;
 -(void) loadPickLists;
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier;
+- (void) changePassword;
 @end
 
 @implementation DCSurveyViewController
@@ -66,6 +70,7 @@
 @synthesize submitToolBarButton = _submitToolBarButton;
 @synthesize httpService = _httpService;
 @synthesize httpStatusCode = _httpStatusCode;
+@synthesize pickListLoaded = _pickListLoaded;
 
 #pragma mark - View LifeCycle
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -95,7 +100,7 @@
     }
     
     
-    [self loadPickLists];
+    
     [self toggleActionButtons];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:RESET_SURVEY_NOTIFICATION object:nil];
@@ -116,14 +121,19 @@
 
 -(void) viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    
+    if (![self isPickListLoaded]) {
+        [self setPickListLoaded:YES];
+        [self loadPickLists];
+    }
 }
 -(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    [self.httpService cancelHTTPService];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    [DCSharedObject hideProgressDialogInView:self.view];
-    self.httpService = nil;
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
 }
 
 
@@ -151,7 +161,12 @@
     NSLog(@"%@", [self.navigationItem description]);
 #endif
     if (self.navigationItem) {
-        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"REPORT_DAMAGE", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(openDamageList)] autorelease];
+        UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"settings.png"] style:UIBarButtonItemStylePlain target:self action:@selector(changePassword)];
+        
+        NSArray *navigationBarItems = [NSArray arrayWithObjects:
+                                       [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"REPORT_DAMAGE", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(openDamageList)] autorelease],
+                                       settingsButton, nil];
+        self.navigationItem.rightBarButtonItems = navigationBarItems;
         
         self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"LOGOUT", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(logout)] autorelease];
     }
@@ -395,6 +410,11 @@
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response string
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
         [DCSharedObject processLogout:self.navigationController clearData:NO];
         return;
     } else
@@ -587,7 +607,11 @@
                         }
                     }
                 } else {
-                    [DCSharedObject hideProgressDialogInView:self.view];
+                    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
                     [self showAlertWithMessage:NSLocalizedString(@"SURVEY_SUBMITTED_SUCCESSFULLY", @"")];
                     [self resetSurvey:nil];
                 }
@@ -600,6 +624,11 @@
     if ([[notification name] isEqualToString:RESET_SURVEY_NOTIFICATION]) {
         [self resetSurvey:nil];
     }
+}
+
+- (void) changePassword {
+    DCChangePasswordViewController *changePasswordViewController = [[[DCChangePasswordViewController alloc] initWithNibName:@"ChangePasswordView" bundle:nil] autorelease];
+    [self.navigationController pushViewController:changePasswordViewController animated:YES];
 }
 
 #pragma mark - UIAlertViewDelegate methods
@@ -745,7 +774,7 @@
 }
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
-    [DCSharedObject hideProgressDialogInView:self.view];
+    
     NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 #if kDebug
     NSLog(@"%@: %@", identifier, responseString);
@@ -754,16 +783,29 @@
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
         [DCSharedObject processLogout:self.navigationController clearData:NO];
         
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
-
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
-    [DCSharedObject hideProgressDialogInView:self.view];
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
@@ -965,23 +1007,8 @@
                 }
                     break;
                 case 2: {
-                    //dummy values
-                    NSArray *trailerIdArray = [NSArray arrayWithObjects:
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"Place1", LABEL,
-                                                @"Place1", VALUE, nil],
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"Place2", LABEL,
-                                                @"Place2", VALUE, nil],
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"Place3", LABEL,
-                                                @"Place3", VALUE, nil],
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"Place4", LABEL,
-                                                @"Place4", VALUE, nil],
-                                               nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyPlace isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:nil type:DCPickListItemSurveyPlace isSingleValue:YES] autorelease];
                     pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
@@ -993,45 +1020,14 @@
         case 1:
             switch (indexPath.row) {
                 case 0: {
-                    //dummy values
-                    NSArray *surveyPlatesArray = [NSArray arrayWithObjects:
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"1", LABEL,
-                                                @"1", VALUE, nil],
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"2", LABEL,
-                                                @"2", VALUE, nil],
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"3", LABEL,
-                                                @"3", VALUE, nil],
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"4", LABEL,
-                                                @"4", VALUE, nil],
-                                               nil];
-                    
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:surveyPlatesArray type:DCPickListItemSurveyPlates isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:nil type:DCPickListItemSurveyPlates isSingleValue:YES] autorelease];
                     pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;
                 case 1: {
-                    //dummy values
-                    NSArray *surveyStrapsArray = [NSArray arrayWithObjects:
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"1", LABEL,
-                                                @"1", VALUE, nil],
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"2", LABEL,
-                                                @"2", VALUE, nil],
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"3", LABEL,
-                                                @"3", VALUE, nil],
-                                               [NSDictionary dictionaryWithObjectsAndKeys:
-                                                @"4", LABEL,
-                                                @"4", VALUE, nil],
-                                               nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:surveyStrapsArray type:DCPickListItemSurveyStraps isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:nil type:DCPickListItemSurveyStraps isSingleValue:YES] autorelease];
                     pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }

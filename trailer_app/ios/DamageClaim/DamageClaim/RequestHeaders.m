@@ -18,16 +18,18 @@
 	
     NSString *username = nil;
     NSString *password = nil;
-    if ([[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME] && [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD]) {
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME]) {
         username = [[NSUserDefaults standardUserDefaults] valueForKey:USER_NAME];
-        password = [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD];
-    } else if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:USER_NAME] && [[[DCSharedObject sharedPreferences] preferences] valueForKey:PASSWORD]) {
-        
+    } else if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:USER_NAME]) {
         username = [[[DCSharedObject sharedPreferences] preferences] valueForKey:USER_NAME];
+    }
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD]) {
+        password = [[NSUserDefaults standardUserDefaults] valueForKey:PASSWORD];
+    } else if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:PASSWORD]) {
         password = [[[DCSharedObject sharedPreferences] preferences] valueForKey:PASSWORD];
     }
-    if (username && password) {
-        
+    
+    if (username) {
         //generate a random number and save it as unique salt
         NSInteger randomNumber = arc4random();
         NSString *randomNumberString = [NSString stringWithFormat:@"%d", randomNumber];
@@ -45,7 +47,7 @@
 #if kDebug
             NSLog(@"newDate in requestHeaders: %@", [DCSharedObject strFromISO8601:timestamp]);
 #endif
-
+            
         }
         
         NSString *timestampString = [DCSharedObject strFromISO8601:timestamp];
@@ -54,20 +56,30 @@
         [[NSUserDefaults standardUserDefaults] synchronize];
         NSString *apiKey = [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_KEY];
         
+        NSDictionary *headerDictionary;
         if (apiKey && timestampString) {
-            NSDictionary *headerDictionary = [NSDictionary dictionaryWithObjectsAndKeys: 
-                                              @"text/json", @"Accept", 
-                                              username, X_USERNAME, 
-                                              password, X_PASSWORD, 
-                                              timestampString, X_TIMESTAMP, 
-                                              apiKey, X_GIZUR_API_KEY, 
-                                              randomNumberString, X_UNIQUE_SALT,
-                                              @"sv,en-us,en;q=0.5", @"Accept-Language", 
-                                              nil];
-            return headerDictionary;
+            if (password) {
+                headerDictionary = [NSDictionary dictionaryWithObjectsAndKeys:
+                                                  @"text/json", @"Accept",
+                                                  username, X_USERNAME,
+                                                  password, X_PASSWORD,
+                                                  timestampString, X_TIMESTAMP,
+                                                  apiKey, X_GIZUR_API_KEY,
+                                                  randomNumberString, X_UNIQUE_SALT,
+                                                  @"sv,en-us,en;q=0.5", @"Accept-Language",
+                                                  nil];
+            } else {
+                headerDictionary = [NSDictionary dictionaryWithObjectsAndKeys:
+                                    @"text/json", @"Accept",
+                                    username, X_USERNAME,
+                                    timestampString, X_TIMESTAMP,
+                                    apiKey, X_GIZUR_API_KEY,
+                                    randomNumberString, X_UNIQUE_SALT,
+                                    @"sv,en-us,en;q=0.5", @"Accept-Language",
+                                    nil];
+            }
         }
-        
-        
+        return headerDictionary;
     }
     
     return nil;

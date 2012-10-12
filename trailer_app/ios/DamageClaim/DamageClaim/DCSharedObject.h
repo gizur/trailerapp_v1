@@ -19,8 +19,6 @@
 
 +(DCSharedObject *) sharedPreferences;
 
-+(BOOL) alertViewShown;
-
 +(void)showAlertWithMessage:(NSString *)alertMessage;
 
 +(void)showAlertWithMessage:(NSString *)alertMessage delegate:(id<UIAlertViewDelegate>) delegate;

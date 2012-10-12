@@ -90,6 +90,6 @@
 
 "RESET_PASSWORD" = "Återställ lösenord";
 "CHANGE_PASSWORD" = "Ändra lösenord";
-"ENTER_OLD_PASSWORD" = "Ange gammalt lösenord";
-"ENTER_NEW_PASSWORD" = "Ange nytt lösenord";
-"CONFIRM_NEW_PASSWORD" = "Bekräfta nytt lösenord";
+"ENTER_OLD_PASSWORD" = "Ange gammalt lösenord...";
+"ENTER_NEW_PASSWORD" = "Ange nytt lösenord...";
+"CONFIRM_NEW_PASSWORD" = "Bekräfta nytt lösenord...";

@@ -46,6 +46,7 @@
 @property (nonatomic, getter = isEditable) BOOL editable;
 @property (nonatomic, retain) HTTPService *httpService;
 @property (nonatomic) NSInteger httpStatusCode;
+@property (nonatomic, getter = isGetDamageDetailCalled) BOOL getDamageDetailCalled;
 
 //The documentIds and list of images using the document Ids.
 //They're not added to the model class since the images aren't stored in the persistent storage
@@ -82,6 +83,7 @@
 @synthesize thumbnailImagesArray = _thumbnailImagesArray;
 @synthesize documentIdArray = _documentIdArray;
 @synthesize opertationQueue = _opertationQueue;
+@synthesize getDamageDetailCalled = _getDamageDetailCalled;
 
 #pragma mark - View LifeCycle
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -124,7 +126,6 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     [self customizeNavigationBar];
-    [self getDamageDetail];
     if (!self.damageDetailModel) {
         self.damageDetailModel = [[[DCDamageDetailModel alloc] init] autorelease];
     }
@@ -140,6 +141,16 @@
     
 }
 
+- (void) viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    if (![self isGetDamageDetailCalled]) {
+        [self setGetDamageDetailCalled:YES];
+        [self getDamageDetail];
+    }
+    
+}
+
 - (void)viewDidUnload
 {
     [self setDamageTableView:nil];
@@ -152,10 +163,12 @@
 
 -(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    [self.httpService cancelHTTPService];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    [DCSharedObject hideProgressDialogInView:self.view];
-    self.httpService = nil;
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -233,6 +246,11 @@
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response string
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
         [DCSharedObject processLogout:self.navigationController clearData:NO];
         return;
     } else
@@ -606,7 +624,20 @@
         NSLog(@"%@", [image description]);
 #endif
         if (image) {
-            NSData *imageData = UIImageJPEGRepresentation(image, 0.5f);
+            NSData *imageData = UIImageJPEGRepresentation(image, 1.0);
+#if kDebug
+            NSLog(@"ImageLength: %d", [imageData length]);
+#endif
+
+            if ([[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_IMAGE_SIZE]) {
+                for (CGFloat compressionLevel = 0.9; [imageData length] > [(NSNumber *)[[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_IMAGE_SIZE] integerValue] && compressionLevel >= 0; compressionLevel -= 0.1) {
+                    imageData = UIImageJPEGRepresentation(image, compressionLevel);
+#if kDebug
+                    NSLog(@"ImageLength: %d", [imageData length]);
+#endif
+                }
+            }
+            
             
             UIImage *thumbnailImage = [image thumbnailImage:THUMBNAIL_IMAGE_SIZE transparentBorder:0 cornerRadius:0 interpolationQuality:kCGInterpolationLow];
 #if kDebug
@@ -710,7 +741,6 @@
 }
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
-    [DCSharedObject hideProgressDialogInView:self.view];
     NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 //#if kDebug
 //    NSLog(@"%@", responseString);
@@ -739,6 +769,11 @@
             [self showAlertWithMessage:NSLocalizedString(@"IMAGE_LOADING_ERROR", @"")];
             
         } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+            if (self.navigationController) {
+                [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+            } else {
+                [DCSharedObject hideProgressDialogInView:self.view];
+            }
             [DCSharedObject processLogout:self.navigationController clearData:NO];
             
         } else {
@@ -747,10 +782,21 @@
         
     }
     
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
+
+    
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
-    [DCSharedObject hideProgressDialogInView:self.view];
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
     if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
         [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
     } else {
@@ -1022,11 +1068,20 @@
                     }
                 }
             } else {
-                if ([[self.damageDetailModel.damageDriverCausedDamage lowercaseString] isEqualToString:@"yes"]) {
-                    [segmentedControl setSelectedSegmentIndex:0];
+//                if ([[self.damageDetailModel.damageDriverCausedDamage lowercaseString] isEqualToString:@"yes"]) {
+//                    [segmentedControl setSelectedSegmentIndex:0];
+//                } else {
+//                    [segmentedControl setSelectedSegmentIndex:1];
+//                }
+                NSDictionary *driverCausedDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_DRIVERCAUSEDDAMAGE];
+                if (driverCausedDamageDict) {
+                    NSString *yesValue = [driverCausedDamageDict valueForKey:@"Yes"];
+                    self.damageDetailModel.damageDriverCausedDamage = yesValue;
                 } else {
-                    [segmentedControl setSelectedSegmentIndex:1];
+                    self.damageDetailModel.damageDriverCausedDamage = @"Yes";
                 }
+                [segmentedControl setSelectedSegmentIndex:0];
+                
             }
             [segmentedControl addTarget:self action:@selector(toggleDriverCausedDamage:) forControlEvents:UIControlEventValueChanged];
             if ([self isEditable]) {

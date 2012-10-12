@@ -26,7 +26,9 @@
 typedef enum {
     kRequestMethodGET,
     kRequestMethodPOST,
-    kRequestMethodNone
+    kRequestMethodNone,
+    kRequestMethodPUT,
+    
 } RequestMethod;
 
 typedef enum {
@@ -41,7 +43,7 @@ typedef enum {
 @property (nonatomic, retain) NSMutableData *receivedData;
 @property (nonatomic, retain) NSURLConnection *connection;
 //retaining the delegate instead of assigning it.
-@property (nonatomic, retain) id<HTTPServiceDelegate>delegate;
+@property (nonatomic, retain) NSObject<HTTPServiceDelegate> *delegate;
 @property (nonatomic, retain) NSString *serviceURLString;
 @property (nonatomic, retain) NSMutableDictionary *headersDictionary;
 @property (nonatomic, retain) NSString *bodyString;

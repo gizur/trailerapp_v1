@@ -36,9 +36,10 @@
 @property (retain, nonatomic) NSMutableArray *damageListModelArray;
 @property (retain, nonatomic) DCSurveyModel *surveyModel;
 @property (nonatomic) NSInteger submittingDamageIndex;
+@property (nonatomic) NSInteger totalCurrentDamages;
 @property (retain, nonatomic) HTTPService *httpService;
 @property (nonatomic) NSInteger httpStatusCode;
-
+@property (nonatomic, getter = isGetDamageListCalled) BOOL getDamageListCalled;
 -(void) customizeNavigationBar;
 -(void) logout;
 -(void) submitDamageReport;
@@ -61,8 +62,10 @@
 @synthesize currentDamageArray = _currentDamageArray;
 @synthesize surveyModel = _surveyModel;
 @synthesize submittingDamageIndex = _submittingDamageIndex;
+@synthesize  totalCurrentDamages = _totalCurrentDamages;
 @synthesize httpService = _httpService;
 @synthesize httpStatusCode = _httpStatusCode;
+@synthesize getDamageListCalled = _getDamageListCalled;
 
 #pragma mark - View LifeCycle methods
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -86,7 +89,7 @@
     }
     
     [self customizeNavigationBar];
-    [self getDamageList];
+    
     
 
     [self.damageTableView reloadData];
@@ -94,6 +97,11 @@
 
 -(void) viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    if (![self isGetDamageListCalled]) {
+        [self setGetDamageListCalled:YES];
+        [self getDamageList];
+    }
     //always use the update modelArray from DCSharedObject
     //and reload the tableView
     if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_DETAIL_MODEL]) {
@@ -125,11 +133,11 @@
 
 -(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    [self.httpService cancelHTTPService];
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    [DCSharedObject hideProgressDialogInView:self.view];
-    self.httpService = nil;
-    
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
 }
 
 - (void)viewDidUnload
@@ -146,6 +154,9 @@
 }
 
 -(void) dealloc {
+#if kDebug
+    NSLog(@"DamageList Deallocated");
+#endif
     [_damageTableView release];
     [_damageListModelArray release];
     [_currentDamageArray release];
@@ -159,6 +170,7 @@
 #pragma mark - Others
 -(void) customizeNavigationBar {
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+    
     self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SUBMIT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(submitDamageReport)] autorelease];
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BACK", @"") style:UIBarButtonItemStylePlain target:self action:@selector(goBack)];
     [self toggleActionButtons];
@@ -174,6 +186,7 @@
     } else {
         [self disableActions];
         self.submittingDamageIndex = 0;
+        self.totalCurrentDamages = [self.currentDamageArray count];
         [self submitDamageReportAtIndex:self.submittingDamageIndex];
     }
 }
@@ -336,9 +349,18 @@
             NSDictionary *extraHeaders = [NSDictionary dictionaryWithObjectsAndKeys:
                                           contentType, @"Content-Type",
                                           [NSString stringWithFormat:@"%d", [body length]], @"Content-Length", nil];
-            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:extraHeaders body:body identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
             
+            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:extraHeaders body:body identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self showProgressView:NO];
+#if kDebug
+            NSLog(@"total: %d, current: %d percentage: %.0f", self.totalCurrentDamages, [self.currentDamageArray count], (((float)self.totalCurrentDamages - (float)[self.currentDamageArray count]) / (float)self.totalCurrentDamages) * 100);
+#endif
+            if (self.navigationController) {
+                [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+            } else {
+                [DCSharedObject hideProgressDialogInView:self.view];
+            }
             
+            [DCSharedObject showProgressDialogInView:self.navigationController.view message:[NSString stringWithFormat:@"%.0f%%", (((float)self.totalCurrentDamages - (float)[self.currentDamageArray count]) / (float)self.totalCurrentDamages) * 100]];
         }
     }
 }
@@ -429,6 +451,11 @@
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response string
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
         [DCSharedObject processLogout:self.navigationController clearData:NO];
         return;
     } else
@@ -559,7 +586,13 @@
                         [self.currentDamageArray removeObjectAtIndex:self.submittingDamageIndex];
                         if ([self.currentDamageArray count] == 0) { //if all the damages were sent successfully, make the array nil
                             self.currentDamageArray = nil;
-                            [DCSharedObject hideProgressDialogInView:self.view];
+                            self.submittingDamageIndex = 0;
+                            self.totalCurrentDamages = 0;
+                            if (self.navigationController) {
+                                [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+                            } else {
+                                [DCSharedObject hideProgressDialogInView:self.view];
+                            }
                             [self showAlertWithMessage:NSLocalizedString(@"DAMAGE_REPORTED_SUCCESSFULLY", @"")];
                             [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:RESET_SURVEY_NOTIFICATION object:nil]];
                         }
@@ -590,7 +623,7 @@
                                 }
                             }
                         } else {
-                            [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                            [self showAlertWithMessage:NSLocalizedString(@"SUBMIT_DAMAGE_ERROR", @"")];
                         }
                     }
                 }
@@ -629,6 +662,16 @@
     if ([[alertView message] isEqualToString:NSLocalizedString(@"DAMAGE_REPORTED_SUCCESSFULLY", @"")]) {
         [self.navigationController popViewControllerAnimated:YES];
     }
+    
+    if ([[alertView message] isEqualToString:NSLocalizedString(@"SUBMIT_DAMAGE_ERROR", @"")] &&
+        [[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"YES", @"")] ) {
+        if (self.currentDamageArray) {
+            if ([self.currentDamageArray count] > 0) {
+                self.submittingDamageIndex = 0;
+                [self submitDamageReportAtIndex:self.submittingDamageIndex];
+            }
+        }
+    }
 }
 
 #pragma mark - HTTPServiceDelegate methods
@@ -637,7 +680,6 @@
 }
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
-    [DCSharedObject hideProgressDialogInView:self.view];
     NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 #if kDebug
     NSLog(@"%@", responseString);
@@ -647,15 +689,31 @@
         [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
     } else {
         if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+            if (self.navigationController) {
+                [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+            } else {
+                [DCSharedObject hideProgressDialogInView:self.view];
+            }
             [DCSharedObject processLogout:self.navigationController clearData:NO];
 
+        }
+    }
+    if (![identifier isEqualToString:HELPDESK]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
         }
     }
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
     if ([identifier isEqualToString:HELPDESK]) {
-        [DCSharedObject hideProgressDialogInView:self.view];
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
         if (self.submittingDamageIndex < [self.currentDamageArray count]) {
             self.submittingDamageIndex++;
             [self submitDamageReportAtIndex:self.submittingDamageIndex];
