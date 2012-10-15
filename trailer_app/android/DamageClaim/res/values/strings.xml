@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <resources>
 
     <string name="addnewimage">Add a new image:</string>
@@ -62,7 +64,7 @@
     <string name="gallery">Gallery</string>
     <string name="selectid">Please select ID before reporting a damage</string>    
     <string name="unclaimeddamages">Unclaimed damages will not be saved. Are you sure you want to exit?</string>
-
+	
     
     
     
@@ -79,6 +81,14 @@
     <string name="sdcard">There is a problem. Please insert the SD card and check again.</string>
     <string name="damagessubmitted">Damage reported successfully</string>
     <string name="noimages">No images for this damage</string>
+    
+        
+    <string name="changepassword">Change\npassword</string>
+    <string name="changepassword1">Change password</string>
+    <string name="reportdamageproblem">There seems to be a problem.\nDo you want to try again?</string>
+    
+    
+    
     
     <!-- Drawable Values -->
 

@@ -1,8 +1,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/reportdamage_scrollview"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:id="@+id/reportdamage_scrollview"
     android:background="@drawable/all_screens" >
 
     <LinearLayout
@@ -24,11 +24,10 @@
             android:paddingTop="10dp"
             android:text="@string/report_damage_button_report_new_damage"
             android:textSize="20sp"
-            android:textStyle="bold"
-            >
-            <requestFocus/>
-            </Button>
-        
+            android:textStyle="bold" >
+
+            <requestFocus />
+        </Button>
 
         <TextView
             android:id="@+id/report_damage_textview_reporting_damage"
@@ -42,7 +41,6 @@
             android:textColor="@drawable/all_textviews"
             android:textSize="25sp"
             android:textStyle="bold" />
-            />
 
         <ListView
             android:id="@+id/report_damage_listview_reporting_damage"
@@ -63,10 +61,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:visibility="gone" />
-        
-        
-        
-               <Button
+
+        <Button
             android:id="@+id/report_damage_button_submit"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -79,11 +75,9 @@
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
             android:text="@string/homepage_button_submit"
-            android:visibility="gone"
             android:textSize="20sp"
-            android:textStyle="bold" />
-        
-        
+            android:textStyle="bold"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="fill_parent"

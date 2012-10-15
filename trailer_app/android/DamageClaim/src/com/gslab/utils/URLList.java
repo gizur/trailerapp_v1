@@ -6,7 +6,7 @@ import com.gslab.interfaces.Constants;
 
 public class URLList {
 
-	private static String PARENT = "http://gizurtrailerapp-env.elasticbeanstalk.com/api/index.php/api";
+	private static String PARENT = "http://phpapplications-env-sixmtjkbzs.elasticbeanstalk.com/api/index.php/api";
 
 	public static void setPARENT(String pARENT) {
 		PARENT = pARENT;
@@ -22,7 +22,13 @@ public class URLList {
 	private final static String LOGOUT = "/Authenticate/logout";
 	private final static String DOCUMENT_ATTACHMENT = "/DocumentAttachments";
 	private final static String ABOUT_URL = "/About";
-	private final static String CHANGE_PWD = "/Authentication/changepw";
+	private final static String CHANGE_PWD = "/Authenticate/changepw";
+	private final static String TICKETSTATUS = "/HelpDesk/ticketstatus";
+	private final static String REPORTDAMAGE = "/HelpDesk/reportdamage";
+	private final static String RESET_PWD = "/Authenticate/reset";
+	private final static String PLATES = "/HelpDesk/plates";
+	private final static String STRAPS = "/HelpDesk/straps";
+	private final static String PLACES = "/HelpDesk/damagereportlocation";
 
 	public static String getURL(final int which) {
 
@@ -64,6 +70,24 @@ public class URLList {
 		case Constants.CHANGE_PWD:
 			return (PARENT + CHANGE_PWD);
 
+		case Constants.TICKETSTATUS:
+			return (PARENT + TICKETSTATUS);
+
+		case Constants.REPORTDAMAGE:
+			return (PARENT + REPORTDAMAGE);
+
+		case Constants.RESET_PWD:
+			return (PARENT + RESET_PWD);
+
+		case Constants.PLATES:
+			return(PARENT + PLATES);
+			
+		case Constants.PLACE:
+			return(PARENT + PLACES);
+			
+		case Constants.STRAPS:
+			return(PARENT + STRAPS);
+			
 		default:
 			Log.i("URLList.java", "in default case");
 			return null;

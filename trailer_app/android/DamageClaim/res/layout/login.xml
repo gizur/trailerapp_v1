@@ -15,7 +15,7 @@
         android:layout_marginTop="10dp"
         android:hint="@string/login_username_hint"
         android:inputType="textEmailAddress"
-        android:text="cloud3@gizur.com"
+        android:text="mobile_app@gizur.com"
         android:textSize="20sp" />
 
     <EditText
@@ -28,7 +28,7 @@
         android:layout_marginTop="10dp"
         android:hint="@string/login_password_hint"
         android:inputType="textPassword"
-        android:text="rksh2jjf"
+        android:text="cwvvzvb0"
         android:textSize="20sp" />
 
     <TextView

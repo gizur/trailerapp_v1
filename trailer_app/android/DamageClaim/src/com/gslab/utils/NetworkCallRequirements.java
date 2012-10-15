@@ -101,7 +101,8 @@ public class NetworkCallRequirements {
 		Log.i("before adding", calendar.getTime().toGMTString());
 		calendar.set(Calendar.SECOND,
 				calendar.SECOND + CoreComponent.getDIFFERENCE());
-		Log.i("Calculating time stamp value", CoreComponent.getDIFFERENCE() + "");
+		Log.i("Calculating time stamp value", CoreComponent.getDIFFERENCE()
+				+ "");
 		Log.i("after adding", calendar.getTime().toGMTString());
 		String format = date.format(calendar.getTime());
 		Log.i("Timestamp", format);
@@ -126,9 +127,9 @@ public class NetworkCallRequirements {
 
 	public static String getSignatureValue(String timestamp, String type,
 			String model) {
-		
+
 		Log.i("-------------------------", "Coming and generating signature");
-		
+
 		String toencode = "";
 		randomNumber = generateRandomNumber();
 		Log.i("Random number", randomNumber + "");
