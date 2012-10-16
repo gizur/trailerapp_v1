@@ -1,6 +1,7 @@
 package com.gslab.damageclaim;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -502,9 +503,14 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 		@Override
 		protected String doInBackground(ArrayList<DamageInfo>... info) {
-			Log.i("Asynchtask", "doinbackground---" + info[0].size());
+			Log.i("Asynctask", "doinbackground---" + info[0].size());
 			ArrayList<DamageInfo> list = info[0];
-			for (i = 0; i < list.size(); i++) {
+
+			int success = 0, total = 0;
+
+			total = list.size();
+
+			do {
 
 				try {
 
@@ -526,13 +532,14 @@ public class ReportDamage extends Activity implements OnClickListener,
 						continue;
 					}
 					list.remove(0);
+					success++;
 
 				} catch (Exception e) {
 					e.printStackTrace();
 					Log.i(getClass().getSimpleName(), e.getClass()
 							.getSimpleName());
 				}
-			}
+			} while (success + failures != total);
 			return null;
 		}
 
@@ -702,28 +709,58 @@ public class ReportDamage extends Activity implements OnClickListener,
 				CoreComponent.mpEntity = CoreComponent.getMpEntity();
 
 				CoreComponent.mpEntity.addPart("trailerid", new StringBody(
-						CoreComponent.trailerid));
+						CoreComponent.trailerid, Charset.forName("UTF-8")));
 
 				CoreComponent.mpEntity.addPart("ticketstatus", new StringBody(
-						getOpenTicketStatusValue()));
+						getOpenTicketStatusValue(), Charset.forName("UTF-8")));
 
-				CoreComponent.mpEntity.addPart("ticket_title", new StringBody(
-						CoreComponent.getUserinfo().getContactname()));
+				CoreComponent.mpEntity.addPart("ticket_title",
+						new StringBody(CoreComponent.getUserinfo()
+								.getContactname(), Charset.forName("UTF-8")));
 
 				CoreComponent.mpEntity.addPart("reportdamage", new StringBody(
-						getReportDamageValueYes()));
+						getReportDamageValueYes(), Charset.forName("UTF-8")));
 
 				CoreComponent.mpEntity.addPart("damagetype", new StringBody(
 						reporting_damage_list.get(0 + failures)
-								.getWhatIsDamaged()));
+								.getWhatIsDamaged(), Charset.forName("UTF-8")));
 
-				CoreComponent.mpEntity.addPart("damageposition",
+				CoreComponent.mpEntity.addPart(
+						"damageposition",
 						new StringBody(reporting_damage_list.get(0 + failures)
-								.getLocationOfDamage()));
+								.getLocationOfDamage(), Charset
+								.forName("UTF-8")));
 
-				CoreComponent.mpEntity.addPart("drivercauseddamage",
+				CoreComponent.mpEntity.addPart(
+						"drivercauseddamage",
 						new StringBody(reporting_damage_list.get(0 + failures)
-								.getDriver_caused_damage()));
+								.getDriver_caused_damage(), Charset
+								.forName("UTF-8")));
+
+				/*
+				 * need to check the sealed condition what about trailer type?
+				 */
+
+				if (DamageClaimApp.place != null)
+					CoreComponent.mpEntity.addPart(
+							"damagereportlocation",
+							new StringBody(DamageClaimApp.place, Charset
+									.forName("UTF-8")));
+
+				if (DamageClaimApp.sealed != null)
+					CoreComponent.mpEntity.addPart("sealed", new StringBody(
+							DamageClaimApp.sealed, Charset.forName("UTF-8")));
+
+				if (DamageClaimApp.sealed
+						.equalsIgnoreCase(getString(string.sealed_no))) {
+					if (DamageClaimApp.straps != null)
+						CoreComponent.mpEntity.addPart("straps",
+								new StringBody(DamageClaimApp.straps, Charset.forName("UTF-8")));
+					if (DamageClaimApp.plates != null)
+						CoreComponent.mpEntity.addPart("plates",
+								new StringBody(DamageClaimApp.plates, Charset.forName("UTF-8")));
+
+				}
 
 				return request;
 			} catch (Exception e) {

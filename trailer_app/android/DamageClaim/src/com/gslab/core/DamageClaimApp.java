@@ -23,4 +23,10 @@ public class DamageClaimApp extends Application {
 	public static ArrayList<String> places_values = null;
 	public static ArrayList<String> straps_values = null;
 	public static ArrayList<String> plates_values = null;
+	
+	public static String trailer_type = null;
+	public static String place = null;
+	public static String plates = null;
+	public static String straps = null;
+	public static String sealed = null;
 }

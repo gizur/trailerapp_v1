@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-
+	<string name="app_name">Gizur Besiktning</string>
     <string name="addnewimage">Lägg till en bild</string>
-    <string name="app_name">Damage Claim</string>
-    <string name="title_activity_login">Damage Claim</string>
+    <string name="title_activity_login">Gizur Besiktning</string>
     <string name="login_textview">Logga in</string>
     <string name="login_username_hint">E-mail</string>
     <string name="login_password_hint">Lösen</string>

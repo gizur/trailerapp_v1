@@ -274,6 +274,11 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 			this.response = null;
 		}
+		
+		if(!login_req) {
+			this.response = status;
+			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
+		}
 
 		else {
 			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);

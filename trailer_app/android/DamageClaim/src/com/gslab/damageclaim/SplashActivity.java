@@ -14,6 +14,7 @@ import com.gslab.core.DamageClaimApp;
 import com.gslab.interfaces.Constants;
 import com.gslab.utils.NetworkCallRequirements;
 import com.gslab.utils.URLList;
+import com.gslab.utils.Utility;
 
 public class SplashActivity extends Activity {
 
@@ -82,8 +83,7 @@ public class SplashActivity extends Activity {
 
 				}
 				if (uri.getQueryParameter("GIZURCLOUD_API_URL") != null) {
-					URLList.setPARENT("https://"
-							+ uri.getQueryParameter("GIZURCLOUD_API_URL")
+					URLList.setPARENT(uri.getQueryParameter("GIZURCLOUD_API_URL")
 									.trim());
 					Log.i(getClass().getSimpleName(),
 							"Got the gizur cloud api url : "
@@ -92,8 +92,12 @@ public class SplashActivity extends Activity {
 					Log.i(getClass().getSimpleName(), "Parent value set : --"
 							+ URLList.getURL(Constants.PARENT) + "--");
 				}
-				else
-					URLList.setPARENT("http://phpapplications-env-sixmtjkbzs.elasticbeanstalk.com/api/index.php/api");
+				else {
+					URLList.setPARENT("https://api.gizur.com/api/index.php/api");					
+				}
+				if(uri.getQueryParameter("GIZURCLOUD_HTTP_SCHEME") != null && uri.getQueryParameter("GIZURCLOUD_API_URL") != null){
+					URLList.setPARENT(uri.getQueryParameter("GIZURCLOUD_HTTP_SCHEME") + "://" + URLList.getURL(Constants.PARENT));
+				}				
 			}
 		} catch (Exception ex) {
 			Log.i(" URL exception ", ex.getMessage() + ", "

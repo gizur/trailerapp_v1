@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.gslab.R;
@@ -53,10 +54,14 @@ public class HomePage extends Activity implements OnClickListener,
 
 	private Thread thread;
 
+	private ScrollView scrollview;
+
 	public void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.homepage);
+
+		scrollview = (ScrollView) findViewById(com.gslab.R.id.scrollview_homepage);
 
 		getApplicationContext();
 
@@ -69,6 +74,8 @@ public class HomePage extends Activity implements OnClickListener,
 		trailertype.setText(getString(string.homepage_textview_trailertype)
 				+ " " + getString(string.trailer_type_own));
 		trailertype.setOnClickListener(this);
+		DamageClaimApp.trailer_type = Utility.getParsedString(trailertype
+				.getText().toString());
 
 		id = (TextView) findViewById(R.id.homepage_textview_id);
 		id.setOnClickListener(this);
@@ -127,11 +134,12 @@ public class HomePage extends Activity implements OnClickListener,
 	private void setSealedValue() {
 		sealed.setText(getString(string.homepage_textview_sealed) + " "
 				+ values.get(sealed_labels.indexOf("no")));
+		DamageClaimApp.sealed = Utility.getParsedString(sealed.getText()
+				.toString());
 	}
 
 	@SuppressWarnings("unchecked")
 	private void getPlateValues() {
-
 
 		if (DamageClaimApp.plates_values != null) {
 			values = (ArrayList<String>) DamageClaimApp.plates_values.clone();
@@ -144,7 +152,7 @@ public class HomePage extends Activity implements OnClickListener,
 					getString(string.networkunavailable));
 			return;
 		}
-		
+
 		values = new ArrayList<String>();
 
 		ProgressDialogHelper.showProgressDialog(this, "",
@@ -153,8 +161,8 @@ public class HomePage extends Activity implements OnClickListener,
 		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
 				createRequest());
 		Utility.waitForThread();
-		
-		if(this.response == null){
+
+		if (this.response == null) {
 			values = null;
 			return;
 		}
@@ -195,8 +203,8 @@ public class HomePage extends Activity implements OnClickListener,
 		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
 				createRequest());
 		Utility.waitForThread();
-		
-		if(this.response == null){
+
+		if (this.response == null) {
 			values = null;
 			return;
 		}
@@ -225,6 +233,7 @@ public class HomePage extends Activity implements OnClickListener,
 	private void getIDValues() // To be fetched from URL
 	{
 		values = new ArrayList<String>();
+		values.clear();
 		if (DamageClaimApp.id_names != null && DamageClaimApp.id_values != null) {
 			values = (ArrayList<String>) DamageClaimApp.id_names.clone();
 			ids = (ArrayList<String>) DamageClaimApp.id_values.clone();
@@ -246,12 +255,12 @@ public class HomePage extends Activity implements OnClickListener,
 		CoreComponent.processRequest(Constants.GET, Constants.ASSETS, this,
 				createRequest());
 		Utility.waitForThread();
-		
-		if(this.response == null){
+
+		if (this.response == null) {
 			values = null;
 			return;
 		}
-		
+
 		if (this.response != null) {
 			try {
 				object = new JSONObject(response);
@@ -298,8 +307,8 @@ public class HomePage extends Activity implements OnClickListener,
 		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
 				createRequest());
 		Utility.waitForThread();
-		
-		if(this.response == null){
+
+		if (this.response == null) {
 			values = null;
 			return;
 		}
@@ -312,7 +321,8 @@ public class HomePage extends Activity implements OnClickListener,
 				values.add(array.getJSONObject(i).getString("value"));
 			}
 		} catch (Exception e) {
-			Log.i(getClass().getSimpleName(), "---------------------------------------");
+			Log.i(getClass().getSimpleName(),
+					"---------------------------------------");
 			e.printStackTrace();
 		}
 
@@ -346,8 +356,8 @@ public class HomePage extends Activity implements OnClickListener,
 		CoreComponent.processRequest(Constants.GET, Constants.HELPDESK, this,
 				createRequest());
 		Utility.waitForThread();
-		
-		if(this.response == null){
+
+		if (this.response == null) {
 			values = null;
 			return;
 		}
@@ -383,6 +393,8 @@ public class HomePage extends Activity implements OnClickListener,
 		case Constants.TRAILER_TYPE:
 			trailertype.setText(getString(string.homepage_textview_trailertype)
 					+ " " + values.get((int) id));
+			DamageClaimApp.trailer_type = Utility.getParsedString(trailertype
+					.getText().toString());
 			break;
 
 		case Constants.ID:
@@ -391,7 +403,7 @@ public class HomePage extends Activity implements OnClickListener,
 			if (values.get((int) id).equalsIgnoreCase(""))
 				CoreComponent.trailerid = null;
 			else {
-				CoreComponent.trailerid = ids.get((int) id);
+				CoreComponent.trailerid = values.get((int) id);
 				Log.i(getClass().getSimpleName(), CoreComponent.trailerid + "");
 			}
 			checkSubmitButtonStatus();
@@ -400,6 +412,8 @@ public class HomePage extends Activity implements OnClickListener,
 		case Constants.PLACE:
 			place.setText(getString(string.homepage_textview_place) + " "
 					+ values.get((int) id));
+			DamageClaimApp.place = Utility.getParsedString(place.getText()
+					.toString());
 			break;
 
 		case Constants.SEALED:
@@ -409,16 +423,22 @@ public class HomePage extends Activity implements OnClickListener,
 				removeTrailerInventory();
 			else
 				addTrailerInventory();
+			DamageClaimApp.sealed = Utility.getParsedString(sealed.getText()
+					.toString());
 			break;
 
 		case Constants.PLATES:
 			plates.setText(getString(string.homepage_textview_plates) + " "
 					+ values.get((int) id));
+			DamageClaimApp.plates = Utility.getParsedString(plates.getText()
+					.toString());
 			break;
 
 		case Constants.STRAPS:
 			straps.setText(getString(string.homepage_textview_straps) + " "
 					+ values.get((int) id));
+			DamageClaimApp.straps = Utility.getParsedString(straps.getText()
+					.toString());
 			break;
 		}
 	}
@@ -443,6 +463,7 @@ public class HomePage extends Activity implements OnClickListener,
 	}
 
 	private void setDefaultValues() {
+		scrollview.scrollTo(0, scrollview.getTop());
 		trailertype.setText(getString(string.homepage_textview_trailertype)
 				+ " " + getString(string.trailer_type_own));
 		id.setText(getString(string.homepage_textview_ID));
@@ -454,6 +475,13 @@ public class HomePage extends Activity implements OnClickListener,
 		trailerinventory.setVisibility(RelativeLayout.VISIBLE);
 		submit.setEnabled(false);
 		CoreComponent.trailerid = null;
+		DamageClaimApp.trailer_type = Utility.getParsedString(trailertype
+				.getText().toString());
+		DamageClaimApp.place = null;
+		DamageClaimApp.straps = null;
+		DamageClaimApp.plates = null;
+		DamageClaimApp.sealed = Utility.getParsedString(sealed.getText()
+				.toString());
 	}
 
 	public void onClick(View v) {
@@ -480,15 +508,15 @@ public class HomePage extends Activity implements OnClickListener,
 			selection = Constants.PLACE;
 			getPlaceValues();
 			if (this.response != null || values != null)
-			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.homepage_textview_place), values,
-					Constants.HOMEPAGE);
+				new ListViewDialog(this, layout.listviewdialog,
+						getString(string.homepage_textview_place), values,
+						Constants.HOMEPAGE);
 		}
 
 		if (v == sealed) {
 			selection = Constants.SEALED;
 			getSealedValues();
-			
+
 			if (this.response != null || values != null)
 				new ListViewDialog(this, layout.listviewdialog,
 						getString(string.homepage_textview_sealed), values,
@@ -499,25 +527,30 @@ public class HomePage extends Activity implements OnClickListener,
 			selection = Constants.PLATES;
 			getPlateValues();
 			if (this.response != null || values != null)
-			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.homepage_textview_plates), values,
-					Constants.HOMEPAGE);
+				new ListViewDialog(this, layout.listviewdialog,
+						getString(string.homepage_textview_plates), values,
+						Constants.HOMEPAGE);
 		}
 
 		if (v == straps) {
 			selection = Constants.STRAPS;
 			getStrapsValues();
 			if (this.response != null || values != null)
-			new ListViewDialog(this, layout.listviewdialog,
-					getString(string.homepage_textview_straps), values,
-					Constants.HOMEPAGE);
+				new ListViewDialog(this, layout.listviewdialog,
+						getString(string.homepage_textview_straps), values,
+						Constants.HOMEPAGE);
 		}
 
 		if (v == damages) {
 
-			Intent intent = new Intent(getApplicationContext(),
-					ReportDamage.class);
-			startActivity(intent);
+			if (performChecks()) {
+
+				Intent intent = new Intent(getApplicationContext(),
+						ReportDamage.class);
+				startActivity(intent);
+			}
+			else 						/*------------------------translation required-------------------*/
+				ToastUI.showToast(getApplicationContext(), "Please fill all the fields");
 
 		}
 
@@ -549,6 +582,23 @@ public class HomePage extends Activity implements OnClickListener,
 			request.addParam("ticketstatus", getClosedTicketStatusValue());
 			request.addParam("trailerid", CoreComponent.trailerid);
 			request.addParam("reportdamage", getReportDamageValueNo());
+
+			/*
+			 * need to check the sealed condition what about trailer type?
+			 */
+
+			if (DamageClaimApp.place != null)
+				request.addParam("damagereportlocation", DamageClaimApp.place);
+			if (DamageClaimApp.sealed != null)
+				request.addParam("sealed", DamageClaimApp.sealed);
+			if (DamageClaimApp.sealed
+					.equalsIgnoreCase(getString(string.sealed_no))) {
+				if (DamageClaimApp.straps != null)
+					request.addParam("straps", DamageClaimApp.straps);
+				if (DamageClaimApp.plates != null)
+					request.addParam("plates", DamageClaimApp.plates);
+			}
+
 			CoreComponent.processRequest(Constants.POST, Constants.HELPDESK,
 					this, request);
 
@@ -562,6 +612,27 @@ public class HomePage extends Activity implements OnClickListener,
 
 		}
 
+	}
+
+	private boolean performChecks() {
+		
+		if(DamageClaimApp.place != null
+			&& DamageClaimApp.trailer_type != null
+			&& CoreComponent.trailerid != null
+			&& DamageClaimApp.sealed != null){
+			if(DamageClaimApp.sealed.equalsIgnoreCase(getString(string.sealed_no))) {
+				if(DamageClaimApp.plates != null && DamageClaimApp.straps != null)
+					return true;
+				else
+					return false;
+			}
+			else
+				return true;
+			
+		}
+		return false;
+			
+		
 	}
 
 	private String getReportDamageValueNo() {
@@ -754,6 +825,23 @@ public class HomePage extends Activity implements OnClickListener,
 			request.addParam("ticketstatus", getClosedTicketStatusValue());
 			request.addParam("trailerid", CoreComponent.trailerid);
 			request.addParam("reportdamage", getReportDamageValueNo());
+
+			/*
+			 * need to check the sealed condition what about trailer type?
+			 */
+
+			if (DamageClaimApp.place != null)
+				request.addParam("damagereportlocation", DamageClaimApp.place);
+			if (DamageClaimApp.sealed != null)
+				request.addParam("sealed", DamageClaimApp.sealed);
+			if (DamageClaimApp.sealed
+					.equalsIgnoreCase(getString(string.sealed_no))) {
+				if (DamageClaimApp.straps != null)
+					request.addParam("straps", DamageClaimApp.straps);
+				if (DamageClaimApp.plates != null)
+					request.addParam("plates", DamageClaimApp.plates);
+			}
+
 			break;
 
 		case Constants.TICKETSTATUS:
