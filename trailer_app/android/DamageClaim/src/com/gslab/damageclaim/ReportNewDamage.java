@@ -120,6 +120,7 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 		gallery = (Gallery) findViewById(id.reportnewdamage_listview_damageimages);
 		registerForContextMenu(gallery);
+		gallery.setScrollbarFadingEnabled(false);
 		gallery.setOnItemClickListener(this);
 
 		done = (Button) findViewById(id.reportnewdamage_button_done);
@@ -451,8 +452,10 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void getDamageCausedValues() {
 
+		values.clear();
 		if (DamageClaimApp.damage_caused_by != null) {
 			values = (ArrayList<String>) DamageClaimApp.damage_caused_by
 					.clone();
@@ -484,10 +487,10 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 				for (int i = 0; i < array.length(); i++) {
 					if (array.getJSONObject(i).getString("value")
-							.equalsIgnoreCase(getString(string.sealed_yes)))
+							.equalsIgnoreCase("yes"))
 						values.add(getString(string.driver));
 					else if (array.getJSONObject(i).getString("value")
-							.equalsIgnoreCase(getString(string.sealed_no)))
+							.equalsIgnoreCase("no"))
 						values.add(getString(string.other));
 					else
 						values.add("-NA-");
@@ -521,8 +524,13 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 					.toString()));
 			previous_data.setLocation(Utility.getParsedString(position
 					.getText().toString()));
-			previous_data.setDriver_caused_damage(Utility
-					.getParsedString(drivercauseddamage.getText().toString()));
+			
+			if(drivercauseddamage.getText().toString().equalsIgnoreCase(getString(string.driver))) {
+				previous_data.setDriver_caused_damage("Yes");
+			}
+			else {			
+			previous_data.setDriver_caused_damage("No");
+			}
 
 			if (previous_data.getDriver_caused_damage().equalsIgnoreCase(
 					getString(string.driver)))

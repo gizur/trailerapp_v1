@@ -21,7 +21,6 @@ public class DisplayDamageClaimImage extends Activity {
 		setContentView(layout.displaydamageimage);
 
 		imageview = (TouchImageView) findViewById(id.damage_claim_imageview_image);
-		
 
 		if (getIntent().getBooleanExtra("report_damage", true)) {
 			uri = (Uri) getIntent().getExtras().getParcelable("uri");

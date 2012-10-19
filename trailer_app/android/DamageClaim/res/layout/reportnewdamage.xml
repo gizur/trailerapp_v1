@@ -8,8 +8,8 @@
         android:id="@+id/reportnewdamage_layout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="20dp"
-        android:background="@drawable/all_screens" >
+        android:background="@drawable/all_screens"
+        android:paddingBottom="20dp" >
 
         <TextView
             android:id="@+id/reportnewdamage_textview_damagedetails"
@@ -72,14 +72,7 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        
-        
-        
-        
-        
-        
-        
-                <View
+        <View
             android:layout_width="fill_parent"
             android:layout_height="1dp"
             android:layout_below="@id/reportnewdamage_textview_position"
@@ -103,17 +96,7 @@
             android:textColor="#6E6E6E"
             android:textSize="20sp"
             android:textStyle="bold" />
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dp"
@@ -152,21 +135,23 @@
 
         <Gallery
             android:id="@+id/reportnewdamage_listview_damageimages"
-            android:layout_below="@id/reportnewdamage_button_damageimages"
             android:layout_width="fill_parent"
             android:layout_height="200dp"
-            android:layout_marginTop="10dp" />
+            android:layout_below="@id/reportnewdamage_button_damageimages"
+            android:layout_marginTop="10dp"
+            android:scrollbarFadeDuration="0"
+            android:scrollbars="horizontal" />
 
         <Button
             android:id="@+id/reportnewdamage_button_done"
-            android:layout_below="@id/reportnewdamage_listview_damageimages"
-            android:layout_width="fill_parent"            
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/reportnewdamage_listview_damageimages"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"            
+            android:layout_marginRight="20dp"
             android:background="@drawable/button_style"
             android:paddingBottom="10dp"
-            android:paddingTop="10dp"            
+            android:paddingTop="10dp"
             android:text="@string/reportnewdamage_button_done"
             android:textSize="20sp"
             android:textStyle="bold" />

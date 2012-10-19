@@ -11,7 +11,7 @@ public class DamageClaimApp extends Application {
 	public static ArrayList<String> sealed_labels = null, sealed_values = null;
 	public static String report_damage_value_no = null;
 	public static String report_damage_value_yes = null;
-	public static ArrayList<String> id_values = null, id_names = null;
+	public static ArrayList<String> id_own = null, id_rented = null;
 	public static String closed_ticket_status_value = null;
 	public static String open_ticket_status_value = null;
 
@@ -19,11 +19,11 @@ public class DamageClaimApp extends Application {
 	public static HashMap<String, ArrayList<String>> hashmap = null;
 
 	public static ArrayList<String> damage_caused_by = null;
-	
+
 	public static ArrayList<String> places_values = null;
 	public static ArrayList<String> straps_values = null;
 	public static ArrayList<String> plates_values = null;
-	
+
 	public static String trailer_type = null;
 	public static String place = null;
 	public static String plates = null;

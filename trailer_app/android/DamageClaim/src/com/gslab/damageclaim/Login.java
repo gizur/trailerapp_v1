@@ -133,6 +133,15 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 								reset = 1;
 
 								dialog.cancel();
+
+								if (!Utility.isEmailValid(username.getText()
+										.toString())) {
+									ToastUI.showToast(
+											act.getApplicationContext(),
+											getString(string.validemail));
+									return;
+								}
+
 								ProgressDialogHelper.showProgressDialog(act,
 										"", getString(string.loading));
 								HTTPRequest request = createRequest();
@@ -146,11 +155,11 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 								if (response != null) {
 									ToastUI.showToast(
 											act.getApplicationContext(),
-											"Password reset successful");
+											getString(string.resetpwdsuccess));
 								} else {
 									ToastUI.showToast(
 											act.getApplicationContext(),
-											"Error resetting the password");
+											getString(string.problem));
 								}
 								reset = 0;
 							}
@@ -192,6 +201,11 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 			return false;
 		}
 
+		if(password.getText().toString().equalsIgnoreCase("")) {
+			ToastUI.showToast(getApplicationContext(), getString(string.loginfieldempty));
+			return false;
+		}
+		
 		return true;
 	}
 
@@ -274,8 +288,8 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 			this.response = null;
 		}
-		
-		if(!login_req) {
+
+		if (!login_req) {
 			this.response = status;
 			handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 		}

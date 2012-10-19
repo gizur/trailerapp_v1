@@ -754,11 +754,15 @@ public class ReportDamage extends Activity implements OnClickListener,
 				if (DamageClaimApp.sealed
 						.equalsIgnoreCase(getString(string.sealed_no))) {
 					if (DamageClaimApp.straps != null)
-						CoreComponent.mpEntity.addPart("straps",
-								new StringBody(DamageClaimApp.straps, Charset.forName("UTF-8")));
+						CoreComponent.mpEntity.addPart(
+								"straps",
+								new StringBody(DamageClaimApp.straps, Charset
+										.forName("UTF-8")));
 					if (DamageClaimApp.plates != null)
-						CoreComponent.mpEntity.addPart("plates",
-								new StringBody(DamageClaimApp.plates, Charset.forName("UTF-8")));
+						CoreComponent.mpEntity.addPart(
+								"plates",
+								new StringBody(DamageClaimApp.plates, Charset
+										.forName("UTF-8")));
 
 				}
 

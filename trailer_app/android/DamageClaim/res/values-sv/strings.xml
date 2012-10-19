@@ -70,7 +70,15 @@
     <string name="noimages">Det finns inga bilder för skadan</string>
     <string name="changepassword">Ändra\nlösenord</string>
     <string name="changepassword1">Ändra lösenord</string>
+    <string name="enterfields">Alla fält måste anges</string>
 
+    <string name="fieldsempty">Vissa fält är tomma</string>
+    <string name="oldpwrong">Det gamla lösenordet är fel</string>
+    <string name="newpwrong">Nytt lösenord måste anges exakt lika i båda fälten. Försök igen.</string>
+    <string name="changepwdsuccess">Ditt lösenord har ändrats. Logga in med det nya lösenordet</string>
+    <string name="resetpwdsuccess">Ditt nya lösenord kommer att skickas till din email adress inom kort. Logga in med ditt nya lösenord.</string>
+    <string name="loginfieldempty">E-mail eller lösen har inte angivits.</string>
+    
     <!-- Drawable Values -->
 
     <color name="app_theme">#F3F3F3</color>

@@ -217,16 +217,16 @@ public class CoreComponent {
 						if (listener != null)
 							listener.onError(CoreComponent.getErr()
 									.getMessage());
-						
+
 						Log.i("Error message : ", request.getResponseCode()
 								+ "");
 						Log.i("Response in exception", responseString);
 					}
 				} catch (Exception e) {
-						if (listener != null) {
-							listener.onError(responseString);
-						}
-						e.printStackTrace();					
+					if (listener != null) {
+						listener.onError(responseString);
+					}
+					e.printStackTrace();
 				}
 			}
 		};

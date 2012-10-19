@@ -1,6 +1,7 @@
 package com.gslab.damageclaim;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -31,6 +32,8 @@ public class PasswordReset extends Activity implements OnClickListener,
 	private Button submit;
 	private Activity activity;
 
+	private String response;
+	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(layout.reset_password);
@@ -73,6 +76,15 @@ public class PasswordReset extends Activity implements OnClickListener,
 				CoreComponent.processRequest(Constants.PUT,
 						Constants.AUTHENTICATE, this, request);
 				Utility.waitForThread();
+				
+				if(this.response != null) {
+					
+					Log.i(getClass().getSimpleName(), "Exiting.. setting result");
+					ToastUI.showToast(getApplicationContext(), getString(string.changepwdsuccess));
+					setResult(RESULT_OK);
+					finish();								
+					
+				}
 
 			}
 		}
@@ -80,25 +92,26 @@ public class PasswordReset extends Activity implements OnClickListener,
 	}
 
 	private boolean performChecks() {
+
 		if (oldp.getText().toString().equalsIgnoreCase("")
 				|| newp.getText().toString().equalsIgnoreCase("")
 				|| confirmnew.getText().toString().equalsIgnoreCase("")) {
 			ToastUI.showToast(getApplicationContext(),
-					"password field cannot be blank");
+					getString(string.fieldsempty));
 			return false;
 		}
-		if (oldp.getText().toString().equals(CoreComponent.getPassword())) {
-			if (newp.getText().toString()
-					.equals(confirmnew.getText().toString()))
-				return true;
-			else {
-				ToastUI.showToast(getApplicationContext(),
-						"new password not matching");
-				return false;
-			}
-		} else {
+
+		if (!oldp.getText().toString().equals(CoreComponent.getPassword())) {
 			ToastUI.showToast(getApplicationContext(),
-					"Old password is incorrect");
+					getString(string.oldpwrong));
+			return false;
+		}
+
+		if (newp.getText().toString().equals(confirmnew.getText().toString()))
+			return true;
+		else {
+			ToastUI.showToast(getApplicationContext(),
+					getString(string.newpwrong));
 			return false;
 		}
 
@@ -141,13 +154,15 @@ public class PasswordReset extends Activity implements OnClickListener,
 
 		Log.i(getClass().getSimpleName(), "success");
 		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
-		finish();
+		this.response = response;
 	}
 
 	public void onError(String status) {
 		Log.i(getClass().getSimpleName(), "error");
-		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
+		this.response = null;
+		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);		
 		handler.sendEmptyMessage(Constants.TOAST);
+		
 	}
 
 	public HTTPRequest createRequest() {

@@ -7,9 +7,11 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,7 +41,7 @@ public class HomePage extends Activity implements OnClickListener,
 		NetworkListener, Runnable {
 
 	private TextView trailertype, id, place, sealed, plates, straps;
-	private ArrayList<String> values, sealed_labels, ids;
+	private ArrayList<String> values, sealed_labels;
 
 	private RelativeLayout trailerinventory;
 
@@ -234,13 +236,15 @@ public class HomePage extends Activity implements OnClickListener,
 	{
 		values = new ArrayList<String>();
 		values.clear();
-		if (DamageClaimApp.id_names != null && DamageClaimApp.id_values != null) {
-			values = (ArrayList<String>) DamageClaimApp.id_names.clone();
-			ids = (ArrayList<String>) DamageClaimApp.id_values.clone();
+		if (DamageClaimApp.id_rented != null && DamageClaimApp.id_own != null) {
+
+			if (Utility.getParsedString(trailertype.getText().toString())
+					.equalsIgnoreCase("own"))
+				values = (ArrayList<String>) DamageClaimApp.id_own.clone();
+			else
+				values = (ArrayList<String>) DamageClaimApp.id_rented.clone();
 			return;
 		}
-
-		ids = new ArrayList<String>();
 
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
@@ -254,6 +258,10 @@ public class HomePage extends Activity implements OnClickListener,
 
 		CoreComponent.processRequest(Constants.GET, Constants.ASSETS, this,
 				createRequest());
+
+		DamageClaimApp.id_own = new ArrayList<String>();
+		DamageClaimApp.id_rented = new ArrayList<String>();
+
 		Utility.waitForThread();
 
 		if (this.response == null) {
@@ -268,16 +276,32 @@ public class HomePage extends Activity implements OnClickListener,
 				for (int i = 0; i < array.length(); i++) {
 					if (array.getJSONObject(i).getString("assetstatus")
 							.equalsIgnoreCase("In Service")) {
-						values.add(array.getJSONObject(i)
-								.getString("assetname"));
-						ids.add(array.getJSONObject(i).getString("id"));
+
+						if (array.getJSONObject(i).getString("trailertype")
+								.equalsIgnoreCase("own"))
+							DamageClaimApp.id_own.add(array.getJSONObject(i)
+									.getString("assetname"));
+						else
+							DamageClaimApp.id_rented.add(array.getJSONObject(i)
+									.getString("assetname"));
+
 					}
 				}
+
+				if (Utility.getParsedString(trailertype.getText().toString())
+						.equalsIgnoreCase("own"))
+					values = (ArrayList<String>) DamageClaimApp.id_own.clone();
+				else
+					values = (ArrayList<String>) DamageClaimApp.id_rented
+							.clone();
+
+				if (values == null) {
+					Log.i(getClass().getSimpleName(), "values = null");
+				}
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			DamageClaimApp.id_names = (ArrayList<String>) values.clone();
-			DamageClaimApp.id_values = (ArrayList<String>) ids.clone();
 
 		}
 
@@ -548,9 +572,9 @@ public class HomePage extends Activity implements OnClickListener,
 				Intent intent = new Intent(getApplicationContext(),
 						ReportDamage.class);
 				startActivity(intent);
-			}
-			else 						/*------------------------translation required-------------------*/
-				ToastUI.showToast(getApplicationContext(), "Please fill all the fields");
+			} else
+				ToastUI.showToast(getApplicationContext(),
+						getString(string.enterfields));
 
 		}
 
@@ -615,24 +639,23 @@ public class HomePage extends Activity implements OnClickListener,
 	}
 
 	private boolean performChecks() {
-		
-		if(DamageClaimApp.place != null
-			&& DamageClaimApp.trailer_type != null
-			&& CoreComponent.trailerid != null
-			&& DamageClaimApp.sealed != null){
-			if(DamageClaimApp.sealed.equalsIgnoreCase(getString(string.sealed_no))) {
-				if(DamageClaimApp.plates != null && DamageClaimApp.straps != null)
+
+		if (DamageClaimApp.place != null && DamageClaimApp.trailer_type != null
+				&& CoreComponent.trailerid != null
+				&& DamageClaimApp.sealed != null) {
+			if (DamageClaimApp.sealed
+					.equalsIgnoreCase(getString(string.sealed_no))) {
+				if (DamageClaimApp.plates != null
+						&& DamageClaimApp.straps != null)
 					return true;
 				else
 					return false;
-			}
-			else
+			} else
 				return true;
-			
+
 		}
 		return false;
-			
-		
+
 	}
 
 	private String getReportDamageValueNo() {
@@ -726,13 +749,39 @@ public class HomePage extends Activity implements OnClickListener,
 		case 2:
 			Intent intent = new Intent(getApplicationContext(),
 					PasswordReset.class);
-			startActivity(intent);
+			Log.i(getClass().getSimpleName(), "Starting activity for result");
+			startActivityForResult(intent, Constants.INTENT_DATA);
 			break;
 		}
 
 		return true;
 	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+		super.onActivityResult(requestCode, resultCode, data);
+		Log.i(getClass().getSimpleName(), "in on activity result");
+		
+		if (resultCode == Activity.RESULT_OK) {
+
+			Log.i(getClass().getSimpleName(),
+					"finish activity on activity result");
+			Intent intent = new Intent(getApplicationContext(), Login.class);			
+			intent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+			Log.i(getClass().getSimpleName(), "Starting activity");
+			startActivity(intent);
+			
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+			SharedPreferences.Editor editor = prefs.edit();
+			editor.putBoolean("credentials", false);
+			editor.commit();
+			
+			finish();
+			Log.i(getClass().getSimpleName(), "finsihing current activity");
+
+		}
+	}
 	public void onSuccessFinish(String response) {
 
 		this.response = response;

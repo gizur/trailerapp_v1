@@ -86,6 +86,15 @@
     <string name="changepassword">Change\npassword</string>
     <string name="changepassword1">Change password</string>
     <string name="reportdamageproblem">There seems to be a problem.\nDo you want to try again?</string>
+    <string name="enterfields">Please enter all fields</string>
+    
+    <string name="fieldsempty">Some fields are empty</string>
+    <string name="oldpwrong">The old password is wrong</string>
+    <string name="newpwrong">New password fields do not match. Please re-enter the new password properly.</string>
+    <string name="changepwdsuccess">Your password is changed. Please login again</string>
+    <string name="resetpwdsuccess">Your new password will be be sent to your email address shortly. Please login with your new password.</string>
+    
+    <string name="loginfieldempty">Either the username or password is empty.</string>
     
     
     

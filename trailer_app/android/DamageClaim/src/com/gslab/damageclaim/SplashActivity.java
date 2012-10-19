@@ -14,7 +14,6 @@ import com.gslab.core.DamageClaimApp;
 import com.gslab.interfaces.Constants;
 import com.gslab.utils.NetworkCallRequirements;
 import com.gslab.utils.URLList;
-import com.gslab.utils.Utility;
 
 public class SplashActivity extends Activity {
 
@@ -22,14 +21,14 @@ public class SplashActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.splash);
-		
+
 		DamageClaimApp.about_Response = null;
 		DamageClaimApp.sealed_labels = null;
 		DamageClaimApp.sealed_values = null;
 		DamageClaimApp.report_damage_value_no = null;
 		DamageClaimApp.report_damage_value_yes = null;
-		DamageClaimApp.id_values = null;
-		DamageClaimApp.id_names = null;
+		DamageClaimApp.id_own = null;
+		DamageClaimApp.id_rented = null;
 		DamageClaimApp.closed_ticket_status_value = null;
 		DamageClaimApp.open_ticket_status_value = null;
 
@@ -37,7 +36,7 @@ public class SplashActivity extends Activity {
 		DamageClaimApp.hashmap = null;
 
 		DamageClaimApp.damage_caused_by = null;
-		
+
 		DamageClaimApp.places_values = null;
 		DamageClaimApp.straps_values = null;
 		DamageClaimApp.plates_values = null;
@@ -83,21 +82,23 @@ public class SplashActivity extends Activity {
 
 				}
 				if (uri.getQueryParameter("GIZURCLOUD_API_URL") != null) {
-					URLList.setPARENT(uri.getQueryParameter("GIZURCLOUD_API_URL")
-									.trim());
+					URLList.setPARENT(uri.getQueryParameter(
+							"GIZURCLOUD_API_URL").trim());
 					Log.i(getClass().getSimpleName(),
 							"Got the gizur cloud api url : "
 									+ uri.getQueryParameter(
 											"GIZURCLOUD_API_URL").trim());
 					Log.i(getClass().getSimpleName(), "Parent value set : --"
 							+ URLList.getURL(Constants.PARENT) + "--");
+				} else {
+					URLList.setPARENT("https://api.gizur.com/api/index.php/api");
 				}
-				else {
-					URLList.setPARENT("https://api.gizur.com/api/index.php/api");					
+				if (uri.getQueryParameter("GIZURCLOUD_HTTP_SCHEME") != null
+						&& uri.getQueryParameter("GIZURCLOUD_API_URL") != null) {
+					URLList.setPARENT(uri
+							.getQueryParameter("GIZURCLOUD_HTTP_SCHEME")
+							+ "://" + URLList.getURL(Constants.PARENT));
 				}
-				if(uri.getQueryParameter("GIZURCLOUD_HTTP_SCHEME") != null && uri.getQueryParameter("GIZURCLOUD_API_URL") != null){
-					URLList.setPARENT(uri.getQueryParameter("GIZURCLOUD_HTTP_SCHEME") + "://" + URLList.getURL(Constants.PARENT));
-				}				
 			}
 		} catch (Exception ex) {
 			Log.i(" URL exception ", ex.getMessage() + ", "

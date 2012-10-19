@@ -100,8 +100,9 @@ public class HTTPRequest {
 			if (!params.isEmpty())
 				request.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
 
-			for(int i = 0;i < params.size();i++){
-				Log.i("Param info", params.get(i).getName() + " : " + params.get(i).getValue());
+			for (int i = 0; i < params.size(); i++) {
+				Log.i("Param info", params.get(i).getName() + " : "
+						+ params.get(i).getValue());
 			}
 			if (CoreComponent.SENDING_IMAGES) {
 
@@ -173,7 +174,7 @@ public class HTTPRequest {
 		} catch (IOException e) {
 			client.getConnectionManager().shutdown();
 			e.printStackTrace();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			client.getConnectionManager().shutdown();
 			e.printStackTrace();
 		}

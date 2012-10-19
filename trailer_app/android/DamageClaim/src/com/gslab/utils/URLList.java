@@ -80,14 +80,14 @@ public class URLList {
 			return (PARENT + RESET_PWD);
 
 		case Constants.PLATES:
-			return(PARENT + PLATES);
-			
+			return (PARENT + PLATES);
+
 		case Constants.PLACE:
-			return(PARENT + PLACES);
-			
+			return (PARENT + PLACES);
+
 		case Constants.STRAPS:
-			return(PARENT + STRAPS);
-			
+			return (PARENT + STRAPS);
+
 		default:
 			Log.i("URLList.java", "in default case");
 			return null;

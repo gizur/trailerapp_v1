@@ -18,14 +18,13 @@ public class About extends Activity {
 
 		ProgressDialogHelper.showProgressDialog(getApplicationContext(), "",
 				getString(string.loading));
-		
+
 		try {
 
-		WebView webview = (WebView) findViewById(id.about);
-		String response = getIntent().getStringExtra("about");
-		webview.loadData(response, "text/html", "UTF-8");
-		}
-		catch(Exception e){
+			WebView webview = (WebView) findViewById(id.about);
+			String response = getIntent().getStringExtra("about");
+			webview.loadData(response, "text/html", "UTF-8");
+		} catch (Exception e) {
 			Utility.showErrorDialog(this);
 		}
 	}
