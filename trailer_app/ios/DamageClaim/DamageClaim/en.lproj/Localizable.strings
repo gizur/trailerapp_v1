@@ -82,7 +82,7 @@
 "ENTER_NEW_PASSWORD" = "Enter new password...";
 "CONFIRM_NEW_PASSWORD" = "Confirm new password...";
 
-"EMPTY_FIELDS" = "Some fields are empty";
+"EMPTY_FIELDS" = "Some fields are empty.";
 "WRONG_OLD_PASSWORD" = "The old password is wrong";
 "NEW_PASSWORD_MISMATCH" = "New password fields do not match. Please re-enter the new password properly.";
 "PASSWORD_CHANGE_SUCCESSFUL" = "Your password is changed. Please login again";

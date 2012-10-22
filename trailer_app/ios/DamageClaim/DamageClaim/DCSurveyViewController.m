@@ -98,9 +98,7 @@
     if (!self.surveyModel) {
         self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
     }
-    
-    
-    
+
     [self toggleActionButtons];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:RESET_SURVEY_NOTIFICATION object:nil];
@@ -161,10 +159,13 @@
     NSLog(@"%@", [self.navigationItem description]);
 #endif
     if (self.navigationItem) {
-        UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"settings.png"] style:UIBarButtonItemStylePlain target:self action:@selector(changePassword)];
+        UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"key.png"] style:UIBarButtonItemStylePlain target:self action:@selector(changePassword)];
         
         NSArray *navigationBarItems = [NSArray arrayWithObjects:
-                                       [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"REPORT_DAMAGE", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(openDamageList)] autorelease],
+                                       [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"REPORT_DAMAGE", @"")
+                                                                         style:UIBarButtonItemStyleBordered
+                                                                        target:self
+                                                                        action:@selector(openDamageList)] autorelease],
                                        settingsButton, nil];
         self.navigationItem.rightBarButtonItems = navigationBarItems;
         
@@ -179,10 +180,26 @@
 
 //open the damage report's list
 -(void) openDamageList {
-    //share the survey model with damageListViewController
-    [[[DCSharedObject sharedPreferences] preferences] setValue:self.surveyModel forKey:SURVEY_MODEL];
-    DCDamageListViewController *damageListViewController = [[[DCDamageListViewController alloc] initWithNibName:@"DamageListView" bundle:nil] autorelease];
-    [self.navigationController pushViewController:damageListViewController animated:YES];
+    //open damage screen only if the user enters trailer id
+    if (!self.surveyModel.surveyAssetModel.trailerId || !self.surveyModel.surveyPlace) {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"EMPTY_FIELDS", @"")];
+    
+    } else if (![self.surveyModel.surveyTrailerSealed boolValue]) {
+        if (!self.surveyModel.surveyPlates || !self.surveyModel.surveyStraps) {
+            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"EMPTY_FIELDS", @"")];
+        } else {
+            //share the survey model with damageListViewController
+            [[[DCSharedObject sharedPreferences] preferences] setValue:self.surveyModel forKey:SURVEY_MODEL];
+            DCDamageListViewController *damageListViewController = [[[DCDamageListViewController alloc] initWithNibName:@"DamageListView" bundle:nil] autorelease];
+            [self.navigationController pushViewController:damageListViewController animated:YES];
+        }
+    } else {
+        //share the survey model with damageListViewController
+        [[[DCSharedObject sharedPreferences] preferences] setValue:self.surveyModel forKey:SURVEY_MODEL];
+        DCDamageListViewController *damageListViewController = [[[DCDamageListViewController alloc] initWithNibName:@"DamageListView" bundle:nil] autorelease];
+        [self.navigationController pushViewController:damageListViewController animated:YES];
+    }
+    
 }
 
 //send the survey to the server

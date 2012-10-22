@@ -327,7 +327,7 @@
 }
 
 -(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    return NSLocalizedString(@"RESET_PASSWORD", @"");
+    return NSLocalizedString(@"CHANGE_PASSWORD", @"");
 }
 
 -(NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {

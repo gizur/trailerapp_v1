@@ -225,26 +225,24 @@ static DCSharedObject *sharedPreferences = nil;
     
     NSString *signature;
     if ([httpService serviceRequestMethod] == kRequestMethodPOST) {
-        NSString *bodyString = nil;
         if (bodyOrNil) {
             httpService.bodyData = bodyOrNil;
         }
         
-#if kDebug
-        NSLog(@"%@", bodyString);
-#endif
+//#if kDebug
+//        NSLog(@"%@", bodyString);
+//#endif
         signature  = [DCSharedObject generateSignatureFromModel:model requestType:POST];
     } else if ( [httpService serviceRequestMethod] == kRequestMethodGET){
         signature = [DCSharedObject generateSignatureFromModel:model requestType:GET];
     } else if([httpService serviceRequestMethod] == kRequestMethodPUT) {
-        NSString *bodyString = nil;
         if (bodyOrNil) {
             httpService.bodyData = bodyOrNil;
         }
         
-#if kDebug
-        NSLog(@"%@", bodyString);
-#endif
+//#if kDebug
+//        NSLog(@"%@", bodyString);
+//#endif
 
         signature = [DCSharedObject generateSignatureFromModel:model requestType:PUT];
     }

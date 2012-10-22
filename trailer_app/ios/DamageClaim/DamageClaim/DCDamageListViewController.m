@@ -648,7 +648,7 @@
 }
 
 -(void) goBack {
-    [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:RESET_SURVEY_NOTIFICATION object:nil]];
+    //[[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:RESET_SURVEY_NOTIFICATION object:nil]];
     [self.navigationController popViewControllerAnimated:YES];
 }
 

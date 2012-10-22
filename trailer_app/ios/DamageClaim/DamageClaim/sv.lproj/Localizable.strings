@@ -93,3 +93,12 @@
 "ENTER_OLD_PASSWORD" = "Ange gammalt lösenord...";
 "ENTER_NEW_PASSWORD" = "Ange nytt lösenord...";
 "CONFIRM_NEW_PASSWORD" = "Bekräfta nytt lösenord...";
+
+
+"EMPTY_FIELDS" = "Vissa fält är tomma";
+"WRONG_OLD_PASSWORD" = "Det gamla lösenordet är fel";
+"NEW_PASSWORD_MISMATCH" = "Nytt lösenord måste anges exakt lika i båda fälten. Försök igen.";
+"PASSWORD_CHANGE_SUCCESSFUL" = "Ditt lösenord har ändrats. Logga in med det nya lösenordet.";
+"PASSWORD_RESET_SUCCESSFUL" = "Ditt nya lösenord kommer att skickas till din email adress inom kort. Logga in med ditt nya lösenord.";
+
+"SUBMIT_DAMAGE_ERROR" = "Kunde inte skicka vissa skaderapporter. Försök igen?";

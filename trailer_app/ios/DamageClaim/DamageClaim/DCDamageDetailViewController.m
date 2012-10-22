@@ -624,13 +624,13 @@
         NSLog(@"%@", [image description]);
 #endif
         if (image) {
-            NSData *imageData = UIImageJPEGRepresentation(image, 1.0);
+            NSData *imageData = UIImageJPEGRepresentation(image, 0.5);
 #if kDebug
             NSLog(@"ImageLength: %d", [imageData length]);
 #endif
 
             if ([[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_IMAGE_SIZE]) {
-                for (CGFloat compressionLevel = 0.9; [imageData length] > [(NSNumber *)[[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_IMAGE_SIZE] integerValue] && compressionLevel >= 0; compressionLevel -= 0.1) {
+                for (CGFloat compressionLevel = 0.4; [imageData length] > [(NSNumber *)[[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_IMAGE_SIZE] integerValue] && compressionLevel >= 0; compressionLevel -= 0.1) {
                     imageData = UIImageJPEGRepresentation(image, compressionLevel);
 #if kDebug
                     NSLog(@"ImageLength: %d", [imageData length]);

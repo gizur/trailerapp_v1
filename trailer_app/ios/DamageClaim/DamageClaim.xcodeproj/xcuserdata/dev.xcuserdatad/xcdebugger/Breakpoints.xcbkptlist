@@ -21,25 +21,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "DamageClaim/DCSurveyViewController.m"
-         timestampString = "371749275.060166"
+         timestampString = "372365311.953116"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "776"
-         endingLineNumber = "776"
+         startingLineNumber = "793"
+         endingLineNumber = "793"
          landmarkName = "-didReceiveResponse:forIdentifier:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "DamageClaim/DCSurveyViewController.m"
-         timestampString = "371749275.060166"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "189"
-         endingLineNumber = "189"
-         landmarkName = "-submitSurveyReport"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -65,8 +52,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "737"
          endingLineNumber = "737"
-         landmarkName = "-imagePickerController:didFinishPickingMediaWithInfo:"
-         landmarkType = "5">
+         landmarkName = "@implementation DCDamageDetailViewController"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "Yes"
@@ -92,6 +79,19 @@
          startingLineNumber = "627"
          endingLineNumber = "627"
          landmarkName = "-imagePickerController:didFinishPickingMediaWithInfo:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "DamageClaim/DCSurveyViewController.m"
+         timestampString = "372365283.724687"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "184"
+         endingLineNumber = "184"
+         landmarkName = "-openDamageList"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

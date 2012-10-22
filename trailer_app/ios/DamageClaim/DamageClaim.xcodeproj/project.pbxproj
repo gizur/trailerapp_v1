@@ -79,11 +79,14 @@
 		D7F2919A15D96520000D1B0E /* CustomCellLoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919B15D96520000D1B0E /* CustomCellLoginView.xib */; };
 		D7F2919C15D96529000D1B0E /* DCViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F2919D15D96529000D1B0E /* DCViewController.xib */; };
 		D7F291A915D96D01000D1B0E /* DCDamageDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7F291A815D96D01000D1B0E /* DCDamageDetailViewController.m */; };
-		D7F291E915D97201000D1B0E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D7F291EA15D97201000D1B0E /* InfoPlist.strings */; };
 		D7F291EE15D976C6000D1B0E /* survey.png in Resources */ = {isa = PBXBuildFile; fileRef = D7F291ED15D976C6000D1B0E /* survey.png */; };
 		D7F291F015D976D8000D1B0E /* damage.png in Resources */ = {isa = PBXBuildFile; fileRef = D7F291EF15D976D8000D1B0E /* damage.png */; };
 		D7F3F063161D85FA00639D73 /* ChangePasswordView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7F3F065161D85FA00639D73 /* ChangePasswordView.xib */; };
 		D7F3F072161DE4D100639D73 /* settings.png in Resources */ = {isa = PBXBuildFile; fileRef = D7F3F071161DE4D100639D73 /* settings.png */; };
+		D7FBBD3F162C02AF003CA8FD /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D7FBBD3E162C02AF003CA8FD /* Default-568h@2x.png */; };
+		D7FBBD42162C06E3003CA8FD /* key.png in Resources */ = {isa = PBXBuildFile; fileRef = D7FBBD41162C06E3003CA8FD /* key.png */; };
+		D7FBBD46162C43AE003CA8FD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D7FBBD48162C43AE003CA8FD /* InfoPlist.strings */; };
+		D7FBBD4E162C50E3003CA8FD /* iTunesArtwork in Resources */ = {isa = PBXBuildFile; fileRef = D7FBBD4D162C50E3003CA8FD /* iTunesArtwork */; };
 		D7FD97B815DA6022000D0AE2 /* PickListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7FD97B715DA6022000D0AE2 /* PickListView.xib */; };
 		D7FD97BC15DA60D5000D0AE2 /* CustomCellPickListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7FD97BB15DA60D5000D0AE2 /* CustomCellPickListView.xib */; };
 		D7FD97BF15DA60F5000D0AE2 /* DCPickListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D7FD97BE15DA60F5000D0AE2 /* DCPickListViewController.m */; };
@@ -150,7 +153,6 @@
 		D77722C015D9124D0071FD06 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		D77722C215D9124D0071FD06 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D77722C415D9124D0071FD06 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		D77722C815D9124D0071FD06 /* DamageClaim-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DamageClaim-Info.plist"; sourceTree = "<group>"; };
 		D77722CC15D9124D0071FD06 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		D77722CE15D9124D0071FD06 /* DamageClaim-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DamageClaim-Prefix.pch"; sourceTree = "<group>"; };
 		D77722CF15D9124D0071FD06 /* DCAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DCAppDelegate.h; sourceTree = "<group>"; };
@@ -201,12 +203,17 @@
 		D7F2919D15D96529000D1B0E /* DCViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DCViewController.xib; sourceTree = "<group>"; };
 		D7F291A715D96D01000D1B0E /* DCDamageDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCDamageDetailViewController.h; sourceTree = "<group>"; };
 		D7F291A815D96D01000D1B0E /* DCDamageDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCDamageDetailViewController.m; sourceTree = "<group>"; };
-		D7F291EA15D97201000D1B0E /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
 		D7F291ED15D976C6000D1B0E /* survey.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = survey.png; sourceTree = "<group>"; };
 		D7F291EF15D976D8000D1B0E /* damage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = damage.png; sourceTree = "<group>"; };
 		D7F3F064161D85FA00639D73 /* sv */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = sv; path = sv.lproj/ChangePasswordView.xib; sourceTree = "<group>"; };
 		D7F3F066161D860900639D73 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ChangePasswordView.xib; sourceTree = "<group>"; };
 		D7F3F071161DE4D100639D73 /* settings.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings.png; sourceTree = "<group>"; };
+		D7FBBD3E162C02AF003CA8FD /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		D7FBBD41162C06E3003CA8FD /* key.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = key.png; sourceTree = "<group>"; };
+		D7FBBD45162C412D003CA8FD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = en; path = "en.lproj/DamageClaim-Info.plist"; sourceTree = "<group>"; };
+		D7FBBD49162C43B4003CA8FD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D7FBBD4A162C4A47003CA8FD /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D7FBBD4D162C50E3003CA8FD /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; path = iTunesArtwork; sourceTree = "<group>"; };
 		D7FD97B715DA6022000D0AE2 /* PickListView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickListView.xib; sourceTree = "<group>"; };
 		D7FD97BB15DA60D5000D0AE2 /* CustomCellPickListView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CustomCellPickListView.xib; sourceTree = "<group>"; };
 		D7FD97BD15DA60F5000D0AE2 /* DCPickListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCPickListViewController.h; sourceTree = "<group>"; };
@@ -273,13 +280,13 @@
 			name = "New Group";
 			sourceTree = "<group>";
 		};
-		D731B9D0161C573000F3FA08 /* ResetPasswordViewController */ = {
+		D731B9D0161C573000F3FA08 /* ChangePasswordViewController */ = {
 			isa = PBXGroup;
 			children = (
 				D731B9D1161C575100F3FA08 /* DCChangePasswordViewController.h */,
 				D731B9D2161C575100F3FA08 /* DCChangePasswordViewController.m */,
 			);
-			name = ResetPasswordViewController;
+			name = ChangePasswordViewController;
 			sourceTree = "<group>";
 		};
 		D731B9D4161C577600F3FA08 /* ChangePasswordView */ = {
@@ -367,8 +374,8 @@
 		D77722C715D9124D0071FD06 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				D77722C815D9124D0071FD06 /* DamageClaim-Info.plist */,
-				D7F291EA15D97201000D1B0E /* InfoPlist.strings */,
+				D7FBBD44162C4129003CA8FD /* DamageClaim-Info.plist */,
+				D7FBBD48162C43AE003CA8FD /* InfoPlist.strings */,
 				D77722CC15D9124D0071FD06 /* main.m */,
 				D77722CE15D9124D0071FD06 /* DamageClaim-Prefix.pch */,
 			);
@@ -416,9 +423,12 @@
 		D77722E415D912F50071FD06 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				D7FBBD4D162C50E3003CA8FD /* iTunesArtwork */,
 				D7F3F071161DE4D100639D73 /* settings.png */,
+				D7FBBD41162C06E3003CA8FD /* key.png */,
 				D70FB05A1612C6930099790E /* Default.png */,
 				D70FB05B1612C6940099790E /* Default@2x.png */,
+				D7FBBD3E162C02AF003CA8FD /* Default-568h@2x.png */,
 				D70FB05C1612C6950099790E /* Icon.png */,
 				D70FB05D1612C6970099790E /* Icon@2x.png */,
 				D76EC08616143C200025FB2B /* loadingImage.png */,
@@ -496,7 +506,7 @@
 		D77722EA15D914520071FD06 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				D731B9D0161C573000F3FA08 /* ResetPasswordViewController */,
+				D731B9D0161C573000F3FA08 /* ChangePasswordViewController */,
 				D7CD849B161BFE6C00B00719 /* ParentViewController */,
 				D70FB03A16104BCF0099790E /* AboutViewController */,
 				D7B231A815F5136E001A1560 /* ImageViewerViewController */,
@@ -835,7 +845,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D7F291E915D97201000D1B0E /* InfoPlist.strings in Resources */,
+				D7FBBD46162C43AE003CA8FD /* InfoPlist.strings in Resources */,
 				D7F2919C15D96529000D1B0E /* DCViewController.xib in Resources */,
 				D70FB08216141ED40099790E /* LoginView.xib in Resources */,
 				D70FB086161420A40099790E /* Localizable.strings in Resources */,
@@ -885,6 +895,9 @@
 				D76EC08416143C200025FB2B /* loadingImage.png in Resources */,
 				D7F3F063161D85FA00639D73 /* ChangePasswordView.xib in Resources */,
 				D7F3F072161DE4D100639D73 /* settings.png in Resources */,
+				D7FBBD3F162C02AF003CA8FD /* Default-568h@2x.png in Resources */,
+				D7FBBD42162C06E3003CA8FD /* key.png in Resources */,
+				D7FBBD4E162C50E3003CA8FD /* iTunesArtwork in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1018,6 +1031,23 @@
 			name = ChangePasswordView.xib;
 			sourceTree = "<group>";
 		};
+		D7FBBD44162C4129003CA8FD /* DamageClaim-Info.plist */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D7FBBD45162C412D003CA8FD /* en */,
+			);
+			name = "DamageClaim-Info.plist";
+			sourceTree = "<group>";
+		};
+		D7FBBD48162C43AE003CA8FD /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D7FBBD49162C43B4003CA8FD /* en */,
+				D7FBBD4A162C4A47003CA8FD /* sv */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
@@ -1044,8 +1074,9 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				SDKROOT = iphoneos;
+				VALID_ARCHS = "armv7 armv7s armv6";
 			};
 			name = Debug;
 		};
@@ -1066,12 +1097,13 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "armv7 armv7s armv6";
 			};
 			name = Release;
 		};
@@ -1086,8 +1118,9 @@
 				GCC_PREFIX_HEADER = "DamageClaim/DamageClaim-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "DamageClaim/DamageClaim-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = "armv7 armv7s armv6";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -1105,10 +1138,11 @@
 				GCC_PREFIX_HEADER = "DamageClaim/DamageClaim-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "DamageClaim/DamageClaim-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				VALID_ARCHS = "armv7 armv7s armv6";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

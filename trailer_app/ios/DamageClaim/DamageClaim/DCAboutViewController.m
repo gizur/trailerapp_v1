@@ -44,13 +44,12 @@
 #endif
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[DCSharedObject createURLStringFromIdentifier:ABOUT]]];
     [request setHTTPMethod:@"GET"];
-    [request setValue:@"text/json" forHTTPHeaderField:@"Accept"];
+    [request setValue:@"text/html" forHTTPHeaderField:@"Accept"];
     [request setValue:@"sv,en-us,en;q=0.5" forHTTPHeaderField:@"Accept-Language"];
     
 #if kDebug
     NSLog(@"%@", [request allHTTPHeaderFields]);
 #endif
-    
     [self.webView loadRequest:request];
     self.view.layer.cornerRadius = 10;
     self.view.layer.masksToBounds = YES;

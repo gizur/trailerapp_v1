@@ -31,7 +31,7 @@ SEARCH_WEB_URL_CALL_TYPE,
 GET_HIVE_URL_CALL_TYPE
 } DC_URL_CALL_TYPE;
 
-#define HTTP_URL @"http://gizurtrailerapp-env.elasticbeanstalk.com/api/index.php/api"
+#define HTTP_URL @"https://api.gizur.com/api/index.php/api"
 
 
 #pragma mark - Keys to share data across the app

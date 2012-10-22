@@ -172,15 +172,18 @@
                                 if ([[[assetDict valueForKey:@"assetstatus"] lowercaseString] isEqualToString:@"in service"]) {
                                     NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
                                     
-                                    NSString *trailerId, *trailerName;
-                                    if ((NSNull *)[assetDict valueForKey:@"id"] != [NSNull null]) {
-                                        trailerId = [assetDict valueForKey:@"id"];
-                                        [dictionary setValue:trailerId forKey:VALUE];
-                                        
-                                    }
+                                    NSString /* *trailerId,*/ *trailerName;
+                                    
+                                    //trailerId will not be used. assetname will be shown as well as sent to the server
+//                                    if ((NSNull *)[assetDict valueForKey:@"id"] != [NSNull null]) {
+//                                        trailerId = [assetDict valueForKey:@"id"];
+//                                        [dictionary setValue:trailerId forKey:VALUE];
+//                                        
+//                                    }
                                     if ((NSNull *)[assetDict valueForKey:@"assetname"] != [NSNull null]) {
                                         trailerName = [assetDict valueForKey:@"assetname"];
                                         [dictionary setValue:trailerName forKey:LABEL];
+                                        [dictionary setValue:trailerName forKey:VALUE];
                                         
                                     }
                                     
