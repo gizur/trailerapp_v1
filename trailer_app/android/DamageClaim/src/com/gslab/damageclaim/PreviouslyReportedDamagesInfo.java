@@ -96,6 +96,7 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 		gallery = (Gallery) findViewById(R.id.reportnewdamage_listview_damageimages);
 		gallery.setOnItemClickListener(this);
+		gallery.setScrollbarFadingEnabled(false);
 
 		damaged_images = new ArrayList<Bitmap>();
 

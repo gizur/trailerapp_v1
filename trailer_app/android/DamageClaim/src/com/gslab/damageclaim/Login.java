@@ -230,10 +230,18 @@ public class Login extends Activity implements OnClickListener, NetworkListener 
 			ProgressDialogHelper.showProgressDialog(this, "",
 					getString(string.loading));
 
+			
+			
 			if (DamageClaimApp.about_Response == null) {
 				CoreComponent.processRequest(Constants.GET, Constants.ABOUT,
 						this, createRequest());
 				Utility.waitForThread();
+				
+				if(this.response == null) {
+					ToastUI.showToast(getApplicationContext(), getString(string.problem));
+					return;
+				}
+				
 				DamageClaimApp.about_Response = new String(response);
 			}
 

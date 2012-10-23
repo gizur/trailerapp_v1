@@ -514,6 +514,8 @@ public class HomePage extends Activity implements OnClickListener,
 			selection = Constants.TRAILER_TYPE;
 			getTrailerTypeValues();
 
+			id.setText(getString(string.homepage_textview_ID));
+			
 			new ListViewDialog(this, layout.listviewdialog,
 					getString(string.homepage_textview_trailertype), values,
 					Constants.HOMEPAGE);

@@ -416,7 +416,6 @@ public class ReportDamage extends Activity implements OnClickListener,
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void reportdamages() {
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
@@ -437,6 +436,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 		dialog.setMax(reporting_damage_list.size());
 		CoreComponent.SENDING_IMAGES = true;
 
+		dialog.show();
 		startAsyncTask();
 
 	}
@@ -493,20 +493,16 @@ public class ReportDamage extends Activity implements OnClickListener,
 	class ReportOperation extends
 			AsyncTask<ArrayList<DamageInfo>, String, String> {
 
-		@Override
 		protected void onPreExecute() {
-			Log.i("Asynchtask", "preexecute");
-			dialog.show();
+			Log.i("Asynctask", "preexecute");
+
 		}
 
-		int i;
+		int success = 0, total = 0;
 
-		@Override
 		protected String doInBackground(ArrayList<DamageInfo>... info) {
 			Log.i("Asynctask", "doinbackground---" + info[0].size());
 			ArrayList<DamageInfo> list = info[0];
-
-			int success = 0, total = 0;
 
 			total = list.size();
 
@@ -524,6 +520,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 							activity);
 
 					publishProgress("");
+
 					Utility.waitForThread();
 
 					if (response == null) {
@@ -543,17 +540,16 @@ public class ReportDamage extends Activity implements OnClickListener,
 			return null;
 		}
 
-		@Override
 		protected void onProgressUpdate(String... values) {
-			Log.i("Asynchtask", "progress");
-			dialog.setProgress(i + 1);
+			Log.i("Asynctask", "progress");
+			dialog.setProgress(success + failures);
 
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
 
-			Log.i("Asynchtask", "postexecute");
+			Log.i("Asynctask", "postexecute");
 			dialog.dismiss();
 
 			checkForErrors();

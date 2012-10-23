@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
@@ -17,6 +21,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -140,8 +145,29 @@ public class HTTPRequest {
 	}
 
 	private void executeRequest(HttpUriRequest request, String url) {
+
 		HttpClient client = new DefaultHttpClient();
 		HttpResponse httpResponse;
+		
+		/*----------------To be removed---------------------------*/
+		
+		try {
+			client.getConnectionManager().getSchemeRegistry().register(new Scheme("https", TrustAllSSLSocketFactory.getDefault(), 443));
+		} catch (KeyManagementException e1) {
+			
+			e1.printStackTrace();
+		} catch (UnrecoverableKeyException e1) {
+			
+			e1.printStackTrace();
+		} catch (NoSuchAlgorithmException e1) {
+			
+			e1.printStackTrace();
+		} catch (KeyStoreException e1) {
+			
+			e1.printStackTrace();
+		}
+		
+		/*----------------To be removed---------------------------*/
 
 		try {
 			httpResponse = client.execute(request);
