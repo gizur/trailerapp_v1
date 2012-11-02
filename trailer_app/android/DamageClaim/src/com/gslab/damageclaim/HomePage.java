@@ -582,10 +582,15 @@ public class HomePage extends Activity implements OnClickListener,
 
 		if (v == submit) {
 
-			if (id.getText().toString()
-					.equalsIgnoreCase(getString(string.homepage_textview_ID))) {
-				ToastUI.showToast(getApplicationContext(),
-						getString(string.selectid));
+//			if (id.getText().toString()
+//					.equalsIgnoreCase(getString(string.homepage_textview_ID))) {
+//				ToastUI.showToast(getApplicationContext(),
+//						getString(string.selectid));
+//				return;
+//			}
+			
+			if(!performChecks()) {
+				ToastUI.showToast(getApplicationContext(), getString(string.enterfields));
 				return;
 			}
 

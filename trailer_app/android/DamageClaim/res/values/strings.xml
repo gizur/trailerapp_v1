@@ -11,7 +11,7 @@
     <string name="login_button_login">Login</string>
     <string name="title_activity_homepage">Home Page</string>
     <string name="homepage_textview_survey">Survey</string>
-    <string name="homepage_textview_ID">ID:</string>
+    <string name="homepage_textview_ID">Trailer ID:</string>
     <string name="homepage_textview_trailertype">Trailer Type:</string>
     <string name="homepage_textview_place">Place:</string>
     <string name="homepage_textview_sealed">Sealed:</string>
@@ -37,8 +37,8 @@
     <string name="damaged_full_image">Image showing the damage</string>
     <string name="manifest_activity_title_damage_claim_image">Image of the damage</string>
     <string name="report_damage_button_report_new_damage">Report a new damage</string>
-    <string name="report_damage_textview_previously_reported_damages">Reported damages</string>
-    <string name="report_damage_textview_reporting_damage">Reporting damage</string>
+    <string name="report_damage_textview_previously_reported_damages">Previously reported damages</string>
+    <string name="report_damage_textview_reporting_damage">New damages</string>
     <string name="report_damage_menu_title">Options:</string>
     <string name="report_damage_menu_item_delete">Delete</string>
     <string name="reportnewdamage_textview_damageimages">Damage Images</string>

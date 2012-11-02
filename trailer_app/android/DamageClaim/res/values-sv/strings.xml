@@ -9,7 +9,7 @@
     <string name="login_password_hint">Lösen</string>
     <string name="login_button_login">Logga in</string>
     <string name="homepage_textview_survey">Kontrollbesiktning</string>
-    <string name="homepage_textview_ID">ID:</string>
+    <string name="homepage_textview_ID">Trailer ID:</string>
     <string name="homepage_textview_trailertype">Typ av trailer:</string>
     <string name="homepage_textview_place">Plats:</string>
     <string name="homepage_textview_sealed">Plomberad:</string>
@@ -28,8 +28,8 @@
     <string name="listimage_adapter_description">Image that describes the damage</string>
     <string name="reportnewdamage_button_done">Klar</string>
     <string name="report_damage_button_report_new_damage">Rapportera en ny skada</string>
-    <string name="report_damage_textview_previously_reported_damages">Rapporterade skador</string>
-    <string name="report_damage_textview_reporting_damage">Skada rapporteras</string>
+    <string name="report_damage_textview_previously_reported_damages">Tidigare rapporterade skador</string>
+    <string name="report_damage_textview_reporting_damage">Nyfunna skador</string>
     <string name="report_damage_menu_title">Alternativ:</string>
     <string name="report_damage_menu_item_delete">Ta bort</string>
     <string name="reportnewdamage_textview_damageimages">Foton</string>

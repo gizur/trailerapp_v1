@@ -99,6 +99,7 @@
 
         <View
             android:layout_width="fill_parent"
+            android:visibility="gone"
             android:layout_height="1dp"
             android:layout_below="@id/reportnewdamage_textview_damagecaused"
             android:layout_marginLeft="10dp"

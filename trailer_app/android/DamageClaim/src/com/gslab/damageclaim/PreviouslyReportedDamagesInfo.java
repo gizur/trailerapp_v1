@@ -93,6 +93,10 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 		drivercauseddamage = (TextView) findViewById(R.id.reportnewdamage_textview_damagecaused);
 		drivercauseddamage.setCompoundDrawables(null, null, null, null);
+		
+		//may need to be removed..!
+		
+		drivercauseddamage.setVisibility(View.GONE);
 
 		gallery = (Gallery) findViewById(R.id.reportnewdamage_listview_damageimages);
 		gallery.setOnItemClickListener(this);
