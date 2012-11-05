@@ -5,6 +5,11 @@ import java.util.HashMap;
 
 import android.app.Application;
 
+import com.gslab.damageclaim.HomePage;
+import com.gslab.damageclaim.PreviouslyReportedDamagesInfo;
+import com.gslab.damageclaim.ReportDamage;
+import com.gslab.damageclaim.ReportNewDamage;
+
 public class DamageClaimApp extends Application {
 
 	public static String about_Response = null;
@@ -29,4 +34,10 @@ public class DamageClaimApp extends Application {
 	public static String plates = null;
 	public static String straps = null;
 	public static String sealed = null;
+	
+	public static HomePage homepage = null;
+	public static PreviouslyReportedDamagesInfo previousdamages = null;
+	public static ReportNewDamage reportnewdamage = null;
+	public static ReportDamage reportdamage = null;
+	
 }

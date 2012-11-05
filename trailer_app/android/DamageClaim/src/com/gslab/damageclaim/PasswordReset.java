@@ -2,9 +2,11 @@ package com.gslab.damageclaim;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,6 +19,7 @@ import com.gslab.R.id;
 import com.gslab.R.layout;
 import com.gslab.R.string;
 import com.gslab.core.CoreComponent;
+import com.gslab.core.DamageClaimApp;
 import com.gslab.interfaces.Constants;
 import com.gslab.interfaces.NetworkListener;
 import com.gslab.networking.HTTPRequest;
@@ -33,7 +36,7 @@ public class PasswordReset extends Activity implements OnClickListener,
 	private Activity activity;
 
 	private String response;
-	
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(layout.reset_password);
@@ -76,14 +79,53 @@ public class PasswordReset extends Activity implements OnClickListener,
 				CoreComponent.processRequest(Constants.PUT,
 						Constants.AUTHENTICATE, this, request);
 				Utility.waitForThread();
-				
-				if(this.response != null) {
+
+				if (this.response != null) {
+
+					Log.i(getClass().getSimpleName(),
+							"Exiting.. setting result");
+					ToastUI.showToast(getApplicationContext(),
+							getString(string.changepwdsuccess));
+
+					if (DamageClaimApp.reportnewdamage != null) {
+						DamageClaimApp.reportnewdamage.finish();
+						DamageClaimApp.reportnewdamage = null;
+						Log.i(getClass().getSimpleName(), "here.....1");
+					}
+
+					if (DamageClaimApp.reportdamage != null) {
+						DamageClaimApp.reportdamage.finish();
+						DamageClaimApp.reportdamage = null;
+						Log.i(getClass().getSimpleName(), "here....2");
+					}
+
+					if (DamageClaimApp.previousdamages != null) {
+						DamageClaimApp.previousdamages.finish();
+						DamageClaimApp.previousdamages = null;
+						Log.i(getClass().getSimpleName(), "here.....3");
+					}
+
+					if (DamageClaimApp.homepage != null) {
+						DamageClaimApp.homepage.finish();
+						DamageClaimApp.homepage = null;
+						Log.i(getClass().getSimpleName(), "here.....4");
+					}
+
+					finish();
+					Intent intent = new Intent(getApplicationContext(),
+							Login.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+					Log.i(getClass().getSimpleName(), "here.....5");
 					
-					Log.i(getClass().getSimpleName(), "Exiting.. setting result");
-					ToastUI.showToast(getApplicationContext(), getString(string.changepwdsuccess));
-					setResult(RESULT_OK);
-					finish();								
-					
+					SharedPreferences preferences = PreferenceManager
+							.getDefaultSharedPreferences(activity.getApplicationContext());
+					SharedPreferences.Editor editor = preferences.edit();
+
+					editor.putBoolean("credentials", false);
+					editor.commit();
+					startActivity(intent);
+					Log.i(getClass().getSimpleName(), "here.....6");
+
 				}
 
 			}
@@ -117,14 +159,14 @@ public class PasswordReset extends Activity implements OnClickListener,
 
 	}
 
-	public boolean onCreateOptionsMenu(Menu menu) {
-
-		menu.add(Menu.NONE, 2, Menu.NONE, getString(string.changepassword));
-		menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE,
-				getString(string.logout));
-
-		return super.onCreateOptionsMenu(menu);
-	}
+	// public boolean onCreateOptionsMenu(Menu menu) {
+	//
+	// menu.add(Menu.NONE, 2, Menu.NONE, getString(string.changepassword));
+	// menu.add(Menu.NONE, Constants.LOGOUT, Menu.NONE,
+	// getString(string.logout));
+	//
+	// return super.onCreateOptionsMenu(menu);
+	// }
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -160,9 +202,9 @@ public class PasswordReset extends Activity implements OnClickListener,
 	public void onError(String status) {
 		Log.i(getClass().getSimpleName(), "error");
 		this.response = null;
-		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);		
+		handler.sendEmptyMessage(Constants.DISMISS_DIALOG);
 		handler.sendEmptyMessage(Constants.TOAST);
-		
+
 	}
 
 	public HTTPRequest createRequest() {

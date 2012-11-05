@@ -155,6 +155,12 @@ public class CoreComponent {
 
 				String timestamp = NetworkCallRequirements.getTimeStampValue();
 
+				if (timestamp == null) {
+					Log.i(getClass().getSimpleName(),
+							"-------timestamp----------null");
+					return;
+				}
+
 				request.addHeader(NetworkCallRequirements.getTimestampString(),
 						timestamp);
 
@@ -383,7 +389,7 @@ public class CoreComponent {
 		editor.commit();
 		Intent intent = new Intent(activity.getApplicationContext(),
 				Login.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		activity.startActivity(intent);
 
 		activity.finish();

@@ -46,9 +46,9 @@
     <string name="dialog_title">Select an option:</string>
     <string name="activity_title_damageinfo">Damage claim information</string>
     <string name="homepage_button_reset">Reset</string>
-    <string name="homepage_button_submit">Submit</string>   
+    <string name="homepage_button_submit">No new damages</string>   
     <string name="login_pd">Logging in</string>
-    <string name="damages">Damages</string>
+    <string name="damages">Report new damage</string>
     <string name="submit_survey">Survey successfully submitted</string>
     <string name="reportnewdamage_textview_damagecaused">Caused by:</string>
     <string name="damage_caused_by">Damage caused by:</string>
@@ -95,6 +95,9 @@
     <string name="resetpwdsuccess">Your new password will be be sent to your email address shortly. Please login with your new password.</string>
     
     <string name="loginfieldempty">Either the username or password is empty.</string>
+    <string name="submit_new_damages">Approve damage report</string>
+    <string name="submit_check_message">Are you sure you want to send this damage report for control</string>
+    <string name="submit">Submit</string>
     
     
     

@@ -85,6 +85,8 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 	private static String error;
 
 	private boolean typeofcall;
+	
+	private View view;
 
 	private HashMap<String, ArrayList<String>> hashmap;
 	private HashMap<String, String> typevalues;
@@ -113,6 +115,9 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 		values = new ArrayList<String>();
 
+		view = (findViewById(id.causedbyview));
+		view.setVisibility(View.VISIBLE);
+		
 		thumbnails = new ArrayList<Bitmap>();
 
 		addnewimage = (Button) findViewById(id.reportnewdamage_button_damageimages);
@@ -143,6 +148,17 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 			previous_data = new DamageInfo();
 		}
 		checkDoneButtonStatus();
+		
+		DamageClaimApp.reportnewdamage = this;
+	}
+	
+	@Override
+	protected void onDestroy() {
+	
+		super.onDestroy();
+		if(DamageClaimApp.reportnewdamage != null) {
+		DamageClaimApp.reportnewdamage = null;
+		}
 	}
 
 	private Handler handler = new Handler() {
@@ -694,6 +710,17 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		switch (item.getItemId()) {
 
 		case Constants.LOGOUT:
+			
+			if(DamageClaimApp.reportdamage != null) {
+				DamageClaimApp.reportdamage.finish();
+				DamageClaimApp.reportdamage = null;
+			}
+			
+			if(DamageClaimApp.homepage != null) {
+				DamageClaimApp.homepage.finish();
+				DamageClaimApp.homepage = null;
+			}
+			
 			CoreComponent.LOGOUT_CALL = true;
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");

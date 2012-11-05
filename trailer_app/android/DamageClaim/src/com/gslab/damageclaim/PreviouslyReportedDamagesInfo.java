@@ -31,6 +31,7 @@ import com.gslab.R.layout;
 import com.gslab.R.string;
 import com.gslab.adapters.ListImageAdapter;
 import com.gslab.core.CoreComponent;
+import com.gslab.core.DamageClaimApp;
 import com.gslab.helpers.DamageInfo;
 import com.gslab.interfaces.Constants;
 import com.gslab.interfaces.NetworkListener;
@@ -70,6 +71,8 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 	private Gallery gallery;
 
 	public void onCreate(Bundle savedInstanceState) {
+		
+		
 		super.onCreate(savedInstanceState);
 		setContentView(layout.reportnewdamage);
 
@@ -127,6 +130,17 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 				}
 			}
 		}.start();
+		
+		DamageClaimApp.previousdamages = this;
+	}
+	
+	@Override
+	protected void onDestroy() {
+	
+		super.onDestroy();
+		if(DamageClaimApp.previousdamages != null) {
+		DamageClaimApp.previousdamages = null;
+		}
 	}
 
 	private Handler handler = new Handler() {
@@ -326,6 +340,17 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 		switch (item.getItemId()) {
 
 		case Constants.LOGOUT:
+			
+			if(DamageClaimApp.reportdamage != null) {
+				DamageClaimApp.reportdamage.finish();
+				DamageClaimApp.reportdamage = null;
+			}
+			
+			if(DamageClaimApp.homepage != null) {
+				DamageClaimApp.homepage.finish();
+				DamageClaimApp.homepage = null;
+			}
+			
 			CoreComponent.LOGOUT_CALL = true;
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");

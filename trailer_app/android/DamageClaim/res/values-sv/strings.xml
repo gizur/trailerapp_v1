@@ -34,11 +34,11 @@
     <string name="report_damage_menu_item_delete">Ta bort</string>
     <string name="reportnewdamage_textview_damageimages">Foton</string>
     <string name="homepage_button_reset">Nollställ</string>
-    <string name="homepage_button_submit">Skicka</string>
+    <string name="homepage_button_submit">Inga nya skador</string>
     <string name="old_password">Old password</string>
     <string name="new_password">New password</string>
     <string name="confirm_new_password">Confirm new password</string>
-    <string name="damages">Skador</string>
+    <string name="damages">Rapportera ny skada</string>
     <string name="submit_survey">Kontrollbesiktningen har skickats</string>
     <string name="reportnewdamage_textview_damagecaused">Orsakad av:</string>
     <string name="damage_caused_by">Orsakad av:</string>
@@ -78,6 +78,9 @@
     <string name="changepwdsuccess">Ditt lösenord har ändrats. Logga in med det nya lösenordet</string>
     <string name="resetpwdsuccess">Ditt nya lösenord kommer att skickas till din email adress inom kort. Logga in med ditt nya lösenord.</string>
     <string name="loginfieldempty">E-mail eller lösen har inte angivits.</string>
+    <string name="submit_new_damages">Godkänn besiktningsprotokoll</string>
+    <string name="submit_check_message">Är du säker på att du vill skicka besiktningsprotokoll för granskning?</string>
+    <string name="submit">Skicka</string>
     
     <!-- Drawable Values -->
 

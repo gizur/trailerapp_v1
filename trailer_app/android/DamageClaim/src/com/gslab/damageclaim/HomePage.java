@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ActionBar.LayoutParams;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -56,6 +57,15 @@ public class HomePage extends Activity implements OnClickListener,
 
 	private Thread thread;
 
+	@Override
+	protected void onDestroy() {
+	
+		super.onDestroy();
+		if(DamageClaimApp.homepage != null) {
+		DamageClaimApp.homepage = null;
+		}
+	}
+
 	private ScrollView scrollview;
 
 	public void onCreate(Bundle savedInstanceState) {
@@ -64,8 +74,6 @@ public class HomePage extends Activity implements OnClickListener,
 		setContentView(R.layout.homepage);
 
 		scrollview = (ScrollView) findViewById(com.gslab.R.id.scrollview_homepage);
-
-		getApplicationContext();
 
 		values = new ArrayList<String>();
 		sealed_labels = new ArrayList<String>();
@@ -93,21 +101,24 @@ public class HomePage extends Activity implements OnClickListener,
 
 		straps = (TextView) findViewById(R.id.homepage_textview_straps);
 		straps.setOnClickListener(this);
-
-		submit = (Button) findViewById(R.id.homepage_button_submit);
-		submit.setEnabled(false);
-		submit.setOnClickListener(this);
-
+		
 		damages = (Button) findViewById(R.id.homepage_button_damages);
 		damages.setOnClickListener(this);
+
+		submit = (Button) findViewById(R.id.homepage_button_submit);		
+		submit.setEnabled(false);
+		submit.setOnClickListener(this);
+				
 		selection = Constants.SEALED;
 		thread = new Thread(this);
 		thread.start();
 
 		addTrailerInventory();
+		
+		DamageClaimApp.homepage = this;
 
 	}
-
+	
 	private Handler handler = new Handler() {
 
 		public void handleMessage(Message msg) {
@@ -573,6 +584,7 @@ public class HomePage extends Activity implements OnClickListener,
 
 				Intent intent = new Intent(getApplicationContext(),
 						ReportDamage.class);
+				
 				startActivity(intent);
 			} else
 				ToastUI.showToast(getApplicationContext(),
@@ -713,7 +725,7 @@ public class HomePage extends Activity implements OnClickListener,
 	@Override
 	protected void onResume() {
 		setDefaultValues();
-		super.onResume();
+		super.onResume();		
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -757,7 +769,7 @@ public class HomePage extends Activity implements OnClickListener,
 			Intent intent = new Intent(getApplicationContext(),
 					PasswordReset.class);
 			Log.i(getClass().getSimpleName(), "Starting activity for result");
-			startActivityForResult(intent, Constants.INTENT_DATA);
+			startActivity(intent);
 			break;
 		}
 

@@ -40,6 +40,7 @@ public final class R {
     }
     public static final class id {
         public static final int about=0x7f090000;
+        public static final int causedbyview=0x7f090022;
         public static final int damage_claim_imageview_image=0x7f090003;
         public static final int damage_list_adapter_location_of_damaged=0x7f090002;
         public static final int damage_list_adapter_what_is_damaged=0x7f090001;
@@ -60,26 +61,26 @@ public final class R {
         public static final int login_edittext_password=0x7f090013;
         public static final int login_edittext_username=0x7f090012;
         public static final int login_textview=0x7f090014;
-        public static final int menu_settings=0x7f09002a;
+        public static final int menu_settings=0x7f09002b;
         public static final int report_damage_button_report_new_damage=0x7f090018;
         public static final int report_damage_button_submit=0x7f09001b;
         public static final int report_damage_listview_previously_reported_damages=0x7f09001c;
         public static final int report_damage_listview_reporting_damage=0x7f09001a;
         public static final int report_damage_textview_reporting_damage=0x7f090019;
         public static final int reportdamage_scrollview=0x7f090017;
-        public static final int reportnewdamage_button_damageimages=0x7f090023;
-        public static final int reportnewdamage_button_done=0x7f090025;
+        public static final int reportnewdamage_button_damageimages=0x7f090024;
+        public static final int reportnewdamage_button_done=0x7f090026;
         public static final int reportnewdamage_layout=0x7f09001d;
-        public static final int reportnewdamage_listview_damageimages=0x7f090024;
+        public static final int reportnewdamage_listview_damageimages=0x7f090025;
         public static final int reportnewdamage_textview_damagecaused=0x7f090021;
         public static final int reportnewdamage_textview_damagedetails=0x7f09001e;
-        public static final int reportnewdamage_textview_damageimages=0x7f090022;
+        public static final int reportnewdamage_textview_damageimages=0x7f090023;
         public static final int reportnewdamage_textview_position=0x7f090020;
         public static final int reportnewdamage_textview_type=0x7f09001f;
-        public static final int reset_password_edittext_confirmnewpassword=0x7f090028;
-        public static final int reset_password_edittext_newpassword=0x7f090027;
-        public static final int reset_password_edittext_oldpassword=0x7f090026;
-        public static final int resetpassword_submit=0x7f090029;
+        public static final int reset_password_edittext_confirmnewpassword=0x7f090029;
+        public static final int reset_password_edittext_newpassword=0x7f090028;
+        public static final int reset_password_edittext_oldpassword=0x7f090027;
+        public static final int resetpassword_submit=0x7f09002a;
         public static final int scrollview_homepage=0x7f090004;
         public static final int trailer_inventory=0x7f09000a;
     }
@@ -109,7 +110,7 @@ public final class R {
         public static final int changepassword1=0x7f05004c;
         public static final int changepwdsuccess=0x7f050052;
         public static final int close=0x7f050046;
-        public static final int confirm_new_password=0x7f050057;
+        public static final int confirm_new_password=0x7f05005a;
         public static final int confirmnewpassword=0x7f050040;
         public static final int damage_caused_by=0x7f050031;
         public static final int damaged_full_image=0x7f050020;
@@ -145,11 +146,11 @@ public final class R {
         public static final int logout=0x7f050033;
         public static final int manifest_activity_title_damage_claim_image=0x7f050021;
         public static final int networkunavailable=0x7f050034;
-        public static final int new_password=0x7f050056;
+        public static final int new_password=0x7f050059;
         public static final int newpassword=0x7f05003f;
         public static final int newpwrong=0x7f050051;
         public static final int noimages=0x7f05004a;
-        public static final int old_password=0x7f050055;
+        public static final int old_password=0x7f050058;
         public static final int oldpassword=0x7f05003e;
         public static final int oldpwrong=0x7f050050;
         public static final int other=0x7f050038;
@@ -178,6 +179,9 @@ public final class R {
         public static final int sealed_yes=0x7f050013;
         public static final int selectid=0x7f05003c;
         public static final int selecttype=0x7f050042;
+        public static final int submit=0x7f050057;
+        public static final int submit_check_message=0x7f050056;
+        public static final int submit_new_damages=0x7f050055;
         public static final int submit_survey=0x7f05002f;
         public static final int surveyticketby=0x7f050035;
         public static final int title_activity_homepage=0x7f050007;

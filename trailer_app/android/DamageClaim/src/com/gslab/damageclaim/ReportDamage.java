@@ -128,7 +128,18 @@ public class ReportDamage extends Activity implements OnClickListener,
 			thread = new Thread(this);
 			thread.start();
 		}
+		
+		DamageClaimApp.reportdamage = this;
 
+	}
+	
+	@Override
+	protected void onDestroy() {
+	
+		super.onDestroy();
+		if(DamageClaimApp.reportdamage != null) {
+		DamageClaimApp.reportdamage = null;
+		}
 	}
 
 	private void createPreviouslyReportedDamagesList() {
@@ -410,7 +421,25 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 		if (v == submit) {
 
-			reportdamages();
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(getString(string.submit_check_message))
+					.setCancelable(false)
+					.setPositiveButton(getString(string.sealed_yes),
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									reportdamages();
+								}
+							})
+					.setNegativeButton(getString(string.sealed_no),
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.cancel();
+								}
+							});
+			AlertDialog alert = builder.create();
+			alert.show();
 
 			// getReportedDamagesList();
 		}
@@ -621,6 +650,10 @@ public class ReportDamage extends Activity implements OnClickListener,
 		switch (item.getItemId()) {
 
 		case Constants.LOGOUT:
+			if(null != DamageClaimApp.homepage) {
+				DamageClaimApp.homepage.finish();
+				DamageClaimApp.homepage = null;
+			}
 			CoreComponent.LOGOUT_CALL = true;
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");

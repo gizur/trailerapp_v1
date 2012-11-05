@@ -16,8 +16,7 @@
     <application
         android:allowTaskReparenting="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name">
-        
+        android:label="@string/app_name" >
         <activity
             android:name=".damageclaim.Login"
             android:label="@string/title_activity_login"
