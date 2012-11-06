@@ -1,6 +1,7 @@
 package com.gslab.damageclaim;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -127,7 +128,18 @@ public class ReportDamage extends Activity implements OnClickListener,
 			thread = new Thread(this);
 			thread.start();
 		}
+		
+		DamageClaimApp.reportdamage = this;
 
+	}
+	
+	@Override
+	protected void onDestroy() {
+	
+		super.onDestroy();
+		if(DamageClaimApp.reportdamage != null) {
+		DamageClaimApp.reportdamage = null;
+		}
 	}
 
 	private void createPreviouslyReportedDamagesList() {
@@ -409,13 +421,30 @@ public class ReportDamage extends Activity implements OnClickListener,
 
 		if (v == submit) {
 
-			reportdamages();
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(getString(string.submit_check_message))
+					.setCancelable(false)
+					.setPositiveButton(getString(string.sealed_yes),
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									reportdamages();
+								}
+							})
+					.setNegativeButton(getString(string.sealed_no),
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.cancel();
+								}
+							});
+			AlertDialog alert = builder.create();
+			alert.show();
 
 			// getReportedDamagesList();
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void reportdamages() {
 		if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 			Log.i("got it", "the network info");
@@ -436,6 +465,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 		dialog.setMax(reporting_damage_list.size());
 		CoreComponent.SENDING_IMAGES = true;
 
+		dialog.show();
 		startAsyncTask();
 
 	}
@@ -492,19 +522,20 @@ public class ReportDamage extends Activity implements OnClickListener,
 	class ReportOperation extends
 			AsyncTask<ArrayList<DamageInfo>, String, String> {
 
-		@Override
 		protected void onPreExecute() {
-			Log.i("Asynchtask", "preexecute");
-			dialog.show();
+			Log.i("Asynctask", "preexecute");
+
 		}
 
-		int i;
+		int success = 0, total = 0;
 
-		@Override
 		protected String doInBackground(ArrayList<DamageInfo>... info) {
-			Log.i("Asynchtask", "doinbackground---" + info[0].size());
+			Log.i("Asynctask", "doinbackground---" + info[0].size());
 			ArrayList<DamageInfo> list = info[0];
-			for (i = 0; i < list.size(); i++) {
+
+			total = list.size();
+
+			do {
 
 				try {
 
@@ -518,6 +549,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 							activity);
 
 					publishProgress("");
+
 					Utility.waitForThread();
 
 					if (response == null) {
@@ -526,27 +558,27 @@ public class ReportDamage extends Activity implements OnClickListener,
 						continue;
 					}
 					list.remove(0);
+					success++;
 
 				} catch (Exception e) {
 					e.printStackTrace();
 					Log.i(getClass().getSimpleName(), e.getClass()
 							.getSimpleName());
 				}
-			}
+			} while (success + failures != total);
 			return null;
 		}
 
-		@Override
 		protected void onProgressUpdate(String... values) {
-			Log.i("Asynchtask", "progress");
-			dialog.setProgress(i + 1);
+			Log.i("Asynctask", "progress");
+			dialog.setProgress(success + failures);
 
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
 
-			Log.i("Asynchtask", "postexecute");
+			Log.i("Asynctask", "postexecute");
 			dialog.dismiss();
 
 			checkForErrors();
@@ -618,6 +650,10 @@ public class ReportDamage extends Activity implements OnClickListener,
 		switch (item.getItemId()) {
 
 		case Constants.LOGOUT:
+			if(null != DamageClaimApp.homepage) {
+				DamageClaimApp.homepage.finish();
+				DamageClaimApp.homepage = null;
+			}
 			CoreComponent.LOGOUT_CALL = true;
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");
@@ -702,28 +738,62 @@ public class ReportDamage extends Activity implements OnClickListener,
 				CoreComponent.mpEntity = CoreComponent.getMpEntity();
 
 				CoreComponent.mpEntity.addPart("trailerid", new StringBody(
-						CoreComponent.trailerid));
+						CoreComponent.trailerid, Charset.forName("UTF-8")));
 
 				CoreComponent.mpEntity.addPart("ticketstatus", new StringBody(
-						getOpenTicketStatusValue()));
+						getOpenTicketStatusValue(), Charset.forName("UTF-8")));
 
-				CoreComponent.mpEntity.addPart("ticket_title", new StringBody(
-						CoreComponent.getUserinfo().getContactname()));
+				CoreComponent.mpEntity.addPart("ticket_title",
+						new StringBody(CoreComponent.getUserinfo()
+								.getContactname(), Charset.forName("UTF-8")));
 
 				CoreComponent.mpEntity.addPart("reportdamage", new StringBody(
-						getReportDamageValueYes()));
+						getReportDamageValueYes(), Charset.forName("UTF-8")));
 
 				CoreComponent.mpEntity.addPart("damagetype", new StringBody(
 						reporting_damage_list.get(0 + failures)
-								.getWhatIsDamaged()));
+								.getWhatIsDamaged(), Charset.forName("UTF-8")));
 
-				CoreComponent.mpEntity.addPart("damageposition",
+				CoreComponent.mpEntity.addPart(
+						"damageposition",
 						new StringBody(reporting_damage_list.get(0 + failures)
-								.getLocationOfDamage()));
+								.getLocationOfDamage(), Charset
+								.forName("UTF-8")));
 
-				CoreComponent.mpEntity.addPart("drivercauseddamage",
+				CoreComponent.mpEntity.addPart(
+						"drivercauseddamage",
 						new StringBody(reporting_damage_list.get(0 + failures)
-								.getDriver_caused_damage()));
+								.getDriver_caused_damage(), Charset
+								.forName("UTF-8")));
+
+				/*
+				 * need to check the sealed condition what about trailer type?
+				 */
+
+				if (DamageClaimApp.place != null)
+					CoreComponent.mpEntity.addPart(
+							"damagereportlocation",
+							new StringBody(DamageClaimApp.place, Charset
+									.forName("UTF-8")));
+
+				if (DamageClaimApp.sealed != null)
+					CoreComponent.mpEntity.addPart("sealed", new StringBody(
+							DamageClaimApp.sealed, Charset.forName("UTF-8")));
+
+				if (DamageClaimApp.sealed
+						.equalsIgnoreCase(getString(string.sealed_no))) {
+					if (DamageClaimApp.straps != null)
+						CoreComponent.mpEntity.addPart(
+								"straps",
+								new StringBody(DamageClaimApp.straps, Charset
+										.forName("UTF-8")));
+					if (DamageClaimApp.plates != null)
+						CoreComponent.mpEntity.addPart(
+								"plates",
+								new StringBody(DamageClaimApp.plates, Charset
+										.forName("UTF-8")));
+
+				}
 
 				return request;
 			} catch (Exception e) {

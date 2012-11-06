@@ -40,7 +40,7 @@ import com.gslab.utils.Utility;
 
 public class CoreComponent {
 
-
+	public static int IMAGE_MAX_SIZE = 500;
 	private static UserInfo userinfo = new UserInfo();
 	private static error err = new error();
 	private static HTTPRequest request;
@@ -144,7 +144,7 @@ public class CoreComponent {
 		if (!NetworkCallRequirements.isNetworkAvailable((Activity) listener)) {
 			Log.i("got it", "the network info");
 			ToastUI.showToast(((Activity) listener).getApplicationContext(),
-					((Activity)listener).getString(string.networkunavailable));
+					((Activity) listener).getString(string.networkunavailable));
 			listener.onError("Please check your network connection and retry");
 			return;
 		}
@@ -154,6 +154,12 @@ public class CoreComponent {
 			public void run() {
 
 				String timestamp = NetworkCallRequirements.getTimeStampValue();
+
+				if (timestamp == null) {
+					Log.i(getClass().getSimpleName(),
+							"-------timestamp----------null");
+					return;
+				}
 
 				request.addHeader(NetworkCallRequirements.getTimestampString(),
 						timestamp);
@@ -176,6 +182,14 @@ public class CoreComponent {
 					responseString = request.getResponseString();
 					responseString = Html.fromHtml(responseString).toString();
 
+					if (responseString == null) {
+						if (listener != null)
+							Utility.showErrorDialog((Activity) listener);
+						Log.i("Corecomponent response string", "its null!");
+						return;
+
+					}
+
 					Log.i("Response string:", responseString + "---");
 					Log.i("Response code:", request.getResponseCode() + "");
 
@@ -187,7 +201,7 @@ public class CoreComponent {
 						}
 						if (new JSONObject(responseString).getString("success")
 								.equalsIgnoreCase("false") && listener != null)
-							listener.onError("Some unexpected error has occurred");
+							listener.onError(responseString);
 						break;
 
 					case Constants.HTTP_FORBIDDEN:
@@ -209,17 +223,17 @@ public class CoreComponent {
 						if (listener != null)
 							listener.onError(CoreComponent.getErr()
 									.getMessage());
+
+						Log.i("Error message : ", request.getResponseCode()
+								+ "");
+						Log.i("Response in exception", responseString);
 					}
 				} catch (Exception e) {
-					Log.i("Error message : ", request.getResponseCode() + "");
-					Log.i("Response in exception", responseString);
-					if (listener != null){
+					if (listener != null) {
 						listener.onError(responseString);
 					}
-						e.printStackTrace();
+					e.printStackTrace();
 				}
-
-				// DIFFERENCE = 0;
 			}
 		};
 		thread = new Thread(runnable);
@@ -275,172 +289,54 @@ public class CoreComponent {
 				cursor.moveToFirst();
 				String path = cursor.getString(column_index);
 
-				
-				
-//				 File file = new File(path);
-//				 Log.i("File status", "" + file.exists());
-				
-				//
-				//
-				// //Decode image size
-				// final int IMAGE_MAX_SIZE=500;
-				// BitmapFactory.Options o = new BitmapFactory.Options();
-				// o.inJustDecodeBounds = true;
-				//
-				// FileInputStream fis = new FileInputStream(file);
-				// BitmapFactory.decodeStream(fis, null, o);
-				// fis.close();
-				//
-				// int scale = 1;
-				// if (o.outHeight > IMAGE_MAX_SIZE || o.outWidth >
-				// IMAGE_MAX_SIZE) {
-				// scale = (int)Math.pow(2, (int)
-				// Math.round(Math.log(IMAGE_MAX_SIZE / (double)
-				// Math.max(o.outHeight, o.outWidth)) / Math.log(0.5)));
-				// }
-				//
-				// //Decode with inSampleSize
-				// BitmapFactory.Options o2 = new BitmapFactory.Options();
-				// o2.inSampleSize = scale;
-				// fis = new FileInputStream(file);
-				// Bitmap bmp = BitmapFactory.decodeStream(fis, null, o2);
-				// fis.close();
-				//
-//
-//				Bitmap bitmap = BitmapFactory.decodeFile(path);
-//
-//				// you can change the format of you image compressed for what do
-//				// you want;
-//				// now it is set up to 640 x 480;
-//
-//				Bitmap bmpCompressed = Bitmap.createScaledBitmap(bitmap, 480,
-//						640, true);
+				Bitmap b = null;
+				try {
+					File file = new File(path);
 
-				
+					// Decode image size
 
-				
-				
-				
-				/*--------------------------------------------------------------------------*/
-				 
-				 
-				 
-				 
-				
-				 
-				 
-//				 
-//				 Bitmap b = null;
-//				
-//				        //Decode image size
-//				        BitmapFactory.Options o = new BitmapFactory.Options();
-//				        o.inJustDecodeBounds = true;
-////				        o.inDither=false;                     //Disable Dithering mode
-////				        o.inPurgeable=true;                   //Tell to gc that whether it needs free memory, the Bitmap can be cleared
-////				        o.inInputShareable=true;              
-//
-//				        FileInputStream fis = new FileInputStream(file);
-//				        b = BitmapFactory.decodeStream(fis, null, o);
-//				        if(b == null)
-//				        	Log.i("First bitmap decode", "null");
-//				        fis.close();
-//
-//				        int scale = 1;
-//				        if (o.outHeight > 320 || o.outWidth > 240) {
-//				            scale = (int)Math.pow(2, (int) Math.round(Math.log(320 / 
-//				               (double) Math.max(o.outHeight, o.outWidth)) / Math.log(0.5)));
-//				        }
-//
-//				        //Decode with inSampleSize
-//				        BitmapFactory.Options o2 = new BitmapFactory.Options();
-//				        o2.inJustDecodeBounds = true;
-////				        o2.inDither = false;
-////				        o2.inPurgeable = true;
-////				        o2.inInputShareable = true;
-//				        o2.inSampleSize = scale;
-//				        fis = new FileInputStream(file);
-//				        b = BitmapFactory.decodeStream(fis, null, o2);
-//				        fis.close();
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 Bitmap b = null;
-			        try {
-			            File file = new File(path);
-			            
-			            //Decode image size
-			         final int IMAGE_MAX_SIZE=500;
-			            BitmapFactory.Options o = new BitmapFactory.Options();
-			            o.inJustDecodeBounds = true;
-			            
-			            FileInputStream fis = new FileInputStream(file);
-			            BitmapFactory.decodeStream(fis, null, o);
-			            
-			            fis.close();
+					BitmapFactory.Options o = new BitmapFactory.Options();
+					o.inJustDecodeBounds = true;
 
-			            int scale = 1;
-			            if (o.outHeight > IMAGE_MAX_SIZE || o.outWidth > IMAGE_MAX_SIZE) {
-			                scale = (int)Math.pow(2, (int) Math.round(Math.log(IMAGE_MAX_SIZE / (double) Math.max(o.outHeight, o.outWidth)) / Math.log(0.5)));
-			            }
+					FileInputStream fis = new FileInputStream(file);
+					BitmapFactory.decodeStream(fis, null, o);
 
-			            //Decode with inSampleSize
-			            BitmapFactory.Options o2 = new BitmapFactory.Options();
-			            o2.inSampleSize = scale;
-			            fis = new FileInputStream(file);
-			            b = BitmapFactory.decodeStream(fis, null, o2);
-			            
-			            fis.close();
-			        } catch (Exception e) {
-			        }
-			        
-			        
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				 
-				    
+					fis.close();
 
-				 if(b == null) {
-					 Log.i("bitmap", "null");
-					 return;
-				 }
-				 
-			
-				 
-				 
-				 
-				 
-				
-				
-				
-				
-				
-				
+					int scale = 1;
+					if (o.outHeight > IMAGE_MAX_SIZE
+							|| o.outWidth > IMAGE_MAX_SIZE) {
+						scale = (int) Math.pow(
+								2,
+								(int) Math.round(Math.log(IMAGE_MAX_SIZE
+										/ (double) Math.max(o.outHeight,
+												o.outWidth))
+										/ Math.log(0.5)));
+					}
+
+					// Decode with inSampleSize
+					BitmapFactory.Options o2 = new BitmapFactory.Options();
+					o2.inSampleSize = scale;
+					fis = new FileInputStream(file);
+					b = BitmapFactory.decodeStream(fis, null, o2);
+
+					fis.close();
+				} catch (Exception e) {
+				}
+
+				if (b == null) {
+					Log.i("bitmap", "null");
+					return;
+				}
+
 				/*------------------------------------------------------------------------------*/
-				
+
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
 				// CompressFormat set up to JPG, you can change to PNG or
 				// whatever you want;
 
-//				bmpCompressed.compress(CompressFormat.JPEG, 100, bos);
+				// bmpCompressed.compress(CompressFormat.JPEG, 100, bos);
 				b.compress(CompressFormat.JPEG, 100, bos);
 
 				byte[] data = bos.toByteArray();
@@ -493,7 +389,7 @@ public class CoreComponent {
 		editor.commit();
 		Intent intent = new Intent(activity.getApplicationContext(),
 				Login.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		activity.startActivity(intent);
 
 		activity.finish();

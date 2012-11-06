@@ -81,6 +81,8 @@ public class Utility {
 	}
 
 	public static void showErrorDialog(final Activity activity) {
+		
+		try {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setMessage(activity.getString(string.problem))
@@ -101,5 +103,9 @@ public class Utility {
 						});
 		AlertDialog alert = builder.create();
 		alert.show();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -1,5 +1,6 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollview_homepage"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#F3F3F3" >
@@ -217,7 +218,7 @@
             <Button
                 android:id="@+id/homepage_button_submit"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:layout_marginBottom="20dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="5dp"
@@ -232,7 +233,7 @@
             <Button
                 android:id="@+id/homepage_button_damages"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:layout_marginBottom="20dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="10dp"
