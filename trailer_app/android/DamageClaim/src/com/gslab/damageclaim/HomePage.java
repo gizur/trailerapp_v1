@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.ActionBar.LayoutParams;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -250,7 +249,7 @@ public class HomePage extends Activity implements OnClickListener,
 		if (DamageClaimApp.id_rented != null && DamageClaimApp.id_own != null) {
 
 			if (Utility.getParsedString(trailertype.getText().toString())
-					.equalsIgnoreCase("own"))
+					.equalsIgnoreCase(getString(string.trailer_type_own)))
 				values = (ArrayList<String>) DamageClaimApp.id_own.clone();
 			else
 				values = (ArrayList<String>) DamageClaimApp.id_rented.clone();
@@ -300,7 +299,7 @@ public class HomePage extends Activity implements OnClickListener,
 				}
 
 				if (Utility.getParsedString(trailertype.getText().toString())
-						.equalsIgnoreCase("own"))
+						.equalsIgnoreCase(getString(string.trailer_type_own)))
 					values = (ArrayList<String>) DamageClaimApp.id_own.clone();
 				else
 					values = (ArrayList<String>) DamageClaimApp.id_rented

@@ -1,5 +1,7 @@
 package com.gslab.damageclaim;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.webkit.WebView;
@@ -23,7 +25,12 @@ public class About extends Activity {
 
 			WebView webview = (WebView) findViewById(id.about);
 			String response = getIntent().getStringExtra("about");
-			webview.loadData(response, "text/html", "UTF-8");
+			if (response != null) {
+				JSONObject object = new JSONObject(response);
+				response = object.getString("result");
+
+				webview.loadData(response, "text/html", "UTF-8");
+			}
 		} catch (Exception e) {
 			Utility.showErrorDialog(this);
 		}
