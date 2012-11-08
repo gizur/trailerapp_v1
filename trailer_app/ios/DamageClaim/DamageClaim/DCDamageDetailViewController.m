@@ -32,7 +32,8 @@
 
 #import "NSString+Base64.h"
 
-#define NEW_DAMAGE_SECTION_ONE_ROWS 3
+#define NEW_DAMAGE_SECTION_ONE_ROWS_NON_EDITABLE 2
+#define NEW_DAMAGE_SECTION_ONE_ROWS_EDITABLE 3
 
 @interface DCDamageDetailViewController ()
 
@@ -837,7 +838,7 @@
     
     switch (section) {
         case 0:
-            return NEW_DAMAGE_SECTION_ONE_ROWS;
+            return NEW_DAMAGE_SECTION_ONE_ROWS_EDITABLE;
             break;
         case 1:
             if ([self isEditable]) {

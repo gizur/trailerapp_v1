@@ -13,5 +13,6 @@
 //more fields can be added here later
 @property (nonatomic, retain) NSString *trailerId;
 @property (nonatomic, retain) NSString *trailerName;
+@property (nonatomic, retain) NSString *trailerType;
 
 @end

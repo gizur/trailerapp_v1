@@ -273,13 +273,6 @@
 			name = LoginModel;
 			sourceTree = "<group>";
 		};
-		D731B9CE161C2C8F00F3FA08 /* New Group */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "New Group";
-			sourceTree = "<group>";
-		};
 		D731B9D0161C573000F3FA08 /* ChangePasswordViewController */ = {
 			isa = PBXGroup;
 			children = (
@@ -494,7 +487,6 @@
 		D77722E915D9144D0071FD06 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				D731B9CE161C2C8F00F3FA08 /* New Group */,
 				D7B231B315F62F15001A1560 /* AssetModel */,
 				D71E55D015E1570F00FE1CB1 /* LoginModel */,
 				D71E55CB15E1123E00FE1CB1 /* DamageDetailModel */,

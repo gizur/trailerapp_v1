@@ -430,7 +430,7 @@ static DCSharedObject *sharedPreferences = nil;
     NSMutableString *retVal = [[[NSMutableString alloc] init] autorelease];
     if (dict) {
         for (NSString *key in dict) {
-            retVal = [[[retVal stringByAppendingFormat:[NSString stringWithFormat:@"%@=%@&", key, [dict valueForKey:key]]] mutableCopy] autorelease];
+            retVal = [[[retVal stringByAppendingString:[NSString stringWithFormat:@"%@=%@&", key, [dict valueForKey:key]]] mutableCopy] autorelease];
         }
         if ([retVal length] > 1) {
             retVal = [[[retVal substringToIndex:[retVal length] - 1] mutableCopy] autorelease];

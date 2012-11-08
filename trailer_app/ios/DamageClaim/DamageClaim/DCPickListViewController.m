@@ -501,7 +501,9 @@
 -(void) makeURLCall {
     switch (self.type) {
         case DCPickListItemSurveyTrailerId:
-            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_LIST]) {
+            if (self.modelArray) {
+                [self.pickListTableView reloadData];
+            } else if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_LIST]) {
                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
             } else {
                 self.modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_LIST];
@@ -512,12 +514,16 @@
         case DCPickListItemTypeDamagePosition:
             //If somehow, the applicable list of damage positions could not be fetched from the server, make a URL call to fetch all the 
             //positions from the server and let the user choose the appropriate position
-            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_LABEL_DICTIONARY]) {
+            if (self.modelArray) {
+                [self.pickListTableView reloadData];
+            } else if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_POSITION_LABEL_DICTIONARY]) {
                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGEPOSITION requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
             }
             break;
         case DCPickListItemTypeDamageType:
-            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_TYPE_LIST]) {
+            if (self.modelArray) {
+                [self.pickListTableView reloadData];
+            } else if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_TYPE_LIST]) {
                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGETYPE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
             } else {
                 self.modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_TYPE_LIST];
@@ -525,7 +531,9 @@
             }
             break;
         case DCPickListItemSurveyPlace:
-            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_REPORT_LOCATION_LIST]) {
+            if (self.modelArray) {
+                [self.pickListTableView reloadData];
+            } else if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_REPORT_LOCATION_LIST]) {
                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_DAMAGEREPORTLOCATION requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
             } else {
                 self.modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_REPORT_LOCATION_LIST];
@@ -533,7 +541,9 @@
             }
             break;
         case DCPickListItemSurveyPlates:
-            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLATES_LIST]) {
+            if (self.modelArray) {
+                [self.pickListTableView reloadData];
+            } else if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLATES_LIST]) {
                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_PLATES requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
             } else {
                 self.modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_PLATES_LIST];
@@ -541,7 +551,9 @@
             }
             break;
         case DCPickListItemSurveyStraps:
-            if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_STRAPS_LIST]) {
+            if (self.modelArray) {
+                [self.pickListTableView reloadData];
+            } else if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_STRAPS_LIST]) {
                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_STRAPS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
             } else {
                 self.modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:SURVEY_STRAPS_LIST];

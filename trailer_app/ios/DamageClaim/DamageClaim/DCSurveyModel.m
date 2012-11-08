@@ -16,7 +16,6 @@
 @synthesize surveyPlates = _surveyPlates;
 @synthesize surveyStraps = _surveyStraps;
 @synthesize surveyAssetModel = _surveyAssetModel;
-@synthesize surveyTrailerType = _surveyTrailerType;
 @synthesize surveyTrailerSealed = _surveyTrailerSealed;
 
 
@@ -27,7 +26,6 @@
     [_surveyStraps release];
     [_surveyAssetModel release];
     [_surveyTrailerSealed release];
-    [_surveyTrailerType release];
     [super dealloc];
 }
 

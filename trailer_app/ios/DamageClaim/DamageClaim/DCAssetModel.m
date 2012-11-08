@@ -11,10 +11,12 @@
 @implementation DCAssetModel
 @synthesize trailerId = _trailerId;
 @synthesize trailerName = _trailerName;
+@synthesize trailerType = _trailerType;
 
 -(void) dealloc {
     [_trailerId release];
     [_trailerName release];
+    [_trailerType release];
     [super dealloc];
 }
 @end

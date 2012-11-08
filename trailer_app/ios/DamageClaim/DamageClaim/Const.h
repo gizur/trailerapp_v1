@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define kDebug FALSE
+#define kDebug TRUE
 
 #define kLocalServer FALSE
 
@@ -160,6 +160,12 @@ enum DCPickListItemTypes {
 #define VALUE @"VALUE"
 
 #define RESET_SURVEY_NOTIFICATION @"RESET_SURVEY_NOTIFICATION"
+
+#define TRAILER_TYPE @"TRAILER_TYPE"
+#define OWN @"coop"
+#define RENTED @"hyrtrailer"
+#define TRAILER_TYPE_SEGMENTED_CONTROL_INDEX_OWN 0
+#define TRAILER_TYPE_SEGMENTED_CONTROL_INDEX_RENTED 1
 
 #pragma mark - List of all the models
 //List of all the models
