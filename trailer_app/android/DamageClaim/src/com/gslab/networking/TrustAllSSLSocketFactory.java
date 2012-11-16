@@ -92,4 +92,3 @@ class TrustAllManager implements X509TrustManager {
 		return null;
 	}
 }
-

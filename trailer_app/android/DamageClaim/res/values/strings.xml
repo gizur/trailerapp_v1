@@ -3,8 +3,8 @@
 <resources>
 
     <string name="addnewimage">Add a new image:</string>
-    <string name="app_name">Gizur Survey</string>
-    <string name="title_activity_login">Gizur Survey</string>
+    <string name="app_name">Survey</string>
+    <string name="title_activity_login">Survey</string>
     <string name="login_textview">Login</string>
     <string name="login_username_hint">Username</string>
     <string name="login_password_hint">Password</string>

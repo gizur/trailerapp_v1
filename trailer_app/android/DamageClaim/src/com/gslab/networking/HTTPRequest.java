@@ -148,25 +148,31 @@ public class HTTPRequest {
 
 		HttpClient client = new DefaultHttpClient();
 		HttpResponse httpResponse;
-		
+
 		/*----------------To be removed---------------------------*/
-		
+
 		try {
-			client.getConnectionManager().getSchemeRegistry().register(new Scheme("https", TrustAllSSLSocketFactory.getDefault(), 443));
+
+			client.getConnectionManager()
+					.getSchemeRegistry()
+					.register(
+							new Scheme("https", TrustAllSSLSocketFactory
+									.getDefault(), 443));
+
 		} catch (KeyManagementException e1) {
-			
+
 			e1.printStackTrace();
 		} catch (UnrecoverableKeyException e1) {
-			
+
 			e1.printStackTrace();
 		} catch (NoSuchAlgorithmException e1) {
-			
+
 			e1.printStackTrace();
 		} catch (KeyStoreException e1) {
-			
+
 			e1.printStackTrace();
 		}
-		
+
 		/*----------------To be removed---------------------------*/
 
 		try {

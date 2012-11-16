@@ -58,10 +58,10 @@ public class HomePage extends Activity implements OnClickListener,
 
 	@Override
 	protected void onDestroy() {
-	
+
 		super.onDestroy();
-		if(DamageClaimApp.homepage != null) {
-		DamageClaimApp.homepage = null;
+		if (DamageClaimApp.homepage != null) {
+			DamageClaimApp.homepage = null;
 		}
 	}
 
@@ -100,24 +100,24 @@ public class HomePage extends Activity implements OnClickListener,
 
 		straps = (TextView) findViewById(R.id.homepage_textview_straps);
 		straps.setOnClickListener(this);
-		
+
 		damages = (Button) findViewById(R.id.homepage_button_damages);
 		damages.setOnClickListener(this);
 
-		submit = (Button) findViewById(R.id.homepage_button_submit);		
+		submit = (Button) findViewById(R.id.homepage_button_submit);
 		submit.setEnabled(false);
 		submit.setOnClickListener(this);
-				
+
 		selection = Constants.SEALED;
 		thread = new Thread(this);
 		thread.start();
 
 		addTrailerInventory();
-		
+
 		DamageClaimApp.homepage = this;
 
 	}
-	
+
 	private Handler handler = new Handler() {
 
 		public void handleMessage(Message msg) {
@@ -145,7 +145,7 @@ public class HomePage extends Activity implements OnClickListener,
 
 	private void setSealedValue() {
 		sealed.setText(getString(string.homepage_textview_sealed) + " "
-				+ values.get(sealed_labels.indexOf("no")));
+				+ values.get(sealed_labels.indexOf("No")));
 		DamageClaimApp.sealed = Utility.getParsedString(sealed.getText()
 				.toString());
 	}
@@ -525,7 +525,7 @@ public class HomePage extends Activity implements OnClickListener,
 			getTrailerTypeValues();
 
 			id.setText(getString(string.homepage_textview_ID));
-			
+
 			new ListViewDialog(this, layout.listviewdialog,
 					getString(string.homepage_textview_trailertype), values,
 					Constants.HOMEPAGE);
@@ -583,7 +583,7 @@ public class HomePage extends Activity implements OnClickListener,
 
 				Intent intent = new Intent(getApplicationContext(),
 						ReportDamage.class);
-				
+
 				startActivity(intent);
 			} else
 				ToastUI.showToast(getApplicationContext(),
@@ -593,15 +593,9 @@ public class HomePage extends Activity implements OnClickListener,
 
 		if (v == submit) {
 
-//			if (id.getText().toString()
-//					.equalsIgnoreCase(getString(string.homepage_textview_ID))) {
-//				ToastUI.showToast(getApplicationContext(),
-//						getString(string.selectid));
-//				return;
-//			}
-			
-			if(!performChecks()) {
-				ToastUI.showToast(getApplicationContext(), getString(string.enterfields));
+			if (!performChecks()) {
+				ToastUI.showToast(getApplicationContext(),
+						getString(string.enterfields));
 				return;
 			}
 
@@ -723,8 +717,9 @@ public class HomePage extends Activity implements OnClickListener,
 
 	@Override
 	protected void onResume() {
-		setDefaultValues();
-		super.onResume();		
+		if (DamageClaimApp.shouldErase)
+			setDefaultValues();
+		super.onResume();
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -780,26 +775,28 @@ public class HomePage extends Activity implements OnClickListener,
 
 		super.onActivityResult(requestCode, resultCode, data);
 		Log.i(getClass().getSimpleName(), "in on activity result");
-		
+
 		if (resultCode == Activity.RESULT_OK) {
 
 			Log.i(getClass().getSimpleName(),
 					"finish activity on activity result");
-			Intent intent = new Intent(getApplicationContext(), Login.class);			
+			Intent intent = new Intent(getApplicationContext(), Login.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 			Log.i(getClass().getSimpleName(), "Starting activity");
 			startActivity(intent);
-			
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+			SharedPreferences prefs = PreferenceManager
+					.getDefaultSharedPreferences(getApplicationContext());
 			SharedPreferences.Editor editor = prefs.edit();
 			editor.putBoolean("credentials", false);
 			editor.commit();
-			
+
 			finish();
 			Log.i(getClass().getSimpleName(), "finsihing current activity");
 
 		}
 	}
+
 	public void onSuccessFinish(String response) {
 
 		this.response = response;
@@ -816,10 +813,12 @@ public class HomePage extends Activity implements OnClickListener,
 
 	public void run() {
 		getSealedValues();
-		if (sealed_labels.contains("no")) {
+		if (sealed_labels.contains("No")) {
 			handler.sendEmptyMessage(1);
 
 		}
+		else
+			Log.i(getClass().getSimpleName(), "Couldn't find no value");
 
 	}
 

@@ -81,30 +81,31 @@ public class Utility {
 	}
 
 	public static void showErrorDialog(final Activity activity) {
-		
+
 		try {
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setMessage(activity.getString(string.problem))
-				.setCancelable(false)
-				.setPositiveButton(activity.getString(string.logout),
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+			builder.setMessage(activity.getString(string.problem))
+					.setCancelable(false)
+					.setPositiveButton(activity.getString(string.logout),
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
 
-								CoreComponent.logout(activity);
+									CoreComponent.logout(activity);
 
-							}
-						})
-				.setNegativeButton(activity.getString(string.close),
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
-		AlertDialog alert = builder.create();
-		alert.show();
-		}
-		catch(Exception e) {
+								}
+							})
+					.setNegativeButton(activity.getString(string.close),
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.cancel();
+								}
+							});
+			AlertDialog alert = builder.create();
+			alert.show();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

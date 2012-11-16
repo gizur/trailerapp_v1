@@ -71,8 +71,7 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 	private Gallery gallery;
 
 	public void onCreate(Bundle savedInstanceState) {
-		
-		
+
 		super.onCreate(savedInstanceState);
 		setContentView(layout.reportnewdamage);
 
@@ -96,9 +95,9 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 
 		drivercauseddamage = (TextView) findViewById(R.id.reportnewdamage_textview_damagecaused);
 		drivercauseddamage.setCompoundDrawables(null, null, null, null);
-		
-		//may need to be removed..!
-		
+
+		// may need to be removed..!
+
 		drivercauseddamage.setVisibility(View.GONE);
 
 		gallery = (Gallery) findViewById(R.id.reportnewdamage_listview_damageimages);
@@ -130,16 +129,16 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 				}
 			}
 		}.start();
-		
+
 		DamageClaimApp.previousdamages = this;
 	}
-	
+
 	@Override
 	protected void onDestroy() {
-	
+
 		super.onDestroy();
-		if(DamageClaimApp.previousdamages != null) {
-		DamageClaimApp.previousdamages = null;
+		if (DamageClaimApp.previousdamages != null) {
+			DamageClaimApp.previousdamages = null;
 		}
 	}
 
@@ -340,17 +339,17 @@ public class PreviouslyReportedDamagesInfo extends Activity implements
 		switch (item.getItemId()) {
 
 		case Constants.LOGOUT:
-			
-			if(DamageClaimApp.reportdamage != null) {
+
+			if (DamageClaimApp.reportdamage != null) {
 				DamageClaimApp.reportdamage.finish();
 				DamageClaimApp.reportdamage = null;
 			}
-			
-			if(DamageClaimApp.homepage != null) {
+
+			if (DamageClaimApp.homepage != null) {
 				DamageClaimApp.homepage.finish();
 				DamageClaimApp.homepage = null;
 			}
-			
+
 			CoreComponent.LOGOUT_CALL = true;
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");
