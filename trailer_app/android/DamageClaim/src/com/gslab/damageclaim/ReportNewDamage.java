@@ -85,7 +85,7 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 	private static String error;
 
 	private boolean typeofcall;
-	
+
 	private View view;
 
 	private HashMap<String, ArrayList<String>> hashmap;
@@ -117,7 +117,7 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 
 		view = (findViewById(id.causedbyview));
 		view.setVisibility(View.VISIBLE);
-		
+
 		thumbnails = new ArrayList<Bitmap>();
 
 		addnewimage = (Button) findViewById(id.reportnewdamage_button_damageimages);
@@ -148,16 +148,16 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 			previous_data = new DamageInfo();
 		}
 		checkDoneButtonStatus();
-		
+
 		DamageClaimApp.reportnewdamage = this;
 	}
-	
+
 	@Override
 	protected void onDestroy() {
-	
+
 		super.onDestroy();
-		if(DamageClaimApp.reportnewdamage != null) {
-		DamageClaimApp.reportnewdamage = null;
+		if (DamageClaimApp.reportnewdamage != null) {
+			DamageClaimApp.reportnewdamage = null;
 		}
 	}
 
@@ -540,12 +540,12 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 					.toString()));
 			previous_data.setLocation(Utility.getParsedString(position
 					.getText().toString()));
-			
-			if(drivercauseddamage.getText().toString().equalsIgnoreCase(getString(string.driver))) {
+
+			if (drivercauseddamage.getText().toString()
+					.equalsIgnoreCase(getString(string.driver))) {
 				previous_data.setDriver_caused_damage("Yes");
-			}
-			else {			
-			previous_data.setDriver_caused_damage("No");
+			} else {
+				previous_data.setDriver_caused_damage("No");
 			}
 
 			if (previous_data.getDriver_caused_damage().equalsIgnoreCase(
@@ -710,17 +710,17 @@ public class ReportNewDamage extends Activity implements OnClickListener,
 		switch (item.getItemId()) {
 
 		case Constants.LOGOUT:
-			
-			if(DamageClaimApp.reportdamage != null) {
+
+			if (DamageClaimApp.reportdamage != null) {
 				DamageClaimApp.reportdamage.finish();
 				DamageClaimApp.reportdamage = null;
 			}
-			
-			if(DamageClaimApp.homepage != null) {
+
+			if (DamageClaimApp.homepage != null) {
 				DamageClaimApp.homepage.finish();
 				DamageClaimApp.homepage = null;
 			}
-			
+
 			CoreComponent.LOGOUT_CALL = true;
 			if (!NetworkCallRequirements.isNetworkAvailable(this)) {
 				Log.i("got it", "the network info");

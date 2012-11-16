@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -116,9 +115,10 @@ public class PasswordReset extends Activity implements OnClickListener,
 							Login.class);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 					Log.i(getClass().getSimpleName(), "here.....5");
-					
+
 					SharedPreferences preferences = PreferenceManager
-							.getDefaultSharedPreferences(activity.getApplicationContext());
+							.getDefaultSharedPreferences(activity
+									.getApplicationContext());
 					SharedPreferences.Editor editor = preferences.edit();
 
 					editor.putBoolean("credentials", false);

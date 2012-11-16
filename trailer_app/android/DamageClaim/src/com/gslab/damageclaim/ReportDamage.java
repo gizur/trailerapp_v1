@@ -128,17 +128,17 @@ public class ReportDamage extends Activity implements OnClickListener,
 			thread = new Thread(this);
 			thread.start();
 		}
-		
+
 		DamageClaimApp.reportdamage = this;
 
 	}
-	
+
 	@Override
 	protected void onDestroy() {
-	
+
 		super.onDestroy();
-		if(DamageClaimApp.reportdamage != null) {
-		DamageClaimApp.reportdamage = null;
+		if (DamageClaimApp.reportdamage != null) {
+			DamageClaimApp.reportdamage = null;
 		}
 	}
 
@@ -488,6 +488,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 			ToastUI.showToast(getApplicationContext(),
 					getString(string.damagessubmitted));
 			CoreComponent.trailerid = null;
+			DamageClaimApp.shouldErase = true;
 			finish();
 		} else {
 			final Activity activity = this;
@@ -517,6 +518,14 @@ public class ReportDamage extends Activity implements OnClickListener,
 		CoreComponent.SENDING_IMAGES = false;
 		which_request = true;
 
+	}
+
+	@Override
+	protected void onResume() {
+		
+		super.onResume();
+		
+		DamageClaimApp.shouldErase = false;
 	}
 
 	class ReportOperation extends
@@ -650,7 +659,7 @@ public class ReportDamage extends Activity implements OnClickListener,
 		switch (item.getItemId()) {
 
 		case Constants.LOGOUT:
-			if(null != DamageClaimApp.homepage) {
+			if (null != DamageClaimApp.homepage) {
 				DamageClaimApp.homepage.finish();
 				DamageClaimApp.homepage = null;
 			}
