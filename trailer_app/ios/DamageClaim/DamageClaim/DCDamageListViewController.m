@@ -171,7 +171,7 @@
 -(void) customizeNavigationBar {
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     
-    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SUBMIT", @"") style:UIBarButtonItemStylePlain target:self action:@selector(submitDamageReport)] autorelease];
+    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"APPROVE_DAMAGE", @"") style:UIBarButtonItemStylePlain target:self action:@selector(submitDamageReport)] autorelease];
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BACK", @"") style:UIBarButtonItemStylePlain target:self action:@selector(goBack)];
     [self toggleActionButtons];
 }
@@ -181,14 +181,10 @@
 }
 
 -(void) submitDamageReport {
-    if (!self.surveyModel.surveyAssetModel.trailerId) {
-        [self showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
-    } else {
-        [self disableActions];
-        self.submittingDamageIndex = 0;
-        self.totalCurrentDamages = [self.currentDamageArray count];
-        [self submitDamageReportAtIndex:self.submittingDamageIndex];
-    }
+    
+    UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"CONFIRM_DAMAGE_SUBMIT", @"") delegate:self cancelButtonTitle:NSLocalizedString(@"CANCEL", @"") otherButtonTitles:NSLocalizedString(@"SUBMIT", @"") , nil] autorelease];
+    [alertView show];
+    
 }
 
 //sends the damage report to the server
@@ -670,6 +666,18 @@
                 self.submittingDamageIndex = 0;
                 [self submitDamageReportAtIndex:self.submittingDamageIndex];
             }
+        }
+    }
+    
+    if ([[alertView message] isEqualToString:NSLocalizedString(@"CONFIRM_DAMAGE_SUBMIT", @"")] &&
+        [[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"SUBMIT", @"")]) {
+        if (!self.surveyModel.surveyAssetModel.trailerId) {
+            [self showAlertWithMessage:NSLocalizedString(@"TRAILER_ID_NULL_ERROR", @"")];
+        } else {
+            [self disableActions];
+            self.submittingDamageIndex = 0;
+            self.totalCurrentDamages = [self.currentDamageArray count];
+            [self submitDamageReportAtIndex:self.submittingDamageIndex];
         }
     }
 }

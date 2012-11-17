@@ -1,13 +1,13 @@
 //
 //  Const.h
-//  Plunk
+//  DamageClaim
 //
 //  Created by GS LAB on 21/05/12.
 //  Copyright (c) 2012 developer.gslab@gmail.com. All rights reserved.
 
 #import <Foundation/Foundation.h>
 
-#define kDebug TRUE
+#define kDebug FALSE
 
 #define kLocalServer FALSE
 
@@ -162,7 +162,7 @@ enum DCPickListItemTypes {
 #define RESET_SURVEY_NOTIFICATION @"RESET_SURVEY_NOTIFICATION"
 
 #define TRAILER_TYPE @"TRAILER_TYPE"
-#define OWN @"coop"
+#define OWN @"cooptrailer"
 #define RENTED @"hyrtrailer"
 #define TRAILER_TYPE_SEGMENTED_CONTROL_INDEX_OWN 0
 #define TRAILER_TYPE_SEGMENTED_CONTROL_INDEX_RENTED 1

@@ -18,7 +18,7 @@
 "TRAILER_TYPE" = "Typ av trailer";
 "OWN" = "Egen";
 "RENTED" = "Hyrtrailer";
-"ID" = "ID:";
+"ID" = "Trailer ID:";
 "PLACE" = "Plats:";
 "SEALED" = "Plomberad";
 "NO" = "Nej";
@@ -42,10 +42,10 @@
 "ADD_PHOTO_ALBUM" = "Sparade foton";
 "CANCEL" = "Avbryta";
 "DISMISS" = "Avskeda";
-"REPORT_DAMAGE" = "Skador";
+"REPORT_DAMAGE" = "Rapportera ny skada";
 "ADD_NEW_IMAGE" = "Lägg till en bild";
 "REPORT_NEW_DAMAGE" = "Rapportera ny skada";
-"REPORTED_DAMAGES" = "Rapporterade skador";
+"REPORTED_DAMAGES" = "Tidigare rapporterade skador";
 "LOGOUT" = "Logga ut";
 
 
@@ -56,7 +56,7 @@
 "PREVIOUSLY_REPORTED_DAMAGES" = "Previously Reported Damages";
 
 
-"REPORTING_DAMAGE" = "Skada rapporteras";
+"REPORTING_DAMAGE" = "Nyfunna skador";
 "DAMAGE_TYPE_ALREADY_ADDED" = "Bilder för denna del av trailern finns redan. De nya bilderna läggs till de befintliga.";
 "EDIT" = "Ändra";
 "DONE" = "Klar";
@@ -102,3 +102,5 @@
 "PASSWORD_RESET_SUCCESSFUL" = "Ditt nya lösenord kommer att skickas till din email adress inom kort. Logga in med ditt nya lösenord.";
 
 "SUBMIT_DAMAGE_ERROR" = "Kunde inte skicka vissa skaderapporter. Försök igen?";
+"CONFIRM_DAMAGE_SUBMIT" = "Är du säker på att du vill skicka besiktningsprotokoll för granskning?";
+"APPROVE_DAMAGE" = "Godkänn besiktningsprotokoll";

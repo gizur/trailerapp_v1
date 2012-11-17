@@ -101,9 +101,11 @@
         self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
     }
     
-    [self toggleActionButtons];
+    [self.surveyTableView reloadData];
+    //[self toggleActionButtons];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:RESET_SURVEY_NOTIFICATION object:nil];
+    [self resetSurvey:nil];
     
 }
 
@@ -206,89 +208,110 @@
 
 //send the survey to the server
 -(void) submitSurveyReport {
-    //make a dictionary of post data
-    NSMutableDictionary *bodyDict = [[[NSMutableDictionary alloc] init] autorelease];
-    
-    NSDictionary *reportDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_REPORTDAMAGE];
+  
+  
+  //make a dictionary of post data
+  NSMutableDictionary *bodyDict = [[[NSMutableDictionary alloc] init] autorelease];
+  
+  NSDictionary *reportDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_REPORTDAMAGE];
+  if (reportDamageDict) {
+    NSString *reportDamageNoValue = [reportDamageDict valueForKey:@"No"];
+#if kDebug
+    NSLog(@"%@", reportDamageDict);
+#endif
     if (reportDamageDict) {
-        NSString *reportDamageNoValue = [reportDamageDict valueForKey:@"No"];
-#if kDebug
-        NSLog(@"%@", reportDamageDict);
-#endif
-        if (reportDamageDict) {
-            [bodyDict setValue:reportDamageNoValue forKey:@"reportdamage"];
-        } else {
-            [bodyDict setValue:@"No" forKey:@"reportdamage"];
-        }
+      [bodyDict setValue:reportDamageNoValue forKey:@"reportdamage"];
     } else {
-        [bodyDict setValue:@"No" forKey:@"reportdamage"];
+      [bodyDict setValue:@"No" forKey:@"reportdamage"];
     }
-    
-    NSDictionary *ticketStatusDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_TICKETSTATUS];
-    if (ticketStatusDict) {
-        NSString *ticketStatusClosedValue = [ticketStatusDict valueForKey:@"Closed"];
+  } else {
+    [bodyDict setValue:@"No" forKey:@"reportdamage"];
+  }
+  
+  NSDictionary *ticketStatusDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_TICKETSTATUS];
+  if (ticketStatusDict) {
+    NSString *ticketStatusClosedValue = [ticketStatusDict valueForKey:@"Closed"];
 #if kDebug
-        NSLog(@"%@, %@", ticketStatusDict, ticketStatusClosedValue);
+    NSLog(@"%@, %@", ticketStatusDict, ticketStatusClosedValue);
 #endif
-        if (ticketStatusClosedValue) {
-            [bodyDict setValue:ticketStatusClosedValue forKey:@"ticketstatus"];
-        } else {
-            [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
-        }
+    if (ticketStatusClosedValue) {
+      [bodyDict setValue:ticketStatusClosedValue forKey:@"ticketstatus"];
     } else {
-        [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
+      [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
     }
-    
-    NSString *ticketTitle = @"";
-    if ([[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]) {
-        ticketTitle = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"SURVEY_TICKET_TITLE", @""), [[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]];
-    }
-    [bodyDict setValue:ticketTitle forKey:@"ticket_title"];
-    
-    
-    if (self.surveyModel.surveyAssetModel.trailerId) {
-        [bodyDict setValue:self.surveyModel.surveyAssetModel.trailerId forKey:@"trailerid"];
-    }
-    
-    if (self.surveyModel.surveyPlace) {
-        [bodyDict setValue:self.surveyModel.surveyPlace forKey:@"damagereportlocation"];
-    }
-    
-    if (self.surveyModel.surveyTrailerSealed) {
-        NSDictionary *sealedDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_SEALED];
-        if (sealedDict) {
-            NSString *sealedYesValue = [sealedDict valueForKey:@"Yes"];
-            NSString *sealedNoValue = [sealedDict valueForKey:@"No"];
+  } else {
+    [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
+  }
+  
+  NSString *ticketTitle = @"";
+  if ([[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]) {
+    ticketTitle = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"SURVEY_TICKET_TITLE", @""), [[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]];
+  }
+  [bodyDict setValue:ticketTitle forKey:@"ticket_title"];
+  
+  
+  if (self.surveyModel.surveyAssetModel.trailerId) {
+    [bodyDict setValue:self.surveyModel.surveyAssetModel.trailerId forKey:@"trailerid"];
+  }
+  
+  if (self.surveyModel.surveyPlace) {
+    [bodyDict setValue:self.surveyModel.surveyPlace forKey:@"damagereportlocation"];
+  }
+  
+  if (self.surveyModel.surveyTrailerSealed) {
+    NSDictionary *sealedDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_SEALED];
+    if (sealedDict) {
+      NSString *sealedYesValue = [sealedDict valueForKey:@"Yes"];
+      NSString *sealedNoValue = [sealedDict valueForKey:@"No"];
 #if kDebug
-            NSLog(@"%@ %@", sealedYesValue, sealedNoValue);
+      NSLog(@"%@ %@", sealedYesValue, sealedNoValue);
 #endif
-            if (sealedDict) {
-                [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?sealedYesValue:sealedNoValue forKey:@"sealed"];
-            } else {
-                [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
-            }
-        } else {
-            [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
-        }
+      if (sealedDict) {
+        [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?sealedYesValue:sealedNoValue forKey:@"sealed"];
+      } else {
+        [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
+      }
+    } else {
+      [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
     }
-    
-    if (self.surveyModel.surveyPlates) {
-        [bodyDict setValue:[NSString stringWithFormat:@"%d", [self.surveyModel.surveyPlates intValue]] forKey:@"plates"];
-    }
-    
-    if (self.surveyModel.surveyStraps) {
-        [bodyDict setValue:[NSString stringWithFormat:@"%d", [self.surveyModel.surveyStraps intValue]] forKey:@"straps"];
-    }
-    
+  }
+  
+  if (self.surveyModel.surveyPlates) {
+    [bodyDict setValue:[NSString stringWithFormat:@"%d", [self.surveyModel.surveyPlates intValue]] forKey:@"plates"];
+  }
+  
+  if (self.surveyModel.surveyStraps) {
+    [bodyDict setValue:[NSString stringWithFormat:@"%d", [self.surveyModel.surveyStraps intValue]] forKey:@"straps"];
+  }
+  
 #if kDebug
-    NSLog(@"Body dict: %@", bodyDict);
+  NSLog(@"Body dict: %@", bodyDict);
 #endif
+
+  
+  //submit survey report only if the user enters trailer id
+  if (!self.surveyModel.surveyAssetModel.trailerId || !self.surveyModel.surveyPlace) {
+    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"EMPTY_FIELDS", @"")];
     
-    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:bodyDict identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
+  } else if (![self.surveyModel.surveyTrailerSealed boolValue]) {
+    if (!self.surveyModel.surveyPlates || !self.surveyModel.surveyStraps) {
+      [DCSharedObject showAlertWithMessage:NSLocalizedString(@"EMPTY_FIELDS", @"")];
+    } else {
+       [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:bodyDict identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
+    }
+  } else {
+     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:bodyDict identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
+  }
+
+  
+  
+  
+  
+    
+   
 }
 
 - (IBAction)resetSurvey:(id)sender {
-    //[DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, @"15x762"] requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
     //reset the survey form here
     //reset trailer type
     UISegmentedControl *trailerTypeSegmentedControl = (UISegmentedControl *)[[self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]] viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
@@ -337,7 +360,7 @@
     }
     [self setTrailerInventoryVisible:YES];
     
-    [self toggleActionButtons];
+    //[self toggleActionButtons];
 }
 
 //open the Trailer inventory section
@@ -708,6 +731,9 @@
 
 - (void) filterAndShowAssetsFromAssetList:(NSArray *)assetList
 {
+#if kDebug
+    NSLog(@"%@", assetList);
+#endif
     NSMutableArray *filteredAssetList = [[[NSMutableArray alloc] init] autorelease];
     UIView *trailerTypeSegmentedControlCell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
     UISegmentedControl *trailerTypeSegmentedControl = (UISegmentedControl *)[trailerTypeSegmentedControlCell viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
@@ -721,7 +747,7 @@
 #endif
 
             if ([[trailerType lowercaseString] isEqualToString:OWN]) {
-                [filteredAssetList addObject:trailerType];
+                [filteredAssetList addObject:asset];
             }
         }
     } else {
@@ -796,7 +822,7 @@
             break;
     }
     
-    [self toggleActionButtons];
+    //[self toggleActionButtons];
     [self.surveyTableView reloadData];
 }
 

@@ -18,7 +18,7 @@
 "TRAILER_TYPE" = "Trailer Type";
 "OWN" = "Own";
 "RENTED" = "Rented";
-"ID" = "ID:";
+"ID" = "Trailer ID:";
 "PLACE" = "Place:";
 "SEALED" = "Sealed";
 "NO" = "No";
@@ -38,10 +38,10 @@
 "ADD_PHOTO_ALBUM" = "Saved Photos";
 "CANCEL" = "Cancel";
 "DISMISS" = "Dismiss";
-"REPORT_DAMAGE" = "Damages";
+"REPORT_DAMAGE" = "Report new damage";
 "ADD_NEW_IMAGE" = "Add a new image";
 "REPORT_NEW_DAMAGE" = "Report a new damage";
-"REPORTED_DAMAGES" = "Reported Damages";
+"REPORTED_DAMAGES" = "Previously reported damage";
 "LOGOUT" = "Logout";
 
 
@@ -49,7 +49,7 @@
 "DAMAGE_DETAILS" = "Damage Details";
 "ADD_NEW_DAMAGE_DETAIL" = "Add New Damage Detail";
 "PREVIOUSLY_REPORTED_DAMAGES" = "Previously Reported Damages";
-"REPORTING_DAMAGE" = "Reporting Damage";
+"REPORTING_DAMAGE" = "New damages";
 "DAMAGE_TYPE_ALREADY_ADDED" = "You have already added this trailer part and type. The images will be added to the existing one.";
 "EDIT" = "Edit";
 "DONE" = "Done";
@@ -89,3 +89,5 @@
 "PASSWORD_RESET_SUCCESSFUL" = "Your new password will be be sent to your email address shortly. Please login with your new password.";
 
 "SUBMIT_DAMAGE_ERROR" = "Could not submit some of the damage claims. Do you want to try again?";
+"CONFIRM_DAMAGE_SUBMIT" = "Are you sure you want to send this damage report for control?";
+"APPROVE_DAMAGE" = "Approve damage report";

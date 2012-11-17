@@ -1,6 +1,6 @@
 //
 //  PLSharedObject.m
-//  Plunk
+//  DamageClaim
 //
 //  Created by Dev on 14/06/12.
 //  Copyright (c) 2012 developer.gslab@gmail.com. All rights reserved.

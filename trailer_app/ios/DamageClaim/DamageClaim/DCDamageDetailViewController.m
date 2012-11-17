@@ -838,7 +838,12 @@
     
     switch (section) {
         case 0:
-            return NEW_DAMAGE_SECTION_ONE_ROWS_EDITABLE;
+            if ([self isEditable]) {
+                return NEW_DAMAGE_SECTION_ONE_ROWS_EDITABLE;
+            } else {
+                return NEW_DAMAGE_SECTION_ONE_ROWS_NON_EDITABLE;
+            }
+            
             break;
         case 1:
             if ([self isEditable]) {
@@ -950,16 +955,12 @@
             cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SimpleCell"] autorelease];
         }
         
-        if (indexPath.section == 0 && indexPath.row == 2) {
-            if ([self isEditable]) {
-                NSArray *customCellSegmentView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellSegmentedView" owner:nil options:nil];
-                if (customCellSegmentView) {
-                    if ([customCellSegmentView count] > 0) {
-                        cell = [customCellSegmentView objectAtIndex:0];
-                    }
+        if (indexPath.section == 0 && indexPath.row == 2 && [self isEditable]) {
+            NSArray *customCellSegmentView = [[NSBundle mainBundle] loadNibNamed:@"CustomCellSegmentedView" owner:nil options:nil];
+            if (customCellSegmentView) {
+                if ([customCellSegmentView count] > 0) {
+                    cell = [customCellSegmentView objectAtIndex:0];
                 }
-            } else {
-                cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SimpleCell"] autorelease];
             }
         }
         
@@ -1089,20 +1090,6 @@
                 segmentedControl.userInteractionEnabled = YES;
             } else {
                 segmentedControl.userInteractionEnabled = NO;
-            }
-        } else {
-            cell.textLabel.adjustsFontSizeToFitWidth = YES;
-            cell.textLabel.shadowColor = [UIColor whiteColor];
-            cell.textLabel.shadowOffset = CGSizeMake(1, 1);
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
-            if (self.damageDetailModel.damageDriverCausedDamage) {
-                if ([[self.damageDetailModel.damageDriverCausedDamage lowercaseString] isEqualToString:@"yes"]) {
-                    cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"DRIVER_CAUSED_DAMAGE", @""), NSLocalizedString(@"DRIVER", @"")];
-                } else {
-                    cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"DRIVER_CAUSED_DAMAGE", @""), NSLocalizedString(@"OTHER", @"")];
-                }
-            } else {
-                cell.textLabel.text = NSLocalizedString(@"DRIVER_CAUSED_DAMAGE", @"");
             }
         }
     }
