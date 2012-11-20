@@ -304,9 +304,9 @@
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSDictionary *resultDict = [jsonDict valueForKey:@"result"];
                         if ((NSNull *)[resultDict valueForKey:@"filecontent"] != [NSNull null]) {
-                            //#if kDebug
-                            //                            NSLog(@"\n\nData: %@\n\n", [resultDict valueForKey:@"filecontent"]);
-                            //#endif
+//#if kDebug
+//                            NSLog(@"\n\nData: %@\n\n", responseString);
+//#endif
                             NSData *imageData = [[resultDict valueForKey:@"filecontent"] base64DecodedData];
                             //UIImage *image = [UIImage imageWithData:imageData];
                             UIImage *image = [[[UIImage alloc] initWithData:imageData] autorelease];
@@ -371,86 +371,12 @@
 #endif
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, imageId] requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self showProgressView:NO];
-    //    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[DCSharedObject createURLStringFromIdentifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, imageId]]] cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:TIMEOUT_INTERVAL];
-    //    
-    //    [request setHTTPMethod:@"GET"];
-    //    
-    //    for (NSString *headerKey in [RequestHeaders commonHeaders]) {
-    //        [request setValue:[[RequestHeaders commonHeaders] objectForKey:headerKey] forHTTPHeaderField:headerKey];
-    //    }
-    //    
-    //    NSString *signature = [DCSharedObject generateSignatureFromModel:DOCUMENTATTACHMENTS requestType:@"GET"];
-    //#if kDebug
-    //    NSLog(@"Signature: %@", signature);
-    //#endif
-    //    [request setValue:signature forHTTPHeaderField:X_SIGNATURE];
-    //    
-    //#if kDebug
-    //    NSLog(@"headers: %@", [request allHTTPHeaderFields]);
-    //#endif
-    //
-    //    if (signature) {
-    //        NSURLResponse *response = nil;
-    //        NSError *error = nil;
-    //        NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    //        if (error) {
-    //#if kDebug
-    //            NSLog(@"%@", [error description]);
-    //#endif
-    //
-    //            [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
-    //            //image was not loaded remove a row from the model array of the table
-    //            //removing any array from documentIdArray will do since this array only gives a hint 
-    //            //of how many images are there
-    //            if (self.documentIdArray) {
-    //                if ([self.documentIdArray count] > 0) {
-    //                    [self.documentIdArray removeObjectAtIndex:0];
-    //                }
-    //            }
-    //            return;
-    //        }
-    //        if (response) {
-    //            NSString *responseString = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
-    //#if kDebug
-    //            NSLog(@"here: %@", responseString);
-    //#endif
-    //            
-    //            if ([(NSHTTPURLResponse *)response statusCode] != 200) {
-    //
-    //                [self performSelectorOnMainThread:@selector(showError) withObject:nil waitUntilDone:NO];
-    //                //image was not loaded remove a row from the model array of the table
-    //                //removing any array from documentIdArray will do since this array only gives a hint 
-    //                //of how many images are there
-    //                if (self.documentIdArray) {
-    //                    if ([self.documentIdArray count] > 0) {
-    //                        [self.documentIdArray removeObjectAtIndex:0];
-    //                    }
-    //                }
-    //                [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
-    //                return;
-    //            } else {
-    //                [self parseResponse:responseString forIdentifier:DOCUMENTATTACHMENTS_ID];
-    //            }
-    //        }
-    //    }
-    //    [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
 }
 
 -(void) getImages {
-    if (self.documentIdArray) {
-        //        if (!self.opertationQueue) {
-        //            self.opertationQueue = [[[NSOperationQueue alloc] init] autorelease];
-        //        }
-        //        [self.opertationQueue cancelAllOperations];
-        
+    if (self.documentIdArray) {        
         for (NSString *imageId in self.documentIdArray) {
             [self getImageFromId:imageId];
-            //            NSBlockOperation *blockOperation = [[[NSBlockOperation alloc] init] autorelease];
-            //            [blockOperation addExecutionBlock:^(void) {
-            //                [self getImageFromId:imageId];
-            //            }];
-            //            [self.opertationQueue addOperation:blockOperation];
-            
         }
     }
 }
@@ -616,7 +542,7 @@
 
 #pragma mark - UIImagePickerControllerDelegate
 -(void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
-    
+    [picker dismissModalViewControllerAnimated:YES];
     NSString *mediaType = [info objectForKey: UIImagePickerControllerMediaType];
     
     if ([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
@@ -732,7 +658,7 @@
     }
     
     self.imagePickerController = nil;
-    [[self modalViewController] dismissModalViewControllerAnimated:YES];
+    
     [self toggleEditButton];
 }
 

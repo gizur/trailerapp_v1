@@ -18,7 +18,15 @@
 @synthesize surveyAssetModel = _surveyAssetModel;
 @synthesize surveyTrailerSealed = _surveyTrailerSealed;
 
-
+- (id) init
+{
+    self = [super init];
+    if (self) {
+        _surveyAssetModel = [[DCAssetModel alloc] init];
+        [_surveyAssetModel retain];
+    }
+    return self;
+}
 
 -(void) dealloc {
     [_surveyPlace release];

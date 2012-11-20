@@ -410,13 +410,11 @@
 
 -(void) toggleTrailerType:(id)sender {
     UISegmentedControl *segmentedControl = (UISegmentedControl *) sender;
-    UITableViewCell *cell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
-    cell.textLabel.text = cell.textLabel.text = NSLocalizedString(@"ID", @"");
-    self.surveyModel.surveyAssetModel.trailerId = @"";
+    //UITableViewCell *cell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
     if ([segmentedControl selectedSegmentIndex] == 0) {
-        self.surveyModel.surveyAssetModel.trailerType = NSLocalizedString(@"OWN", @"");
+        self.surveyModel.surveyAssetModel.trailerType = [NSString stringWithString:NSLocalizedString(@"OWN", @"")];
     } else {
-        self.surveyModel.surveyAssetModel.trailerType = NSLocalizedString(@"RENTED", @"");
+        self.surveyModel.surveyAssetModel.trailerType = [NSString stringWithString:NSLocalizedString(@"RENTED", @"")];
     }
 }
 
@@ -1028,7 +1026,6 @@
                         [segmentedControl setSelectedSegmentIndex:1];
                     }
                     [segmentedControl addTarget:self action:@selector(toggleTrailerType:) forControlEvents:UIControlEventValueChanged];
-                    [segmentedControl sendActionsForControlEvents:UIControlEventValueChanged];
                 }
                     break;
                 case 1: {
