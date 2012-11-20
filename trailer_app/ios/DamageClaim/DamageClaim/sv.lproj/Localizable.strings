@@ -52,8 +52,7 @@
 
 "DAMAGE_DETAILS" = "Skadeuppgifter";
 
-"ADD_NEW_DAMAGE_DETAIL" = "Add New Damage Detail";
-"PREVIOUSLY_REPORTED_DAMAGES" = "Previously Reported Damages";
+"PREVIOUSLY_REPORTED_DAMAGES" = "Tidigare rapporterade skador";
 
 
 "REPORTING_DAMAGE" = "Nyfunna skador";

@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define kDebug FALSE
+#define kDebug TRUE
 
 #define kLocalServer FALSE
 

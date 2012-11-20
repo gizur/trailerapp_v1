@@ -47,7 +47,6 @@
 
 
 "DAMAGE_DETAILS" = "Damage Details";
-"ADD_NEW_DAMAGE_DETAIL" = "Add New Damage Detail";
 "PREVIOUSLY_REPORTED_DAMAGES" = "Previously Reported Damages";
 "REPORTING_DAMAGE" = "New damages";
 "DAMAGE_TYPE_ALREADY_ADDED" = "You have already added this trailer part and type. The images will be added to the existing one.";

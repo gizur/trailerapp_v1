@@ -11,32 +11,6 @@
          timestampString = "374655767.808685"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "798"
-         endingLineNumber = "798"
-         landmarkName = "-pickListDidPickItem:ofType:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "DamageClaim/DCSurveyViewController.m"
-         timestampString = "374655767.808685"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "732"
-         endingLineNumber = "732"
-         landmarkName = "-filterAndShowAssetsFromAssetList:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "DamageClaim/DCSurveyViewController.m"
-         timestampString = "374655767.808685"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
          startingLineNumber = "353"
          endingLineNumber = "353"
          landmarkName = "-resetSurvey:"
@@ -46,26 +20,13 @@
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "DamageClaim/HTTPService.m"
-         timestampString = "374655366.858722"
+         filePath = "DamageClaim/DCSurveyViewController.m"
+         timestampString = "375089973.603567"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "94"
-         endingLineNumber = "94"
-         landmarkName = "-connection:canAuthenticateAgainstProtectionSpace:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "DamageClaim/HTTPService.m"
-         timestampString = "374655367.637129"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "98"
-         endingLineNumber = "98"
-         landmarkName = "-connection:didReceiveAuthenticationChallenge:"
+         startingLineNumber = "411"
+         endingLineNumber = "411"
+         landmarkName = "-toggleTrailerType:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>
