@@ -8,21 +8,32 @@
 
 #import "DCSurveyModel.h"
 
+#import "Const.h"
+
+
 @implementation DCSurveyModel
 @synthesize surveyPlace = _surveyPlace;
 @synthesize surveyPlates = _surveyPlates;
 @synthesize surveyStraps = _surveyStraps;
-@synthesize surveyTrailerId = _surveyTrailerId;
-@synthesize surveyTrailerType = _surveyTrailerType;
+@synthesize surveyAssetModel = _surveyAssetModel;
 @synthesize surveyTrailerSealed = _surveyTrailerSealed;
 
+- (id) init
+{
+    self = [super init];
+    if (self) {
+        _surveyAssetModel = [[DCAssetModel alloc] init];
+        [_surveyAssetModel retain];
+    }
+    return self;
+}
+
 -(void) dealloc {
-    [_surveyPlates release];
+    [_surveyPlace release];
     [_surveyPlates release];
     [_surveyStraps release];
-    [_surveyTrailerId release];
+    [_surveyAssetModel release];
     [_surveyTrailerSealed release];
-    [_surveyTrailerType release];
     [super dealloc];
 }
 

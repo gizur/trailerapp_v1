@@ -4,6 +4,7 @@
    version = "1.0">
    <FileBreakpoints>
       <FileBreakpoint
+<<<<<<< HEAD
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
@@ -27,12 +28,25 @@
          startingLineNumber = "293"
          endingLineNumber = "293"
          landmarkName = "-getImageFromId:"
+=======
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "DamageClaim/DCChangePasswordViewController.m"
+         timestampString = "376219140.799094"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "118"
+         endingLineNumber = "118"
+         landmarkName = "-submit:"
+>>>>>>> multipleDamageClaim
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
+<<<<<<< HEAD
          filePath = "DamageClaim/DCDamageDetailViewController.m"
          timestampString = "368989192.557639"
          startingColumnNumber = "9223372036854775807"
@@ -178,6 +192,16 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "579"
          endingLineNumber = "579">
+=======
+         filePath = "DamageClaim/DCSurveyViewController.m"
+         timestampString = "378388040.80871"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "186"
+         endingLineNumber = "186"
+         landmarkName = "-openDamageList"
+         landmarkType = "5">
+>>>>>>> multipleDamageClaim
       </FileBreakpoint>
    </FileBreakpoints>
 </Bucket>

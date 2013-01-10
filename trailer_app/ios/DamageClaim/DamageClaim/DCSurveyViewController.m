@@ -23,6 +23,12 @@
 
 #import "DCDamageListViewController.h"
 
+#import "MBProgressHUD.h"
+
+#import "JSONKit.h"
+
+#import "DCChangePasswordViewController.h"
+
 
 #define SURVEY_SECTION_ONE_ROWS 4
 #define SURVEY_SECTION_TWO_ROWS 2
@@ -35,6 +41,10 @@
 @property (nonatomic, getter = isTrailerInventoryVisible) BOOL trailerInventoryVisible;
 @property (nonatomic) CGRect originalTableFrame;
 @property (nonatomic, retain) DCSurveyModel *surveyModel;
+@property (retain, nonatomic) IBOutlet UIBarButtonItem *submitToolBarButton;
+@property (retain, nonatomic) HTTPService *httpService;
+@property (nonatomic) NSInteger httpStatusCode;
+@property (nonatomic, getter = isPickListLoaded) BOOL pickListLoaded;
 
 -(void) customizeNavigationBar;
 -(IBAction) submitSurveyReport;
@@ -44,7 +54,12 @@
 -(BOOL) isEmpty:(NSString *)string;
 -(void) openDamageList;
 -(void) logout;
-
+-(void) toggleActionButtons;
+-(void) loadPickLists;
+-(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier;
+- (void) changePassword;
+- (void) filterAndShowAssetsFromAssetList:(NSArray *)assetList;
+- (void) handleNotification:(NSNotification *)notification;
 @end
 
 @implementation DCSurveyViewController
@@ -54,6 +69,10 @@
 @synthesize trailerInventoryVisible = _trailerInventoryVisible;
 @synthesize originalTableFrame = _originalTableFrame;
 @synthesize surveyModel = _surveyModel;
+@synthesize submitToolBarButton = _submitToolBarButton;
+@synthesize httpService = _httpService;
+@synthesize httpStatusCode = _httpStatusCode;
+@synthesize pickListLoaded = _pickListLoaded;
 
 #pragma mark - View LifeCycle
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -71,9 +90,6 @@
 	// Do any additional setup after loading the view.
     [self customizeNavigationBar];
     
-    DCLoginViewController *loginViewController = [[[DCLoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
-    [self presentModalViewController:loginViewController animated:NO];
-    
     //store the original tableview height. will be used in restoring it
     //to its old height
     self.originalTableFrame = self.surveyTableView.frame;
@@ -85,9 +101,11 @@
         self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
     }
     
-    if (!self.surveyModel.surveyTrailerId) {
-        [self.navigationItem.rightBarButtonItem setEnabled:NO];
-    }
+    [self.surveyTableView reloadData];
+    //[self toggleActionButtons];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:RESET_SURVEY_NOTIFICATION object:nil];
+    [self resetSurvey:nil];
     
 }
 
@@ -96,15 +114,31 @@
     [self setSurveyTableView:nil];
     [self setCustomCellSegmentedView:nil];
     [self setCustomCellTextFieldView:nil];
+    [self setSubmitToolBarButton:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RESET_SURVEY_NOTIFICATION object:nil];
     [super viewDidUnload];
+    
     // Release any retained subviews of the main view.
 }
 
 -(void) viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    [self.surveyTableView reloadData];
-    
+    if (![self isPickListLoaded]) {
+        [self setPickListLoaded:YES];
+        [self loadPickLists];
+    }
 }
+-(void) viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
+}
+
+
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
@@ -116,17 +150,28 @@
     [_customCellSegmentedView release];
     [_customCellTextFieldView release];
     [_surveyModel release];
+    [_submitToolBarButton release];
+    [_httpService release];
     [super dealloc];
 }
 
 #pragma mark - Others
 -(void) customizeNavigationBar {
+    [self.navigationController setNavigationBarHidden:NO];
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
 #if kDebug
     NSLog(@"%@", [self.navigationItem description]);
 #endif
     if (self.navigationItem) {
-        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"REPORT_DAMAGE", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(openDamageList)] autorelease];
+        UIBarButtonItem *settingsButton = [[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"key.png"] style:UIBarButtonItemStylePlain target:self action:@selector(changePassword)] autorelease];
+        
+        NSArray *navigationBarItems = [NSArray arrayWithObjects:
+                                       [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"REPORT_DAMAGE", @"")
+                                                                         style:UIBarButtonItemStyleBordered
+                                                                        target:self
+                                                                        action:@selector(openDamageList)] autorelease],
+                                       settingsButton, nil];
+        self.navigationItem.rightBarButtonItems = navigationBarItems;
         
         self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"LOGOUT", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(logout)] autorelease];
     }
@@ -134,35 +179,147 @@
 }
 
 -(void) logout {
-    
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:AUTHENTICATE_LOGOUT requestMethod:kRequestMethodPOST model:AUTHENTICATE delegate:self viewController:self];
 }
 
 //open the damage report's list
 -(void) openDamageList {
-    DCDamageListViewController *damageListViewController = [[[DCDamageListViewController alloc] initWithNibName:@"DamageListView" bundle:nil] autorelease];
-    [self.navigationController pushViewController:damageListViewController animated:YES];
+    //open damage screen only if the user enters trailer id
+    if (!self.surveyModel.surveyAssetModel.trailerId || !self.surveyModel.surveyPlace) {
+        [DCSharedObject showAlertWithMessage:NSLocalizedString(@"EMPTY_FIELDS", @"")];
+        
+    } else if (![self.surveyModel.surveyTrailerSealed boolValue]) {
+        if (!self.surveyModel.surveyPlates || !self.surveyModel.surveyStraps) {
+            [DCSharedObject showAlertWithMessage:NSLocalizedString(@"EMPTY_FIELDS", @"")];
+        } else {
+            //share the survey model with damageListViewController
+            [[[DCSharedObject sharedPreferences] preferences] setValue:self.surveyModel forKey:SURVEY_MODEL];
+            DCDamageListViewController *damageListViewController = [[[DCDamageListViewController alloc] initWithNibName:@"DamageListView" bundle:nil] autorelease];
+            [self.navigationController pushViewController:damageListViewController animated:YES];
+        }
+    } else {
+        //share the survey model with damageListViewController
+        [[[DCSharedObject sharedPreferences] preferences] setValue:self.surveyModel forKey:SURVEY_MODEL];
+        DCDamageListViewController *damageListViewController = [[[DCDamageListViewController alloc] initWithNibName:@"DamageListView" bundle:nil] autorelease];
+        [self.navigationController pushViewController:damageListViewController animated:YES];
+    }
+    
 }
 
 //send the survey to the server
 -(void) submitSurveyReport {
+  
+  
+  //make a dictionary of post data
+  NSMutableDictionary *bodyDict = [[[NSMutableDictionary alloc] init] autorelease];
+  
+  NSDictionary *reportDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_REPORTDAMAGE];
+  if (reportDamageDict) {
+    NSString *reportDamageNoValue = [reportDamageDict valueForKey:@"No"];
+#if kDebug
+    NSLog(@"%@", reportDamageDict);
+#endif
+    if (reportDamageDict) {
+      [bodyDict setValue:reportDamageNoValue forKey:@"reportdamage"];
+    } else {
+      [bodyDict setValue:@"No" forKey:@"reportdamage"];
+    }
+  } else {
+    [bodyDict setValue:@"No" forKey:@"reportdamage"];
+  }
+  
+  NSDictionary *ticketStatusDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_TICKETSTATUS];
+  if (ticketStatusDict) {
+    NSString *ticketStatusClosedValue = [ticketStatusDict valueForKey:@"Closed"];
+#if kDebug
+    NSLog(@"%@, %@", ticketStatusDict, ticketStatusClosedValue);
+#endif
+    if (ticketStatusClosedValue) {
+      [bodyDict setValue:ticketStatusClosedValue forKey:@"ticketstatus"];
+    } else {
+      [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
+    }
+  } else {
+    [bodyDict setValue:@"Closed" forKey:@"ticketstatus"];
+  }
+  
+  NSString *ticketTitle = @"";
+  if ([[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]) {
+    ticketTitle = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"SURVEY_TICKET_TITLE", @""), [[NSUserDefaults standardUserDefaults] valueForKey:CONTACT_NAME]];
+  }
+  [bodyDict setValue:ticketTitle forKey:@"ticket_title"];
+  
+  
+  if (self.surveyModel.surveyAssetModel.trailerId) {
+    [bodyDict setValue:self.surveyModel.surveyAssetModel.trailerId forKey:@"trailerid"];
+  }
+  
+  if (self.surveyModel.surveyPlace) {
+    [bodyDict setValue:self.surveyModel.surveyPlace forKey:@"damagereportlocation"];
+  }
+  
+  if (self.surveyModel.surveyTrailerSealed) {
+    NSDictionary *sealedDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_SEALED];
+    if (sealedDict) {
+      NSString *sealedYesValue = [sealedDict valueForKey:@"Yes"];
+      NSString *sealedNoValue = [sealedDict valueForKey:@"No"];
+#if kDebug
+      NSLog(@"%@ %@", sealedYesValue, sealedNoValue);
+#endif
+      if (sealedDict) {
+        [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?sealedYesValue:sealedNoValue forKey:@"sealed"];
+      } else {
+        [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
+      }
+    } else {
+      [bodyDict setValue:[self.surveyModel.surveyTrailerSealed boolValue]?@"Yes":@"No" forKey:@"sealed"];
+    }
+  }
+  
+  if (self.surveyModel.surveyPlates) {
+    [bodyDict setValue:[NSString stringWithFormat:@"%d", [self.surveyModel.surveyPlates intValue]] forKey:@"plates"];
+  }
+  
+  if (self.surveyModel.surveyStraps) {
+    [bodyDict setValue:[NSString stringWithFormat:@"%d", [self.surveyModel.surveyStraps intValue]] forKey:@"straps"];
+  }
+  
+#if kDebug
+  NSLog(@"Body dict: %@", bodyDict);
+#endif
+
+  
+  //submit survey report only if the user enters trailer id
+  if (!self.surveyModel.surveyAssetModel.trailerId || !self.surveyModel.surveyPlace) {
+    [DCSharedObject showAlertWithMessage:NSLocalizedString(@"EMPTY_FIELDS", @"")];
+    
+  } else if (![self.surveyModel.surveyTrailerSealed boolValue]) {
+    if (!self.surveyModel.surveyPlates || !self.surveyModel.surveyStraps) {
+      [DCSharedObject showAlertWithMessage:NSLocalizedString(@"EMPTY_FIELDS", @"")];
+    } else {
+       [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:bodyDict identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
+    }
+  } else {
+     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:bodyDict identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
+  }
+
 }
 
 - (IBAction)resetSurvey:(id)sender {
     //reset the survey form here
-    
     //reset trailer type
     UISegmentedControl *trailerTypeSegmentedControl = (UISegmentedControl *)[[self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]] viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
     [trailerTypeSegmentedControl setSelectedSegmentIndex:0];
     
-    if (self.surveyModel.surveyTrailerType) {
-        self.surveyModel.surveyTrailerType = @"";
+    if (self.surveyModel.surveyAssetModel.trailerType) {
+        self.surveyModel.surveyAssetModel.trailerType = @"";
     }
     
     //reset trailer id
     UITableViewCell *idCell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
     idCell.textLabel.text = NSLocalizedString(@"ID", @"");
-    if (self.surveyModel.surveyTrailerId) {
-        self.surveyModel.surveyTrailerId = nil;
+    if (self.surveyModel.surveyAssetModel.trailerId) {
+        self.surveyModel.surveyAssetModel.trailerId = nil;
     }
     
     //reset survey place
@@ -188,30 +345,23 @@
     
     //reset survey trailer sealed field
     UISegmentedControl *trailerSealedSegmentedControl = (UISegmentedControl *)[[self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:3 inSection:0]] viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
-    [trailerSealedSegmentedControl setSelectedSegmentIndex:0];
+    [trailerSealedSegmentedControl setSelectedSegmentIndex:1];
     if (self.surveyModel.surveyTrailerSealed) {
         self.surveyModel.surveyTrailerSealed = nil;
     }
-    if ([self isTrailerInventoryVisible]) {
+    if (![self isTrailerInventoryVisible]) {
         [self toggleInventorySection:trailerSealedSegmentedControl];
     }
-    [self setTrailerInventoryVisible:NO];
+    [self setTrailerInventoryVisible:YES];
     
-    if (!self.surveyModel.surveyTrailerId) {
-        [self.navigationItem.rightBarButtonItem setEnabled:NO];
-    }
-    
-    
-    
-    
-    
+    //[self toggleActionButtons];
 }
 
 //open the Trailer inventory section
 //if trailer is not sealed
 -(void) toggleInventorySection:(id)sender {
     UISegmentedControl *segmentedControl = (UISegmentedControl *)sender;
-        
+    
     if ([segmentedControl selectedSegmentIndex] == 0 && [self isTrailerInventoryVisible]) {
         //make inventory section invisible
         self.trailerInventoryVisible = NO;
@@ -224,19 +374,23 @@
         //[self.surveyTableView reloadData];
         [self.surveyTableView endUpdates];
         
+        //reset the plates and straps if the trailer is sealed
+        self.surveyModel.surveyPlates = nil;
+        self.surveyModel.surveyStraps = nil;
+        
+        
         
     } else if ([segmentedControl selectedSegmentIndex] == 1 && ![self isTrailerInventoryVisible]) {
         //make inventory section visible
         self.trailerInventoryVisible = YES;
         
         self.surveyModel.surveyTrailerSealed = [NSNumber numberWithBool:NO];
-
+        
         
         NSArray *indexPaths = [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:0 inSection:1], [NSIndexPath indexPathForRow:1 inSection:1], nil];
         
         [self.surveyTableView beginUpdates];
         [self.surveyTableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
-        //[self.surveyTableView reloadData];
         [self.surveyTableView endUpdates];
     }
     //store the original tableview height. will be used in restoring it
@@ -245,16 +399,16 @@
 #if kDebug
     NSLog(@"TABLE HEIGHT: %f, ORIGINAL HEIGHT: %f", self.surveyTableView.frame.size.height, self.originalTableFrame.size.height);
 #endif
-
+    
 }
 
 -(void) toggleTrailerType:(id)sender {
     UISegmentedControl *segmentedControl = (UISegmentedControl *) sender;
+
     if ([segmentedControl selectedSegmentIndex] == 0) {
-        //assigning temporary hard coded values
-        self.surveyModel.surveyTrailerType = @"Own";
+        self.surveyModel.surveyAssetModel.trailerType = [NSString stringWithString:NSLocalizedString(@"OWN", @"")];
     } else {
-        self.surveyModel.surveyTrailerType = @"Rented";
+        self.surveyModel.surveyAssetModel.trailerType = [NSString stringWithString:NSLocalizedString(@"RENTED", @"")];
     }
 }
 
@@ -266,36 +420,434 @@
     }
     return NO;
 }
+
+-(void) toggleActionButtons {
+    if (!self.surveyModel.surveyAssetModel.trailerId) {
+        //[self.navigationItem.rightBarButtonItem setEnabled:NO];
+        [self.submitToolBarButton setEnabled:NO];
+    } else {
+        //[self.navigationItem.rightBarButtonItem setEnabled:YES];
+        [self.submitToolBarButton setEnabled:YES];
+    }
+}
+
+-(void) loadPickLists {
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_TICKETSTATUS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+    
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:HELPDESK_SEALED requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+    
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+    
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_DRIVERCAUSEDDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+  
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:ASSETS_TRAILERTYPE requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
+    
+}
+
+-(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
+    //logout irrespective of the response string
+    if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
+        return;
+    } else
+        if (responseString) {
+            NSDictionary *jsonDict = [responseString objectFromJSONString];
+            if ([identifier isEqualToString:HELPDESK_TICKETSTATUS]) {
+                if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+                    if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                        if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                            NSArray *resultArray = [jsonDict valueForKey:@"result"];
+                            NSMutableDictionary *ticketStatusDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                            for (NSDictionary *result in resultArray) {
+                                if ((NSNull *)[result valueForKey:@"label"] != [NSNull null]) {
+                                    NSString *label = [result valueForKey:@"label"];
+                                    if ((NSNull *)[result valueForKey:@"value"] != [NSNull null]) {
+                                        NSString *value = [result valueForKey:@"value"];
+                                        [ticketStatusDictionary setValue:value forKey:label];
+                                    }
+                                }
+                            }
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:ticketStatusDictionary forKey:HELPDESK_TICKETSTATUS];
+                        }
+                        [self.surveyTableView reloadData];
+                        
+                    }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                        NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                        if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                            NSString *errorCode = [errorDict valueForKey:@"code"];
+                            if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                                if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                    [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+
+                                    
+                                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_TICKETSTATUS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                                }
+                            } else {
+                                [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                            }
+                        }
+                    } else {
+                        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                    }
+                }
+            }
+            
+            
+            if ([identifier isEqualToString:HELPDESK_SEALED]) {
+                if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+                    if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                        if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                            NSArray *resultArray = [jsonDict valueForKey:@"result"];
+                            NSMutableDictionary *sealedDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                            for (NSDictionary *result in resultArray) {
+                                if ((NSNull *)[result valueForKey:@"label"] != [NSNull null]) {
+                                    NSString *label = [result valueForKey:@"label"];
+                                    if ((NSNull *)[result valueForKey:@"value"] != [NSNull null]) {
+                                        NSString *value = [result valueForKey:@"value"];
+                                        [sealedDictionary setValue:value forKey:label];
+                                    }
+                                }
+                            }
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:sealedDictionary forKey:HELPDESK_SEALED];
+                            //as per the requirement, select trailer sealed to No
+                            self.surveyModel.surveyTrailerSealed = [NSNumber numberWithBool:NO];
+                            [self setTrailerInventoryVisible:YES];
+                            
+                        }
+                        [self.surveyTableView reloadData];
+                    }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                        NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                        if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                            NSString *errorCode = [errorDict valueForKey:@"code"];
+                            if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                                if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                    [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+
+                                    //timestamp is adjusted. call the same url again
+                                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_SEALED requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                                }
+                            } else {
+                                [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                            }
+                        }
+                    } else {
+                        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                    }
+                }
+            }
+            
+            
+            if ([identifier isEqualToString:HELPDESK_REPORTDAMAGE]) {
+                if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+                    if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                        if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                            NSArray *resultArray = [jsonDict valueForKey:@"result"];
+                            NSMutableDictionary *reportDamageDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                            for (NSDictionary *result in resultArray) {
+                                if ((NSNull *)[result valueForKey:@"label"] != [NSNull null]) {
+                                    NSString *label = [result valueForKey:@"label"];
+                                    if ((NSNull *)[result valueForKey:@"value"] != [NSNull null]) {
+                                        NSString *value = [result valueForKey:@"value"];
+                                        [reportDamageDictionary setValue:value forKey:label];
+                                    }
+                                }
+                            }
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:reportDamageDictionary forKey:HELPDESK_REPORTDAMAGE];
+                        }
+                        [self.surveyTableView reloadData];
+                    }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                        NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                        if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                            NSString *errorCode = [errorDict valueForKey:@"code"];
+                            if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                                if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                    [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                    
+                                    //timestamp is adjusted. call the same url again
+                                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                                }
+                            } else {
+                                [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                            }
+                        }
+                    } else {
+                        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                    }
+                }
+            }
+            
+            if ([identifier isEqualToString:HELPDESK_DRIVERCAUSEDDAMAGE]) {
+                if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+                    if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                        if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                            NSArray *resultArray = [jsonDict valueForKey:@"result"];
+                            NSMutableDictionary *driverCausedDamageDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                            for (NSDictionary *result in resultArray) {
+                                if ((NSNull *)[result valueForKey:@"label"] != [NSNull null]) {
+                                    NSString *label = [result valueForKey:@"label"];
+                                    if ((NSNull *)[result valueForKey:@"value"] != [NSNull null]) {
+                                        NSString *value = [result valueForKey:@"value"];
+                                        [driverCausedDamageDictionary setValue:value forKey:label];
+                                    }
+                                }
+                            }
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:driverCausedDamageDictionary forKey:HELPDESK_DRIVERCAUSEDDAMAGE];
+                        }
+                        [self.surveyTableView reloadData];
+                        
+                    }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                        NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                        if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                            NSString *errorCode = [errorDict valueForKey:@"code"];
+                            if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                                if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                    [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                    
+                                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_DRIVERCAUSEDDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+                                }
+                            } else {
+                                [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                            }
+                        }
+                    } else {
+                        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                    }
+                }
+            }
+            
+            
+            if ([identifier isEqualToString:HELPDESK]) {
+                if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+                    if (![(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                        if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                            NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                            if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                                NSString *errorCode = [errorDict valueForKey:@"code"];
+                                if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                                    if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                        [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                        
+                                        //timestamp is adjusted. call the same url again
+                                        [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
+                                    }
+                                } else {
+                                    [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                                }
+                            }
+                        }
+                    } else {
+                        if (self.navigationController) {
+                            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+                        } else {
+                            [DCSharedObject hideProgressDialogInView:self.view];
+                        }
+                        [self showAlertWithMessage:NSLocalizedString(@"SURVEY_SUBMITTED_SUCCESSFULLY", @"")];
+                        [self resetSurvey:nil];
+                    }
+                }
+            }
+            
+            if ([identifier isEqualToString:ASSETS]) {
+                if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+                    if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                        if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                            NSArray *assetsArray = [jsonDict valueForKey:@"result"];
+                            
+                            NSMutableArray *modelArray = [[[NSMutableArray alloc] init] autorelease];
+                            for (NSDictionary *assetDict in assetsArray) {
+                                
+                                if ((NSNull *)[assetDict valueForKey:@"assetstatus"] != [NSNull null]) {
+                                    if ([[[assetDict valueForKey:@"assetstatus"] lowercaseString] isEqualToString:@"in service"]) {
+                                        NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                                        
+                                        NSString *trailerName;
+                                        //trailerId will not be used. assetname will be shown as well as sent to the server
+                                        if ((NSNull *)[assetDict valueForKey:@"assetname"] != [NSNull null]) {
+                                            trailerName = [assetDict valueForKey:@"assetname"];
+                                            [dictionary setValue:trailerName forKey:LABEL];
+                                            [dictionary setValue:trailerName forKey:VALUE];
+                                            
+                                            if ((NSNull *)[assetDict valueForKey:@"trailertype"] != [NSNull null]) {
+                                                NSString *trailertype = [assetDict valueForKey:@"trailertype"];
+                                                [dictionary setValue:trailertype forKey:TRAILER_TYPE];
+                                            }
+                                            
+                                            
+                                        }
+                                        [modelArray addObject:dictionary];
+                                    }
+                                }
+                            }
+#if kDebug
+                            NSLog(@"%@", modelArray);
+#endif
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:modelArray forKey:ASSETS_LIST];
+                            [self filterAndShowAssetsFromAssetList:modelArray];
+                        }
+                    }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                        NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                        if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                            NSString *errorCode = [errorDict valueForKey:@"code"];
+                            if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                                if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                    [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                    
+                                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
+                                }
+                            } else {
+                                [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                            }
+                        }
+                    } else {
+                        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                    }
+                }
+            }
+            
+            
+            if ([identifier isEqualToString:ASSETS_TRAILERTYPE]) {
+                if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+                    if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                        if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                            NSArray *resultArray = [jsonDict valueForKey:@"result"];
+                            NSMutableDictionary *trailerTypeDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                            for (NSDictionary *result in resultArray) {
+                                if ((NSNull *)[result valueForKey:@"label"] != [NSNull null]) {
+                                    NSString *label = [result valueForKey:@"label"];
+                                    if ((NSNull *)[result valueForKey:@"value"] != [NSNull null]) {
+                                        NSString *value = [result valueForKey:@"value"];
+                                        [trailerTypeDictionary setValue:value forKey:label];
+                                    }
+                                }
+                            }
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:trailerTypeDictionary forKey:ASSETS_TRAILERTYPE];
+#if kDebug
+                            NSLog(@"%@", trailerTypeDictionary);
+#endif
+                        }
+                        [self.surveyTableView reloadData];
+                        
+                    }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                        NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                        if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                            NSString *errorCode = [errorDict valueForKey:@"code"];
+                            if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                                if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                    [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                    
+                                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:ASSETS_TRAILERTYPE requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
+                                }
+                            } else {
+                                [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                            }
+                        }
+                    } else {
+                        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                    }
+                }
+            }
+        }
+}
+
+-(void) handleNotification:(NSNotification *)notification {
+    if ([[notification name] isEqualToString:RESET_SURVEY_NOTIFICATION]) {
+        [self resetSurvey:nil];
+    }
+}
+
+- (void) changePassword {
+    DCChangePasswordViewController *changePasswordViewController = [[[DCChangePasswordViewController alloc] initWithNibName:@"ChangePasswordView" bundle:nil] autorelease];
+    [self.navigationController pushViewController:changePasswordViewController animated:YES];
+}
+
+- (void) filterAndShowAssetsFromAssetList:(NSArray *)assetList
+{
+#if kDebug
+    NSLog(@"%@", assetList);
+#endif
+    NSMutableArray *filteredAssetList = [[[NSMutableArray alloc] init] autorelease];
+    UIView *trailerTypeSegmentedControlCell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+    UISegmentedControl *trailerTypeSegmentedControl = (UISegmentedControl *)[trailerTypeSegmentedControlCell viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
+    
+    NSString *selectedTitle = [trailerTypeSegmentedControl titleForSegmentAtIndex:[trailerTypeSegmentedControl selectedSegmentIndex]];
+    for (NSDictionary *asset in assetList) {
+        NSString *trailerType = [asset valueForKey:TRAILER_TYPE];
+#if kDebug
+        NSLog(@"asset: %@ trailerType: %@", asset, trailerType);
+#endif
+        
+        if ([[trailerType lowercaseString] isEqualToString:[selectedTitle lowercaseString]]) {
+            [filteredAssetList addObject:asset];
+        }
+    }
+#if kDebug
+    NSLog(@"filteredList: %@", filteredAssetList);
+#endif
+  
+    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:filteredAssetList type:DCPickListItemSurveyTrailerId isSingleValue:YES] autorelease];
+    pickListViewController.delegate = self;
+    [self.navigationController pushViewController:pickListViewController animated:YES];
+}
+
+#pragma mark - UIAlertViewDelegate methods
+-(void) alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    [super alertView:alertView didDismissWithButtonIndex:buttonIndex];
+    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"LOGOUT", @"")]) {
+        [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:AUTHENTICATE_LOGOUT requestMethod:kRequestMethodGET model:AUTHENTICATE delegate:self viewController:self];
+    }
+}
+
+
+
 #pragma mark - DCPickListViewControllerDelegate
 -(void) pickListDidPickItem:(id)item ofType:(NSInteger)type {
+    NSDictionary *dict = item;
     switch (type) {
         case DCPickListItemSurveyTrailerId:
             if (!self.surveyModel) {
                 self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
             }
-            self.surveyModel.surveyTrailerId = item;
+            
+            if (!self.surveyModel.surveyAssetModel) {
+                self.surveyModel.surveyAssetModel = [[[DCAssetModel alloc] init] autorelease];
+            }
+            
+            
+            self.surveyModel.surveyAssetModel.trailerName = [dict valueForKey:LABEL];
+#if kDebug
+            NSLog(@"%@", self.surveyModel.surveyAssetModel);
+#endif
+            self.surveyModel.surveyAssetModel.trailerId = [dict valueForKey:VALUE];
             break;
         case DCPickListItemSurveyPlace:
             if (!self.surveyModel) {
                 self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
             }
-            self.surveyModel.surveyPlace = item;
+            self.surveyModel.surveyPlace = [item valueForKey:VALUE];
             break;
         case DCPickListItemSurveyPlates:
             if (!self.surveyModel) {
                 self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
             }
-            self.surveyModel.surveyPlates = item;
+            self.surveyModel.surveyPlates = [item valueForKey:VALUE];
             break;
         case DCPickListItemSurveyStraps:
             if (!self.surveyModel) {
                 self.surveyModel = [[[DCSurveyModel alloc] init] autorelease];
             }
-            self.surveyModel.surveyStraps = item;
+            self.surveyModel.surveyStraps = [item valueForKey:VALUE];
             break;
         default:
             break;
     }
+    
+    //[self toggleActionButtons];
+    [self.surveyTableView reloadData];
 }
 
 -(void) pickListDidPickItems:(NSArray *)items ofType:(NSInteger)type {
@@ -378,6 +930,66 @@
     return YES;
 }
 
+
+#pragma mark - HTTPServiceDelegate methods
+-(void) responseCode:(int)code {
+    self.httpStatusCode = code;
+}
+
+-(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
+    
+    NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+#if kDebug
+    NSLog(@"%@: %@", identifier, responseString);
+#endif
+    
+    if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
+        [self parseResponse:[DCSharedObject decodeSwedishHTMLFromString:responseString] forIdentifier:identifier];
+    } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
+        
+    } else {
+        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
+    //hide the progress bar only after trailertype is loaded
+    if ([identifier isEqualToString:ASSETS_TRAILERTYPE]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
+    }
+    
+}
+
+-(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
+    if (self.navigationController) {
+        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+    } else {
+        [DCSharedObject hideProgressDialogInView:self.view];
+    }
+    if ([error code] >= kNetworkConnectionError && [error code] <= kHostUnreachableError) {
+        [self showAlertWithMessage:NSLocalizedString(@"NETWORK_ERROR", @"")];
+    } else if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
+        [DCSharedObject processLogout:self.navigationController clearData:NO];
+        
+    } else {
+        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+    }
+    
+    
+}
+
+-(void) storeResponse:(NSData *)data forIdentifier:(NSString *)identifier {
+    
+}
+
+
 #pragma mark - UITableViewDataSource methods
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
     return 2;
@@ -423,7 +1035,6 @@
         
         if ((indexPath.section == 0 && (indexPath.row == 1 || indexPath.row == 2)) || indexPath.section == 1) {
             cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SimpleCell"] autorelease];
-            
         }
     }
     
@@ -431,13 +1042,22 @@
         case 0:
             switch (indexPath.row) {
                 case 0: {
+                    cell.selectionStyle = UITableViewCellSelectionStyleNone;
                     UILabel *titleLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_TITE_LABEL_TAG];
                     titleLabel.text = NSLocalizedString(@"TRAILER_TYPE", @"");
                     
                     UISegmentedControl *segmentedControl = (UISegmentedControl *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
-                    [segmentedControl setTitle:NSLocalizedString(@"OWN", @"") forSegmentAtIndex:0];
-                    [segmentedControl setTitle:NSLocalizedString(@"RENTED", @"") forSegmentAtIndex:1];
-                    if ([[self.surveyModel.surveyTrailerType lowercaseString] isEqualToString:NSLocalizedString(@"RENTED", @"")]) {
+                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_TRAILERTYPE]) {
+                        NSDictionary *trailerTypeDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_TRAILERTYPE];
+                        if ([[trailerTypeDict allKeys] count] == 2) {
+                            [segmentedControl setTitle:[[trailerTypeDict allKeys] objectAtIndex:0] forSegmentAtIndex:0];
+                            [segmentedControl setTitle:[[trailerTypeDict allKeys] objectAtIndex:1] forSegmentAtIndex:1];
+                        }
+#if kDebug
+                        NSLog(@"TrailerTypr: %@", [[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_TRAILERTYPE]);
+#endif
+                    }
+                    if ([[self.surveyModel.surveyAssetModel.trailerType lowercaseString] isEqualToString:[NSLocalizedString(@"RENTED", @"") lowercaseString]]) {
                         [segmentedControl setSelectedSegmentIndex:1];
                     }
                     [segmentedControl addTarget:self action:@selector(toggleTrailerType:) forControlEvents:UIControlEventValueChanged];
@@ -449,16 +1069,16 @@
                     
                     cell.textLabel.shadowColor = [UIColor whiteColor];
                     cell.textLabel.shadowOffset = CGSizeMake(1, 1);
-                    if (self.surveyModel.surveyTrailerId) {
-                        cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"ID", @""), self.surveyModel.surveyTrailerId];
-                         [self.navigationItem.rightBarButtonItem setEnabled:YES];
+                    if (self.surveyModel.surveyAssetModel.trailerName) {
+                        cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"ID", @""), self.surveyModel.surveyAssetModel.trailerName];
+                        [self.navigationItem.rightBarButtonItem setEnabled:YES];
                         
                     } else {
                         cell.textLabel.text = NSLocalizedString(@"ID", @"");
                     }
                 }
                     break;
-                case 2: {                    
+                case 2: {
                     cell.selectionStyle = UITableViewCellSelectionStyleGray;
                     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     cell.textLabel.shadowColor = [UIColor whiteColor];
@@ -471,12 +1091,26 @@
                 }
                     break;
                 case 3: {
+                    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+                    
                     UILabel *titleLabel = (UILabel *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_TITE_LABEL_TAG];
                     titleLabel.text = NSLocalizedString(@"SEALED", @"");
                     
                     UISegmentedControl *segmentedControl = (UISegmentedControl *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
-                    [segmentedControl setTitle:NSLocalizedString(@"YES", @"") forSegmentAtIndex:0];
-                    [segmentedControl setTitle:NSLocalizedString(@"NO", @"") forSegmentAtIndex:1];
+                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_SEALED]) {
+                        NSString *yesString = [[[DCSharedObject sharedPreferences] preferences] valueForKey:@"Yes"];
+                        NSString *noString = [[[DCSharedObject sharedPreferences] preferences] valueForKey:@"No"];
+                        if (yesString && noString) {
+                            [segmentedControl setTitle:yesString forSegmentAtIndex:0];
+                            [segmentedControl setTitle:noString forSegmentAtIndex:1];
+                        } else {
+                            [segmentedControl setTitle:NSLocalizedString(@"YES", @"") forSegmentAtIndex:0];
+                            [segmentedControl setTitle:NSLocalizedString(@"NO", @"") forSegmentAtIndex:1];
+                        }
+                    } else {
+                        [segmentedControl setTitle:NSLocalizedString(@"YES", @"") forSegmentAtIndex:0];
+                        [segmentedControl setTitle:NSLocalizedString(@"NO", @"") forSegmentAtIndex:1];
+                    }
                     [segmentedControl addTarget:self action:@selector(toggleInventorySection:) forControlEvents:UIControlEventValueChanged];
                     if (self.surveyModel.surveyTrailerSealed) {
 #if kDebug
@@ -503,7 +1137,7 @@
                     
                     if (self.surveyModel.surveyPlates) {
                         cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"PLATES", @""), self.surveyModel.surveyPlates];
-                        } else {
+                    } else {
                         cell.textLabel.text = NSLocalizedString(@"PLATES", @"");
                     }
                 }
@@ -541,18 +1175,12 @@
         case 0:
             switch (indexPath.row) {
                 case 1: {
-                    //dummy values
-                    NSArray *trailerIdArray = [NSArray arrayWithObjects:@"TR031A", @"TR031B", @"TR031B", @"TR031B", nil];
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyTrailerId isSingleValue:YES] autorelease];
-                    pickListViewController.delegate = self;
-                    [self.navigationController pushViewController:pickListViewController animated:YES];
+                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
                 }
                     break;
                 case 2: {
-                    //dummy values
-                    NSArray *trailerIdArray = [NSArray arrayWithObjects:@"Place 1", @"Place 2", @"Place 3", @"Place 4", nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyPlace isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:nil type:DCPickListItemSurveyPlace isSingleValue:YES] autorelease];
                     pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
@@ -564,19 +1192,14 @@
         case 1:
             switch (indexPath.row) {
                 case 0: {
-                    //dummy values
-                    NSArray *trailerIdArray = [NSArray arrayWithObjects:@"1", @"2", @"3", @"4", nil];
-                    
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyPlates isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:nil type:DCPickListItemSurveyPlates isSingleValue:YES] autorelease];
                     pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }
                     break;
                 case 1: {
-                    //dummy values
-                    NSArray *trailerIdArray = [NSArray arrayWithObjects:@"1", @"2", @"3", @"4", nil];
                     
-                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:trailerIdArray type:DCPickListItemSurveyStraps isSingleValue:YES] autorelease];
+                    DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:nil type:DCPickListItemSurveyStraps isSingleValue:YES] autorelease];
                     pickListViewController.delegate = self;
                     [self.navigationController pushViewController:pickListViewController animated:YES];
                 }

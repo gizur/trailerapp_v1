@@ -8,9 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+#import "DCAssetModel.h"
+
 @interface DCSurveyModel : NSObject
-@property (nonatomic, retain) NSString *surveyTrailerType;
-@property (nonatomic, retain) NSString *surveyTrailerId;
+@property (nonatomic, retain) DCAssetModel *surveyAssetModel;
 @property (nonatomic, retain) NSString *surveyPlace;
 @property (nonatomic, retain) NSNumber *surveyTrailerSealed;
 @property (nonatomic, retain) NSNumber *surveyPlates;

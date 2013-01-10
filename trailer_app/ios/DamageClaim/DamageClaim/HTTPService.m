@@ -1,6 +1,6 @@
 //
 //  HttpService.m
-//  Plunk
+//  DamageClaim
 //
 //  Created by GS LAB on 21/05/12.
 //  Copyright (c) 2012 developer.gslab@gmail.com. All rights reserved.
@@ -8,7 +8,6 @@
 
 #import "HTTPService.h"
 #import "Const.h"
-
 @implementation HTTPService
 
 @synthesize receivedData,connection ;
@@ -20,24 +19,25 @@
 }
 
 - (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
-               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod {
+               delegate : (NSObject<HTTPServiceDelegate> *)serviceDelegate requestMethod : (RequestMethod)requestMethod {
     if (self=[super init]) {
         serviceURLString = urlString ;[serviceURLString retain] ;
         headersDictionary=[headers mutableCopy] ;//[headersDictionary retain] ;
         bodyString = body ;[bodyString retain];
-        delegate=serviceDelegate ;
+        delegate=serviceDelegate; [delegate retain];
         serviceRequestMethod = requestMethod;
+        identifier = @"";
     }
     return self ;
 }
 
 - (id)initWithURLString : (NSString *)urlString headers : (NSDictionary *)headers body : (NSString *)body 
-               delegate : (id<HTTPServiceDelegate>)serviceDelegate requestMethod : (RequestMethod)requestMethod identifier:(NSString *)iden{
+               delegate : (NSObject<HTTPServiceDelegate> *)serviceDelegate requestMethod : (RequestMethod)requestMethod identifier:(NSString *)iden{
     if (self=[super init]) {
         serviceURLString = urlString ;[serviceURLString retain] ;
         headersDictionary = [headers mutableCopy] ;//[headersDictionary retain] ;
         bodyString = body; [bodyString retain];
-        delegate=serviceDelegate;
+        delegate=serviceDelegate; [serviceDelegate retain];
         serviceRequestMethod = requestMethod;
         identifier = iden; [identifier retain];
     }
@@ -51,6 +51,12 @@
     
     if (self.serviceRequestMethod == kRequestMethodPOST) { //set up request type 
        [self.request setHTTPMethod:@"POST"];
+    } else if (self.serviceRequestMethod == kRequestMethodGET) {
+        [self.request setHTTPMethod:@"GET"];
+    } else if (self.serviceRequestMethod == kRequestMethodPUT) {
+        [self.request setHTTPMethod:@"PUT"];
+    } else {
+        [self.request setHTTPMethod:@"DELETE"];
     }
     
     if (self.headersDictionary!=nil) { //setup headers
@@ -75,7 +81,7 @@
     self.connection = [[[NSURLConnection alloc] initWithRequest:self.request delegate:self startImmediately:YES] autorelease];
 
     if (!self.connection) {
-        [self.delegate serviceDidFailWithError:nil forURLString:self.serviceURLString];
+        [self.delegate serviceDidFailWithError:nil forIdentifier:self.identifier];
     }
 }
 
@@ -107,18 +113,27 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    
-    [self.delegate didReceiveResponse:self.receivedData forIdentifier:self.identifier];
-    if ([(UIViewController *)self.delegate respondsToSelector:@selector(storeResponse:forCallType:)]) {
+#if kDebug
+    NSLog(@"%@", self.delegate);
+#endif
+    if (self.delegate != nil) {
+        [self.delegate didReceiveResponse:self.receivedData forIdentifier:self.identifier];
+    }
+    if (self.delegate != nil) {
         [self.delegate storeResponse:self.receivedData forIdentifier:self.identifier];
     }
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
 #if kDebug
+    NSLog(@"%@", self.delegate);
+#endif
+#if kDebug
     NSLog(@"ERROR: %@", [error description]);
 #endif
-    [self.delegate serviceDidFailWithError:error forIdentifier:self.identifier];
+    if (self.delegate != nil) {
+        [self.delegate serviceDidFailWithError:error forIdentifier:self.identifier];
+    }
 }
 
 - (void)cancelHTTPService {
@@ -128,15 +143,20 @@
 - (void) connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response{
     NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
     int code = [httpResponse statusCode];
-    [self.delegate responseCode:code];
+#if kDebug
+    NSLog(@"%@", self.delegate);
+#endif
+    if (self.delegate != nil) {
+        [self.delegate responseCode:code];
+    }
     
 }
-#pragma mark - 
 
 
+#pragma mark -
 - (void)dealloc {
     [receivedData release];
-    delegate = nil;
+    [delegate release];
     [connection release];
     [serviceURLString release];
     [headersDictionary release];
@@ -148,3 +168,4 @@
 
 
 @end
+

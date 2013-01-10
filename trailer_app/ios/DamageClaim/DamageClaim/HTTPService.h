@@ -1,6 +1,6 @@
 //
 //  HttpService.h
-//  Plunk
+//  DamageClaim
 //
 //  Created by GS LAB on 21/05/12.
 //  Copyright (c) 2012 developer.gslab@gmail.com. All rights reserved.
@@ -26,11 +26,14 @@
 typedef enum {
     kRequestMethodGET,
     kRequestMethodPOST,
-    kRequestMethodNone
+    kRequestMethodNone,
+    kRequestMethodPUT,
+    
 } RequestMethod;
 
 typedef enum {
-    kNetworkConnectionError = -1004,
+    kNetworkConnectionError = -1009,
+    kHostUnreachableError = -1004,
     kServerTimeOutError = -1001,
     kServerConnectionError
 }ConnectionError;
@@ -39,7 +42,8 @@ typedef enum {
 
 @property (nonatomic, retain) NSMutableData *receivedData;
 @property (nonatomic, retain) NSURLConnection *connection;
-@property (nonatomic, assign) id<HTTPServiceDelegate>delegate;
+//retaining the delegate instead of assigning it.
+@property (nonatomic, retain) NSObject<HTTPServiceDelegate> *delegate;
 @property (nonatomic, retain) NSString *serviceURLString;
 @property (nonatomic, retain) NSMutableDictionary *headersDictionary;
 @property (nonatomic, retain) NSString *bodyString;

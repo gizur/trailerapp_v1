@@ -28,8 +28,6 @@
 -(void) customizeNavigationBar;
 -(void) logout;
 -(void) submitDamageReport;
--(NSInteger) checkDuplicateModel:(DCDamageDetailModel *) model;
--(void) tranferImagesFromOldModel:(DCDamageDetailModel *)oldModel toNewModel:(DCDamageDetailModel *)newModel;
 @end
 
 @implementation DCDamageViewController
@@ -120,28 +118,6 @@
     [self.damageTableView reloadData];
 }
 
--(void) viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    //always use the update modelArray from DCSharedObject
-    //and reload the tableView
-    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_DETAIL_MODEL]) {
-        DCDamageDetailModel *damageDetailModel = [[[DCSharedObject sharedPreferences] preferences] valueForKey:DAMAGE_DETAIL_MODEL];
-        NSInteger index = [self checkDuplicateModel:damageDetailModel];
-        if (index == -1) {
-            [self.damageDetailModelArray addObject:damageDetailModel];
-        } else {
-            [self.damageTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:1] animated:YES scrollPosition:UITableViewScrollPositionTop];
-            
-            [self tranferImagesFromOldModel:damageDetailModel toNewModel:[self.damageDetailModelArray objectAtIndex:index]];
-        }
-        
-        
-        //clear the selected object from DCSharedObject
-        [[[DCSharedObject sharedPreferences] preferences] removeObjectForKey:DAMAGE_DETAIL_MODEL];
-        [self.damageTableView reloadData];
-    }
-}
-
 - (void)viewDidUnload
 {
     [self setDamageTableView:nil];
@@ -180,56 +156,6 @@
 //sends the damage report to the server
 -(void) submitDamageReport {
     
-}
-//checks if the newly created object already
-//exists in the array. if yes, it returns its index otherwise returns -1
--(NSInteger) checkDuplicateModel:(DCDamageDetailModel *)model {
-    if (model && self.damageDetailModelArray) {
-        for (NSInteger i = 0; i < [self.damageDetailModelArray count]; i++) {
-            DCDamageDetailModel *existingDamageDetailModel = [self.damageDetailModelArray objectAtIndex:i];
-            if (existingDamageDetailModel.damageType && model.damageType) {
-                if ([existingDamageDetailModel.damageType isEqualToString:model.damageType]) {
-                    if (existingDamageDetailModel.damagePosition && model.damagePosition) {
-                        if ([existingDamageDetailModel.damagePosition isEqualToString:model.damagePosition]) {
-                            return i;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return -1;
-}
-
-//transfers all the imagePaths from newModel to oldModel
-//add only those imagePaths which are not present
--(void) tranferImagesFromOldModel:(DCDamageDetailModel *)oldModel toNewModel:(DCDamageDetailModel *)newModel {
-    if (oldModel.damageImagePaths) {
-        if (!newModel.damageImagePaths) {
-            newModel.damageImagePaths = [[[NSMutableSet alloc] init] autorelease];
-        }
-        if (!newModel.damageThumbnailImagePaths) {
-            newModel.damageThumbnailImagePaths = [[[NSMutableSet alloc] init] autorelease];
-        }
-        NSArray *oldImagePathsArray = [oldModel.damageImagePaths allObjects];
-        NSArray *oldThumbnailImagePathsArray = [oldModel.damageThumbnailImagePaths allObjects];
-        
-#if kDebug
-        NSLog(@"Before copy: %@", newModel.damageThumbnailImagePaths);
-#endif
-        for (NSString *imagePaths in oldImagePathsArray) {
-            [newModel.damageImagePaths addObject:imagePaths];
-        }
-        for (NSString *thumbnailPaths in oldThumbnailImagePathsArray) {
-            [newModel.damageThumbnailImagePaths addObject:thumbnailPaths];
-        }
-        
-        
-        
-#if kDebug
-        NSLog(@"After copy: %@", newModel.damageThumbnailImagePaths);
-#endif
-    }
 }
 
 #pragma mark - UITableViewDataSource methods
@@ -354,7 +280,7 @@
 #pragma mark - UITableViewDelegate methods
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    DCDamageDetailViewController *damageDetailViewController;
+    DCDamageDetailViewController *damageDetailViewController = nil;
     if ([self isEditable]) {
         if (indexPath.section == 0) {
             damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil] autorelease];
@@ -362,10 +288,7 @@
         } else {
             if (self.damageDetailModelArray) {
                 if (indexPath.row < [self.damageDetailModelArray count]) {
-                    DCDamageDetailModel *damage = [self.damageDetailModelArray objectAtIndex:indexPath.row];
-#if kDebug
-                    NSLog(@"%@",damage.damageThumbnailImagePaths);
-#endif
+
                     damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:[self.damageDetailModelArray objectAtIndex:indexPath.row]] autorelease];
                 }
             }
@@ -373,16 +296,15 @@
     } else {
         if (self.damageDetailModelArray) {
             if (indexPath.row < [self.damageDetailModelArray count]) {
-                DCDamageDetailModel *damage = [self.damageDetailModelArray objectAtIndex:indexPath.row];
-#if kDebug
-                NSLog(@"%@",damage.damageThumbnailImagePaths);
-#endif
                 damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:[self.damageDetailModelArray objectAtIndex:indexPath.row]] autorelease];
             }
         }
     }
     
-    [self.navigationController pushViewController:damageDetailViewController animated:YES];
+    if (damageDetailViewController) {
+        [self.navigationController pushViewController:damageDetailViewController animated:YES];
+    }
+    
 }
 
 @end

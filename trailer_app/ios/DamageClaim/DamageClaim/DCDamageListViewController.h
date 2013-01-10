@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface DCDamageListViewController : UIViewController<UITableViewDelegate, UITableViewDataSource>
+#import "HTTPService.h"
+#import "DCParentViewController.h"
+
+@interface DCDamageListViewController : DCParentViewController<UITableViewDelegate, UITableViewDataSource, HTTPServiceDelegate, UIAlertViewDelegate, UIAlertViewDelegate>
 
 @end

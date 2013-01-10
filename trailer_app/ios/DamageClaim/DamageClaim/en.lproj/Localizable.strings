@@ -1,0 +1,92 @@
+/* 
+  Localizable.strings
+  DamageClaim
+
+  Created by Dev on 13/08/12.
+  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+*/
+
+"LOADING_MESSAGE" = "Loading...";
+"SAVING_MESSAGE" = "Saving...";
+"LOGIN" = "Login";
+"USERNAME" = "Username...";
+"PASSWORD" = "Password...";
+"SURVEY_SECTION_ONE_TITLE" = "Survey";
+"SURVEY_SECTION_TWO_TITLE" = "Trailer Inventory";
+"TAB_BAR_ITEM_SURVEY" = "Survey";
+"TAB_BAR_ITEM_DAMAGE" = "Damage";
+"TRAILER_TYPE" = "Trailer Type";
+"OWN" = "Own";
+"RENTED" = "Rented";
+"ID" = "Trailer ID:";
+"PLACE" = "Place:";
+"SEALED" = "Sealed";
+"NO" = "No";
+"YES" = "Yes";
+"PLATES" = "Plates:";
+"STRAPS" = "Straps:";
+"SUBMIT" = "Submit";
+"DONE" = "Done";
+"TRAILER_DETAILS" = "Trailer Details";
+"DAMAGE_DETAILS" = "Damage Details";
+"DAMAGE_IMAGES" = "Damage Images";
+"DAMAGE_TYPE" = "Type:";
+"DAMAGE_POSITION" = "Position:";
+"ADD_PHOTO" = "Choose";
+"ADD_PHOTO_CAMERA" = "Camera";
+"ADD_PHOTO_LIBRARY" = "Photo Library";
+"ADD_PHOTO_ALBUM" = "Saved Photos";
+"CANCEL" = "Cancel";
+"DISMISS" = "Dismiss";
+"REPORT_DAMAGE" = "Report new damage";
+"ADD_NEW_IMAGE" = "Add a new image";
+"REPORT_NEW_DAMAGE" = "Report a new damage";
+"REPORTED_DAMAGES" = "Previously reported damage";
+"LOGOUT" = "Logout";
+
+
+
+"DAMAGE_DETAILS" = "Damage Details";
+"PREVIOUSLY_REPORTED_DAMAGES" = "Previously Reported Damages";
+"REPORTING_DAMAGE" = "New damages";
+"DAMAGE_TYPE_ALREADY_ADDED" = "You have already added this trailer part and type. The images will be added to the existing one.";
+"EDIT" = "Edit";
+"DONE" = "Done";
+"INTERNAL_SERVER_ERROR" = "There is some problem with the server. Please report this to developers.";
+"NETWORK_ERROR" = "Network Error. Please check if your network is available and try again later!";
+"SELECT_DAMAGE_TYPE" = "Please select a damage type.";
+
+"SUBMITTING" = "Submitting...";
+"NO_API_KEY_ERROR" = "Error logging in! Please open the link you've received via text/mail to register properly.";
+"EMPTY_USERNAME_PASSWORD" = "Either the username or password is empty.";
+"INVALID_LOGIN" = "Could not verify your identity. Please note that you've to open this app from the link given to you via text/mail for the first time. If you've already done so, please contact your company.";
+"SURVEY_TICKET_TITLE" = "Survey ticket by";
+"DAMAGE_TICKET_TITLE" = "Damage report by";
+"IMAGE_LOADING_ERROR" = "Could not load an image. Please try again.";
+"TRAILER_ID_NULL_ERROR" = "Please choose a trailer-id first.";
+"SURVEY" = "Survey";
+"DAMAGES" = "Damages";
+
+"DRIVER_CAUSED_DAMAGE" = "Caused By:";
+"DRIVER" = "Driver";
+"OTHER" = "Other";
+"BACK" = "Back";
+
+"SURVEY_SUBMITTED_SUCCESSFULLY" = "Survey submitted successfully";
+"DAMAGE_REPORTED_SUCCESSFULLY" = "Damage reported successfully";
+
+"RESET_PASSWORD" = "Reset password";
+"CHANGE_PASSWORD" = "Change password";
+"ENTER_OLD_PASSWORD" = "Enter old password...";
+"ENTER_NEW_PASSWORD" = "Enter new password...";
+"CONFIRM_NEW_PASSWORD" = "Confirm new password...";
+
+"EMPTY_FIELDS" = "Some fields are empty.";
+"WRONG_OLD_PASSWORD" = "The old password is wrong";
+"NEW_PASSWORD_MISMATCH" = "New password fields do not match. Please re-enter the new password properly.";
+"PASSWORD_CHANGE_SUCCESSFUL" = "Your password is changed. Please login again";
+"PASSWORD_RESET_SUCCESSFUL" = "Your new password will be be sent to your email address shortly. Please login with your new password.";
+
+"SUBMIT_DAMAGE_ERROR" = "Could not submit some of the damage claims. Do you want to try again?";
+"CONFIRM_DAMAGE_SUBMIT" = "Are you sure you want to send this damage report for control?";
+"APPROVE_DAMAGE" = "Approve damage report";

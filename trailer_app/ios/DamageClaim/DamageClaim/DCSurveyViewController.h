@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import "DCPickListViewController.h"
+#import "HTTPService.h"
+#import "DCParentViewController.h"
 
-@interface DCSurveyViewController : UIViewController<UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, DCPickListViewControllerDelegate>
+@interface DCSurveyViewController : DCParentViewController<UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, DCPickListViewControllerDelegate, HTTPServiceDelegate, UIAlertViewDelegate>
 
 @end
