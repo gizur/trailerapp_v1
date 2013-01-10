@@ -163,7 +163,7 @@
     NSLog(@"%@", [self.navigationItem description]);
 #endif
     if (self.navigationItem) {
-        UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"key.png"] style:UIBarButtonItemStylePlain target:self action:@selector(changePassword)];
+        UIBarButtonItem *settingsButton = [[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"key.png"] style:UIBarButtonItemStylePlain target:self action:@selector(changePassword)] autorelease];
         
         NSArray *navigationBarItems = [NSArray arrayWithObjects:
                                        [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"REPORT_DAMAGE", @"")
@@ -303,12 +303,6 @@
      [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:bodyDict identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
   }
 
-  
-  
-  
-  
-    
-   
 }
 
 - (IBAction)resetSurvey:(id)sender {
@@ -410,7 +404,7 @@
 
 -(void) toggleTrailerType:(id)sender {
     UISegmentedControl *segmentedControl = (UISegmentedControl *) sender;
-    //UITableViewCell *cell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
+
     if ([segmentedControl selectedSegmentIndex] == 0) {
         self.surveyModel.surveyAssetModel.trailerType = [NSString stringWithString:NSLocalizedString(@"OWN", @"")];
     } else {
@@ -445,6 +439,8 @@
     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
     
     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_DRIVERCAUSEDDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
+  
+    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:ASSETS_TRAILERTYPE requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
     
 }
 
@@ -487,7 +483,7 @@
                             if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                                 if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                     [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                    //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+
                                     
                                     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_TICKETSTATUS requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                                 }
@@ -531,7 +527,7 @@
                             if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                                 if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                     [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                    //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+
                                     //timestamp is adjusted. call the same url again
                                     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_SEALED requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                                 }
@@ -571,7 +567,6 @@
                             if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                                 if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                     [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                    //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
                                     
                                     //timestamp is adjusted. call the same url again
                                     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_REPORTDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
@@ -612,7 +607,6 @@
                             if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                                 if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                     [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                    //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
                                     
                                     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK_DRIVERCAUSEDDAMAGE requestMethod:kRequestMethodGET model:HELPDESK delegate:self viewController:self];
                                 }
@@ -637,7 +631,6 @@
                                 if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                                     if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                         [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                        //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
                                         
                                         //timestamp is adjusted. call the same url again
                                         [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:HELPDESK requestMethod:kRequestMethodPOST model:HELPDESK delegate:self viewController:self];
@@ -703,9 +696,51 @@
                             if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                                 if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                     [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                    //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
                                     
                                     [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
+                                }
+                            } else {
+                                [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                            }
+                        }
+                    } else {
+                        [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
+                    }
+                }
+            }
+            
+            
+            if ([identifier isEqualToString:ASSETS_TRAILERTYPE]) {
+                if ((NSNull *)[jsonDict valueForKey:SUCCESS] != [NSNull null]) {
+                    if ([(NSNumber *)[jsonDict valueForKey:SUCCESS] boolValue]) {
+                        if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
+                            NSArray *resultArray = [jsonDict valueForKey:@"result"];
+                            NSMutableDictionary *trailerTypeDictionary = [[[NSMutableDictionary alloc] init] autorelease];
+                            for (NSDictionary *result in resultArray) {
+                                if ((NSNull *)[result valueForKey:@"label"] != [NSNull null]) {
+                                    NSString *label = [result valueForKey:@"label"];
+                                    if ((NSNull *)[result valueForKey:@"value"] != [NSNull null]) {
+                                        NSString *value = [result valueForKey:@"value"];
+                                        [trailerTypeDictionary setValue:value forKey:label];
+                                    }
+                                }
+                            }
+                            [[[DCSharedObject sharedPreferences] preferences] setValue:trailerTypeDictionary forKey:ASSETS_TRAILERTYPE];
+#if kDebug
+                            NSLog(@"%@", trailerTypeDictionary);
+#endif
+                        }
+                        [self.surveyTableView reloadData];
+                        
+                    }  else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
+                        NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
+                        if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
+                            NSString *errorCode = [errorDict valueForKey:@"code"];
+                            if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
+                                if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
+                                    [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+                                    
+                                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil body:nil identifier:ASSETS_TRAILERTYPE requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
                                 }
                             } else {
                                 [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
@@ -739,33 +774,21 @@
     UIView *trailerTypeSegmentedControlCell = [self.surveyTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
     UISegmentedControl *trailerTypeSegmentedControl = (UISegmentedControl *)[trailerTypeSegmentedControlCell viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
     
-    
-    if ([trailerTypeSegmentedControl selectedSegmentIndex] == TRAILER_TYPE_SEGMENTED_CONTROL_INDEX_OWN) {
-        for (NSDictionary *asset in assetList) {
-            NSString *trailerType = [asset valueForKey:TRAILER_TYPE];
+    NSString *selectedTitle = [trailerTypeSegmentedControl titleForSegmentAtIndex:[trailerTypeSegmentedControl selectedSegmentIndex]];
+    for (NSDictionary *asset in assetList) {
+        NSString *trailerType = [asset valueForKey:TRAILER_TYPE];
 #if kDebug
-            NSLog(@"asset: %@ trailerType: %@", asset, trailerType);
+        NSLog(@"asset: %@ trailerType: %@", asset, trailerType);
 #endif
-
-            if ([[trailerType lowercaseString] isEqualToString:OWN]) {
-                [filteredAssetList addObject:asset];
-            }
-        }
-    } else {
-        for (NSDictionary *asset in assetList) {
-
-            NSString *trailerType = [asset valueForKey:TRAILER_TYPE];
-#if kDebug
-            NSLog(@"asset: %@ trailerType: %@", asset, trailerType);
-#endif
-            if ([[trailerType lowercaseString] isEqualToString:RENTED]) {
-                [filteredAssetList addObject:asset];
-            }
+        
+        if ([[trailerType lowercaseString] isEqualToString:[selectedTitle lowercaseString]]) {
+            [filteredAssetList addObject:asset];
         }
     }
-    
+#if kDebug
     NSLog(@"filteredList: %@", filteredAssetList);
-    
+#endif
+  
     DCPickListViewController *pickListViewController = [[[DCPickListViewController alloc] initWithNibName:@"PickListView" bundle:nil modelArray:filteredAssetList type:DCPickListItemSurveyTrailerId isSingleValue:YES] autorelease];
     pickListViewController.delegate = self;
     [self.navigationController pushViewController:pickListViewController animated:YES];
@@ -933,11 +956,15 @@
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"INTERNAL_SERVER_ERROR", @"")];
     }
-    if (self.navigationController) {
-        [DCSharedObject hideProgressDialogInView:self.navigationController.view];
-    } else {
-        [DCSharedObject hideProgressDialogInView:self.view];
+    //hide the progress bar only after trailertype is loaded
+    if ([identifier isEqualToString:ASSETS_TRAILERTYPE]) {
+        if (self.navigationController) {
+            [DCSharedObject hideProgressDialogInView:self.navigationController.view];
+        } else {
+            [DCSharedObject hideProgressDialogInView:self.view];
+        }
     }
+    
 }
 
 -(void) serviceDidFailWithError:(NSError *)error forIdentifier:(NSString *)identifier {
@@ -1020,8 +1047,16 @@
                     titleLabel.text = NSLocalizedString(@"TRAILER_TYPE", @"");
                     
                     UISegmentedControl *segmentedControl = (UISegmentedControl *)[cell viewWithTag:CUSTOM_CELL_SEGMENTED_SEGMENTED_VIEW_TAG];
-                    [segmentedControl setTitle:NSLocalizedString(@"OWN", @"") forSegmentAtIndex:0];
-                    [segmentedControl setTitle:NSLocalizedString(@"RENTED", @"") forSegmentAtIndex:1];
+                    if ([[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_TRAILERTYPE]) {
+                        NSDictionary *trailerTypeDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_TRAILERTYPE];
+                        if ([[trailerTypeDict allKeys] count] == 2) {
+                            [segmentedControl setTitle:[[trailerTypeDict allKeys] objectAtIndex:0] forSegmentAtIndex:0];
+                            [segmentedControl setTitle:[[trailerTypeDict allKeys] objectAtIndex:1] forSegmentAtIndex:1];
+                        }
+#if kDebug
+                        NSLog(@"TrailerTypr: %@", [[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_TRAILERTYPE]);
+#endif
+                    }
                     if ([[self.surveyModel.surveyAssetModel.trailerType lowercaseString] isEqualToString:[NSLocalizedString(@"RENTED", @"") lowercaseString]]) {
                         [segmentedControl setSelectedSegmentIndex:1];
                     }
@@ -1140,13 +1175,7 @@
         case 0:
             switch (indexPath.row) {
                 case 1: {
-                    if (![[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_LIST]) {
-                        [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
-                    } else {
-                        NSArray *modelArray = [[[DCSharedObject sharedPreferences] preferences] valueForKey:ASSETS_LIST];
-                        [self filterAndShowAssetsFromAssetList:modelArray];
-                        
-                    }
+                    [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];
                 }
                     break;
                 case 2: {

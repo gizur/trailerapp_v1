@@ -172,7 +172,7 @@
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     
     self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"APPROVE_DAMAGE", @"") style:UIBarButtonItemStylePlain target:self action:@selector(submitDamageReport)] autorelease];
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BACK", @"") style:UIBarButtonItemStylePlain target:self action:@selector(goBack)];
+    self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BACK", @"") style:UIBarButtonItemStylePlain target:self action:@selector(goBack)] autorelease];
     [self toggleActionButtons];
 }
 
@@ -552,7 +552,7 @@
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                 [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+
                                 //timestamp is adjusted. call the same url again
                                 [self getDamageList];
                             }
@@ -606,7 +606,7 @@
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                 [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+
                                 //timestamp is adjusted. call the same url again
 #if kDebug
                                 NSLog(@"s: %d, c: %d", self.submittingDamageIndex, [self.currentDamageArray count]);
@@ -644,7 +644,7 @@
 }
 
 -(void) goBack {
-    //[[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:RESET_SURVEY_NOTIFICATION object:nil]];
+
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -971,7 +971,7 @@
 
 #pragma mark - UITableViewDelegate methods
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    DCDamageDetailViewController *damageDetailViewController;
+    DCDamageDetailViewController *damageDetailViewController = nil;
     if (self.currentDamageArray) {
         if ([self.currentDamageArray count] > 0) {
             if (indexPath.section == 0) {

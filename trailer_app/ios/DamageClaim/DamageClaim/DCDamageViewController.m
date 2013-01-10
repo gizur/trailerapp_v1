@@ -280,7 +280,7 @@
 #pragma mark - UITableViewDelegate methods
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    DCDamageDetailViewController *damageDetailViewController;
+    DCDamageDetailViewController *damageDetailViewController = nil;
     if ([self isEditable]) {
         if (indexPath.section == 0) {
             damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:nil] autorelease];
@@ -288,10 +288,7 @@
         } else {
             if (self.damageDetailModelArray) {
                 if (indexPath.row < [self.damageDetailModelArray count]) {
-                    DCDamageDetailModel *damage = [self.damageDetailModelArray objectAtIndex:indexPath.row];
-#if kDebug
-                    NSLog(@"%@",damage.damageThumbnailImagePaths);
-#endif
+
                     damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:[self.damageDetailModelArray objectAtIndex:indexPath.row]] autorelease];
                 }
             }
@@ -299,10 +296,6 @@
     } else {
         if (self.damageDetailModelArray) {
             if (indexPath.row < [self.damageDetailModelArray count]) {
-                DCDamageDetailModel *damage = [self.damageDetailModelArray objectAtIndex:indexPath.row];
-#if kDebug
-                NSLog(@"%@",damage.damageThumbnailImagePaths);
-#endif
                 damageDetailViewController = [[[DCDamageDetailViewController alloc] initWithNibName:@"DamageDetailView" bundle:nil damageDetailModel:[self.damageDetailModelArray objectAtIndex:indexPath.row]] autorelease];
             }
         }

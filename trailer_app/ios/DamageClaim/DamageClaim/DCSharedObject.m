@@ -146,7 +146,7 @@ static DCSharedObject *sharedPreferences = nil;
         [[httpService headersDictionary] setValue:[headersDictionaryOrNil valueForKey:key] forKey:key];
     }
     
-    NSString *signature;
+    NSString *signature = nil;
     if ([httpService serviceRequestMethod] == kRequestMethodPOST) {
         NSString *bodyString = nil;
         if (bodyDictionaryOrNil) {
@@ -223,7 +223,7 @@ static DCSharedObject *sharedPreferences = nil;
         [[httpService headersDictionary] setValue:[headersDictionaryOrNil valueForKey:key] forKey:key];
     }
     
-    NSString *signature;
+    NSString *signature = nil;
     if ([httpService serviceRequestMethod] == kRequestMethodPOST) {
         if (bodyOrNil) {
             httpService.bodyData = bodyOrNil;
@@ -295,7 +295,7 @@ static DCSharedObject *sharedPreferences = nil;
         [[httpService headersDictionary] setValue:[headersDictionaryOrNil valueForKey:key] forKey:key];
     }
     
-    NSString *signature;
+    NSString *signature = nil;
     if ([httpService serviceRequestMethod] == kRequestMethodPOST) {
         NSString *bodyString = nil;
         if (bodyDictionaryOrNil) {
@@ -368,7 +368,7 @@ static DCSharedObject *sharedPreferences = nil;
         [[httpService headersDictionary] setValue:[headersDictionaryOrNil valueForKey:key] forKey:key];
     }
     
-    NSString *signature;
+    NSString *signature = nil;
     if ([httpService serviceRequestMethod] == kRequestMethodPOST) {
         NSString *bodyString = nil;
         if (bodyOrNil) {

@@ -56,7 +56,7 @@
         [[NSUserDefaults standardUserDefaults] synchronize];
         NSString *apiKey = [[NSUserDefaults standardUserDefaults] valueForKey:GIZURCLOUD_API_KEY];
         
-        NSDictionary *headerDictionary;
+        NSDictionary *headerDictionary = nil;
         if (apiKey && timestampString) {
             if (password) {
                 headerDictionary = [NSDictionary dictionaryWithObjectsAndKeys:

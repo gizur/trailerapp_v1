@@ -200,8 +200,6 @@
 }
 
 - (IBAction)login:(id)sender {
-    //[self dismissModalViewControllerAnimated:YES];i]
-    //[DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:[NSString stringWithFormat:DOCUMENTATTACHMENTS_ID, @"15x475"] requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
     
     UITextField *usernameTextField = (UITextField *)[[self.loginTableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]] viewWithTag:LOGIN_USERNAME_TEXTFIELD_TAG];
     
@@ -227,10 +225,6 @@
             
         } else {
             [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:AUTHENTICATE_LOGIN requestMethod:kRequestMethodPOST model:AUTHENTICATE delegate:self viewController:self];
-            
-//            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:@"DocumentAttachments/15x501" requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
-//            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:@"DocumentAttachments/15x502" requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
-//            [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:@"DocumentAttachments/15x503" requestMethod:kRequestMethodGET model:DOCUMENTATTACHMENTS delegate:self viewController:self];
         }
     } else {
         [self showAlertWithMessage:NSLocalizedString(@"NO_API_KEY_ERROR", @"")];
@@ -318,7 +312,7 @@
                     if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                         if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                             [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                            //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+
                             //timestamp is adjusted. call the same url again
                             [self login:nil];
                         }

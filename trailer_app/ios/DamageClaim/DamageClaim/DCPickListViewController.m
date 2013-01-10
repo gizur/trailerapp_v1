@@ -145,7 +145,6 @@
 
 
 #pragma mark - Others
-#pragma warning - Change the datatype of status
 -(void) parseResponse:(NSString *)responseString forIdentifier:(NSString *)identifier {
     //logout irrespective of the response
     if ([identifier isEqualToString:AUTHENTICATE_LOGOUT]) {
@@ -172,14 +171,9 @@
                                 if ([[[assetDict valueForKey:@"assetstatus"] lowercaseString] isEqualToString:@"in service"]) {
                                     NSMutableDictionary *dictionary = [[[NSMutableDictionary alloc] init] autorelease];
                                     
-                                    NSString /* *trailerId,*/ *trailerName;
+                                    NSString *trailerName;
                                     
-                                    //trailerId will not be used. assetname will be shown as well as sent to the server
-//                                    if ((NSNull *)[assetDict valueForKey:@"id"] != [NSNull null]) {
-//                                        trailerId = [assetDict valueForKey:@"id"];
-//                                        [dictionary setValue:trailerId forKey:VALUE];
-//                                        
-//                                    }
+
                                     if ((NSNull *)[assetDict valueForKey:@"assetname"] != [NSNull null]) {
                                         trailerName = [assetDict valueForKey:@"assetname"];
                                         [dictionary setValue:trailerName forKey:LABEL];
@@ -193,15 +187,6 @@
                                     [self.modelArray addObject:dictionary];
                                 }
                             }
-//                            if (!self.labelArray) {
-//                                self.labelArray = [[[NSMutableArray alloc] init] autorelease];
-//                            }
-//                            [self.labelArray addObject:trailerId];
-//                            
-//                            if (!self.valueArray) {
-//                                self.valueArray = [[[NSMutableArray alloc] init] autorelease];
-//                            }
-//                            [self.valueArray addObject:trailerId];
                         }
                         [[[DCSharedObject sharedPreferences] preferences] setValue:self.modelArray forKey:ASSETS_LIST];
                     }
@@ -426,9 +411,6 @@
                         [[[DCSharedObject sharedPreferences] preferences] setValue:self.modelArray forKey:SURVEY_STRAPS_LIST];
                     }
                 }
-                
-                
-                [self.pickListTableView reloadData];
             } else if ((NSNull *)[jsonDict valueForKey:@"error"] != [NSNull null]) {
                 NSDictionary *errorDict = [jsonDict valueForKey:@"error"];
                 if ((NSNull *)[errorDict valueForKey:@"code"] != [NSNull null]) {
@@ -436,7 +418,7 @@
                     if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                         if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                             [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                            //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];                             //timestamp is adjusted. call the same url again
+                            //timestamp is adjusted. call the same url again
                             
                             if ([identifier isEqualToString:ASSETS]) {
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService extraHeaders:nil bodyDictionary:nil identifier:ASSETS requestMethod:kRequestMethodGET model:ASSETS delegate:self viewController:self];                            }
@@ -458,17 +440,13 @@
             }
         }
     }
-    
+    [self.pickListTableView reloadData];
 #if kDebug
     NSLog(@"%@", self.modelArray);
 #endif
 
 }
 -(void) customizeNavigationBar {
-//    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-//    if (self.navigationItem) {
-//        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DONE", @"") style:UIBarButtonItemStylePlain target:self action:@selector(storeSelectedValues)] autorelease];
-//    }
     
 }
 
@@ -724,6 +702,7 @@
         if ([imageView isHidden]) {
             //select this row and unselect all other rows
             imageView.hidden = NO;
+            
             
             for (NSInteger i = 0 ; i < [self.valueArray count]; i++) {
                 if (i != indexPath.row) {

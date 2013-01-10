@@ -181,7 +181,7 @@
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                 [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+
                                 //timestamp is adjusted. call the same url again
                                 [DCSharedObject makeURLCALLWithHTTPService:self.httpService
                                                               extraHeaders:nil bodyDictionary:[NSDictionary dictionaryWithObjectsAndKeys:self.enteredNewPassword, @"newpassword", nil]
@@ -218,8 +218,8 @@
 
 #pragma mark - UITextFieldDelegate
 
--(BOOL) textFieldShouldReturn:(UITextField *)textField {
-    
+- (void) textFieldDidEndEditing:(UITextField *)textField
+{
     if (textField.tag == RESET_OLD_PASSWORD_TAG) {
 #if kDebug
         NSLog(@"old password: %@", textField.text);
@@ -228,10 +228,8 @@
         //assign it to the model
         if (![self isEmpty:textField.text]) {
             self.oldPassword = textField.text;
-            
         }
-        UITextField *enteredPasswordTextField = (UITextField *)[[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]] viewWithTag:RESET_NEW_PASSWORD_TAG];
-        [enteredPasswordTextField becomeFirstResponder];
+        
     }
     
     if (textField.tag == RESET_NEW_PASSWORD_TAG) {
@@ -243,8 +241,6 @@
             self.enteredNewPassword = textField.text;
             
         }
-        UITextField *confirmPasswordTextField = (UITextField *)[[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0]] viewWithTag:RESET_CONFIRM_NEW_PASSWORD_TAG];
-        [confirmPasswordTextField becomeFirstResponder];
     }
     
     if (textField.tag == RESET_CONFIRM_NEW_PASSWORD_TAG) {
@@ -256,6 +252,25 @@
             self.confirmNewPassword = textField.text;
             
         }
+    }
+}
+
+-(BOOL) textFieldShouldReturn:(UITextField *)textField {
+    
+    if (textField.tag == RESET_OLD_PASSWORD_TAG) {
+
+        UITextField *enteredPasswordTextField = (UITextField *)[[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]] viewWithTag:RESET_NEW_PASSWORD_TAG];
+        [enteredPasswordTextField becomeFirstResponder];
+    }
+    
+    if (textField.tag == RESET_NEW_PASSWORD_TAG) {
+        
+        UITextField *confirmPasswordTextField = (UITextField *)[[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0]] viewWithTag:RESET_CONFIRM_NEW_PASSWORD_TAG];
+        [confirmPasswordTextField becomeFirstResponder];
+    }
+    
+    if (textField.tag == RESET_CONFIRM_NEW_PASSWORD_TAG) {
+        
         [textField resignFirstResponder];
     }
     return YES;

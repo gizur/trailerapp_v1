@@ -214,22 +214,7 @@
 }
 
 -(void) goBack {
-    //    //user cancelled damage claim procedure.
-    //    //delete all the locally stored images;
-    //    if (self.numberOfImages > 0) {
-    //        for (NSInteger i = 0; i < self.numberOfImages; i++) {
-    //            NSArray *pathArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDirectory, YES);
-    //            if (pathArray) {
-    //                if ([pathArray count] > 0) {
-    //                    NSString *docDirURL = [pathArray objectAtIndex:0];
-    //                    NSString *thumbnailImageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, i]];
-    //                    NSString *imageNamePath = [docDirURL stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%d.png", DAMAGE_THUMBNAIL_IMAGE_NAME, i]];
-    //                    [[NSFileManager defaultManager] removeItemAtPath:imageNamePath error:nil];
-    //                    [[NSFileManager defaultManager] removeItemAtPath:thumbnailImageNamePath error:nil];
-    //                }
-    //            }
-    //        }
-    //    }
+
     if (self.opertationQueue) {
         [self.opertationQueue cancelAllOperations];
     }
@@ -284,7 +269,7 @@
                         if ([errorCode isEqualToString:TIME_NOT_IN_SYNC]) {
                             if ((NSNull *)[errorDict valueForKey:@"time_difference"] != [NSNull null]) {
                                 [[[DCSharedObject sharedPreferences] preferences] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
-                                //[[NSUserDefaults standardUserDefaults] setValue:[errorDict valueForKey:@"time_difference"] forKey:TIME_DIFFERENCE];
+
                                 //timestamp is adjusted. call the same url again
                                 [self getDamageDetail];
                             }
@@ -304,9 +289,7 @@
                     if ((NSNull *)[jsonDict valueForKey:@"result"] != [NSNull null]) {
                         NSDictionary *resultDict = [jsonDict valueForKey:@"result"];
                         if ((NSNull *)[resultDict valueForKey:@"filecontent"] != [NSNull null]) {
-//#if kDebug
-//                            NSLog(@"\n\nData: %@\n\n", responseString);
-//#endif
+
                             NSData *imageData = [[resultDict valueForKey:@"filecontent"] base64DecodedData];
                             //UIImage *image = [UIImage imageWithData:imageData];
                             UIImage *image = [[[UIImage alloc] initWithData:imageData] autorelease];
@@ -669,9 +652,7 @@
 
 -(void) didReceiveResponse:(NSData *)data forIdentifier:(NSString *)identifier {
     NSString *responseString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
-//#if kDebug
-//    NSLog(@"%@", responseString);
-//#endif
+
     
     if (self.httpStatusCode == 200 || self.httpStatusCode == 403) {
         
@@ -811,7 +792,7 @@
 }
 
 -(CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UIView *cell;
+    UIView *cell = nil;
     if (indexPath.section == 0) {
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"Cell"] autorelease];
     }
@@ -996,11 +977,7 @@
                     }
                 }
             } else {
-//                if ([[self.damageDetailModel.damageDriverCausedDamage lowercaseString] isEqualToString:@"yes"]) {
-//                    [segmentedControl setSelectedSegmentIndex:0];
-//                } else {
-//                    [segmentedControl setSelectedSegmentIndex:1];
-//                }
+
                 NSDictionary *driverCausedDamageDict = [[[DCSharedObject sharedPreferences] preferences] valueForKey:HELPDESK_DRIVERCAUSEDDAMAGE];
                 if (driverCausedDamageDict) {
                     NSString *yesValue = [driverCausedDamageDict valueForKey:@"Yes"];

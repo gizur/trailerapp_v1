@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define kDebug TRUE
+#define kDebug FALSE
 
 #define kLocalServer FALSE
 
@@ -31,7 +31,7 @@ SEARCH_WEB_URL_CALL_TYPE,
 GET_HIVE_URL_CALL_TYPE
 } DC_URL_CALL_TYPE;
 
-#define HTTP_URL @"https://api.gizur.com/api/index.php/api"
+#define HTTP_URL @"http://api.gizur.com/api/index.php/api"
 
 
 #pragma mark - Keys to share data across the app
@@ -197,6 +197,7 @@ enum DCPickListItemTypes {
 #define HELPDESK_DRIVERCAUSEDDAMAGE @"HelpDesk/drivercauseddamage"
 #define HELPDESK_DAMAGED @"HelpDesk/damaged"
 #define ASSETS @"Assets"
+#define ASSETS_TRAILERTYPE @"Assets/trailertype"
 #define HELPDESK_TICKETSTATUS @"HelpDesk/ticketstatus"
 #define HELPDESK_REPORTDAMAGE @"HelpDesk/reportdamage"
 #define HELPDESK_SEALED @"HelpDesk/sealed"
